@@ -127,7 +127,9 @@ const PANEL_QUERIES: Record<string, () => HTMLElement | null> = {
   legend: () => screen.queryByRole('group', { name: trStrings.legend.title }),
   sidebar: () => screen.queryByRole('group', { name: trStrings.sidebar.title }),
   search: () => screen.queryByRole('combobox', { name: trStrings.search.label }),
-  filters: () => screen.queryByRole('group', { name: trStrings.filters.title }),
+  // The filter bar mounts collapsed, so its presence reads as the toggle
+  // button rather than as a labelled group.
+  filters: () => screen.queryByRole('button', { name: trStrings.filters.open }),
   pie: () => screen.queryByRole('group', { name: trStrings.pie.title }),
   trend: () => screen.queryByRole('group', { name: trStrings.trend.title }),
 };
@@ -168,5 +170,24 @@ describe('CrimeHeatMap — panel matrix', () => {
   it('keeps the attribution even with every panel disabled, since the licence requires it', () => {
     renderMap({ panels: ALL_OFF });
     expect(screen.getByText(/OpenStreetMap/u)).toBeInTheDocument();
+  });
+});
+
+describe('CrimeHeatMap — fixed layout', () => {
+  it('marks no panel as hidden on narrow screens', () => {
+    const { container } = renderMap();
+    // The Phase 3 breakpoints hid panels below 640px. Positions are fixed now,
+    // so nothing carries a hide-on-compact marker.
+    expect(container.querySelectorAll('.hm-hide-compact')).toHaveLength(0);
+  });
+
+  it('places every panel in its own grid area', () => {
+    const { container } = renderMap();
+    for (const area of [
+      'hm-area-topLeft', 'hm-area-topCentre', 'hm-area-topRight',
+      'hm-area-left', 'hm-area-right', 'hm-area-bottomLeft',
+    ]) {
+      expect(container.querySelector(`.${area}`), area).not.toBeNull();
+    }
   });
 });

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Chip } from '@/components/primitives/Chip.js';
 import { GlassPanel } from '@/components/primitives/GlassPanel.js';
 import { IconButton } from '@/components/primitives/IconButton.js';
@@ -32,6 +32,34 @@ export function FilterBar({
   }, [dispatch]);
 
   const selected = new Set(filters.categories);
+  const [open, setOpen] = useState(false);
+
+  // Count what is actually narrowing the data, so a closed bar still says so.
+  // Hiding active filters behind a shut panel is how someone ends up reading a
+  // filtered map as the whole picture.
+  const [lo, hi] = filters.yearRange;
+  const [boundLo, boundHi] = yearBounds;
+  const activeCount = filters.categories.length
+    + (lo !== boundLo || hi !== boundHi ? 1 : 0);
+
+  if (!open) {
+    return (
+      <GlassPanel className={styles.collapsed}>
+        <button
+          type="button"
+          className={styles.toggle}
+          aria-expanded={false}
+          aria-label={strings.filters.open}
+          onClick={() => { setOpen(true); }}
+        >
+          <span>{strings.filters.title}</span>
+          {activeCount > 0 ? (
+            <span className={styles.badge}>{formatTrNumber(activeCount)}</span>
+          ) : null}
+        </button>
+      </GlassPanel>
+    );
+  }
 
   return (
     <GlassPanel label={strings.filters.title} className={styles.bar}>
@@ -43,6 +71,15 @@ export function FilterBar({
           onClick={() => { dispatch({ type: 'resetFilters' }); }}
         >
           {strings.filters.reset}
+        </button>
+        <button
+          type="button"
+          className={styles.reset}
+          aria-expanded
+          aria-label={strings.filters.close}
+          onClick={() => { setOpen(false); }}
+        >
+          ×
         </button>
       </div>
 

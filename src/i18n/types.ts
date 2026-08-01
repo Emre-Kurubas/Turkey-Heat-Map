@@ -26,6 +26,9 @@ export interface Strings {
     perCapita: string;
     /** Shown when no category chip is selected — empty means every category. */
     allCategories: string;
+    /** Accessible names for the collapse toggle. */
+    open: string;
+    close: string;
   };
   pie: {
     title: string;

@@ -24,6 +24,8 @@ export const trStrings: Strings = {
     reset: 'Sıfırla',
     perCapita: 'Nüfusa göre',
     allCategories: 'Tümü',
+    open: 'Filtreleri aç',
+    close: 'Filtreleri kapat',
   },
   pie: {
     title: 'Suç türü dağılımı',

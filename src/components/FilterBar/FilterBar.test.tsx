@@ -29,7 +29,8 @@ const base: HeatMapState = {
   scaleMode: 'quantile',
 };
 
-function renderBar(state: HeatMapState = base, props: Partial<FilterBarProps> = {}) {
+/** Renders the bar in its default collapsed state. */
+function renderBarClosed(state: HeatMapState = base, props: Partial<FilterBarProps> = {}) {
   const store = createHeatMapStore(state);
   const wrapper = ({ children }: { children: ReactNode }) => (
     <HeatMapProvider store={store} hoverStore={createHoverStore()} strings={trStrings}>
@@ -47,6 +48,16 @@ function renderBar(state: HeatMapState = base, props: Partial<FilterBarProps> = 
     { wrapper },
   );
   return { ...utils, store };
+}
+
+/**
+ * Renders it and opens it, which is what every assertion below assumes — the
+ * controls now live behind the toggle.
+ */
+function renderBar(state: HeatMapState = base, props: Partial<FilterBarProps> = {}) {
+  const utils = renderBarClosed(state, props);
+  fireEvent.click(screen.getByRole('button', { name: trStrings.filters.open }));
+  return utils;
 }
 
 describe('FilterBar', () => {
@@ -148,5 +159,56 @@ describe('FilterBar', () => {
     const highlighted = container.querySelectorAll('[data-highlighted="true"]');
     expect(highlighted).toHaveLength(1);
     expect(highlighted[0]?.textContent).toContain('Darp');
+  });
+});
+
+describe('FilterBar — collapsed by default', () => {
+  it('shows only a button until it is opened', () => {
+    renderBarClosed();
+    expect(screen.getByRole('button', { name: trStrings.filters.open }))
+      .toBeInTheDocument();
+    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Hırsızlık/u })).not.toBeInTheDocument();
+  });
+
+  it('reports its state through aria-expanded', () => {
+    renderBarClosed();
+    expect(screen.getByRole('button', { name: trStrings.filters.open }))
+      .toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('reveals the controls when opened', () => {
+    renderBarClosed();
+    fireEvent.click(screen.getByRole('button', { name: trStrings.filters.open }));
+
+    expect(screen.getAllByRole('slider')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: /Hırsızlık/u })).toBeInTheDocument();
+  });
+
+  it('closes again on a second press', () => {
+    renderBarClosed();
+    fireEvent.click(screen.getByRole('button', { name: trStrings.filters.open }));
+    fireEvent.click(screen.getByRole('button', { name: trStrings.filters.close }));
+    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
+  });
+
+  /**
+   * A closed filter bar must not hide the fact that filters are active — that
+   * is how someone ends up reading a filtered map as the whole picture.
+   */
+  it('shows an active-filter count on the button while closed', () => {
+    const filtered: HeatMapState = {
+      ...base,
+      filters: { yearRange: [2018, 2019], categories: ['darp'] },
+    };
+    renderBarClosed(filtered);
+    expect(screen.getByRole('button', { name: trStrings.filters.open }).textContent)
+      .toMatch(/2/u);
+  });
+
+  it('shows no count when nothing is filtered', () => {
+    renderBarClosed();
+    expect(screen.getByRole('button', { name: trStrings.filters.open }).textContent)
+      .not.toMatch(/\d/u);
   });
 });

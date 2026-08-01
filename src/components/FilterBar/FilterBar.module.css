@@ -31,3 +31,35 @@
 .sectionLabel { font-size: 11px; color: var(--hm-fg-muted); }
 .chips { display: flex; flex-wrap: wrap; gap: 5px; }
 .perCapita { justify-self: start; }
+
+.collapsed { padding: 0; width: auto; }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: var(--hm-radius);
+  background: transparent;
+  color: var(--hm-fg);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
+
+.badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--hm-fg);
+  color: var(--hm-ink-inverse);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}

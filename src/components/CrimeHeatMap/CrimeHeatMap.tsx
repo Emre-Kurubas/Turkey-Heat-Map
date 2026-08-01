@@ -124,7 +124,7 @@ function Content({ props, panels }: ContentProps) {
         ) : null}
 
         {panels.filters ? (
-          <div className="hm-area-topCentre hm-hide-compact">
+          <div className="hm-area-topCentre">
             <FilterBar
               categories={categories}
               categoryTotals={categoryTotals}
@@ -135,7 +135,7 @@ function Content({ props, panels }: ContentProps) {
         ) : null}
 
         {panels.pie ? (
-          <div className="hm-area-topRight hm-hide-compact">
+          <div className="hm-area-topRight">
             <CategoryPieChart
               categories={categories}
               totals={categoryTotals}
@@ -146,13 +146,13 @@ function Content({ props, panels }: ContentProps) {
         ) : null}
 
         {panels.sidebar ? (
-          <div className="hm-area-left hm-hide-compact">
+          <div className="hm-area-left">
             <Sidebar rows={rows} scale={scale} />
           </div>
         ) : null}
 
         {panels.trend ? (
-          <div className="hm-area-right hm-hide-compact">
+          <div className="hm-area-right">
             <TrendChart byYear={rollup.byYear} />
           </div>
         ) : null}
