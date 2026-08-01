@@ -21,6 +21,10 @@
  * not intercept drags: the map stays grabbable in the gaps between panels.
  * GlassPanel re-enables pointer events for itself.
  */
+/*
+ * `auto` tracks collapse to zero when their panel is absent, so switching a
+ * panel off reflows the rest rather than leaving a hole (§7.8).
+ */
 .hm-overlay {
   position: absolute;
   inset: 0;
@@ -28,10 +32,44 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "topLeft    topCentre  topRight"
+    "left       centre     right"
+    "bottomLeft bottomCtr  bottomRight";
   gap: 12px;
   padding: 12px;
 }
 
+/*
+ * Panels are spread across the corners rather than stacked down one side.
+ * Stacking the two charts in a single row overflowed an 800px viewport and
+ * pushed the legend off the bottom of the screen.
+ */
+.hm-area-topLeft { grid-area: topLeft; align-self: start; }
+.hm-area-topCentre { grid-area: topCentre; align-self: start; justify-self: center; }
+.hm-area-topRight { grid-area: topRight; align-self: start; justify-self: end; }
+.hm-area-left { grid-area: left; align-self: start; min-height: 0; }
+.hm-area-right { grid-area: right; align-self: end; justify-self: end; }
+.hm-area-bottomLeft {
+  grid-area: bottomLeft;
+  align-self: end;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+/*
+ * No breakpoints. Panel positions are fixed at every window size by choice:
+ * a layout that rearranges itself is harder to learn than one that simply
+ * gets tighter. On a narrow window the panels cover more of the map, which is
+ * the accepted trade.
+ */
+
+/*
+ * Screen-reader-only content: the trend chart's data table, the tooltip's live
+ * region. Visible content is the failure mode here — these elements carry no
+ * layout of their own, so losing this rule dumps a raw table onto the page.
+ */
 .hm-visually-hidden {
   position: absolute;
   width: 1px;

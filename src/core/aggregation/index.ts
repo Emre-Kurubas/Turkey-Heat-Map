@@ -6,3 +6,5 @@ export type { RankedRegion, RankOptions, RankSort } from './rank.js';
 export { rankRegions } from './rank.js';
 export type { DiffResult, RegionDiff } from './diff.js';
 export { diffRollups } from './diff.js';
+export type { PopulationIndex } from './perCapita.js';
+export { buildPopulationIndex, toPerCapita } from './perCapita.js';

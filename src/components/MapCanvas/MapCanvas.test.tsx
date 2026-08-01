@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HeatMapProvider } from '@/context/HeatMapProvider.js';
 import { createHeatMapStore, type HeatMapState } from '@/context/HeatMapStore.js';
 import { createHoverStore } from '@/context/HoverStore.js';
@@ -20,6 +20,10 @@ const base: HeatMapState = {
   focusedCode: null,
   selectedCode: null,
   filters: { yearRange: [2020, 2020], categories: [] },
+  defaultFilters: { yearRange: [2020, 2020], categories: [] },
+  yearBounds: [2020, 2020],
+  flyToRequest: null,
+  detail: null,
   metric: 'total',
   scaleMode: 'quantile',
 };
@@ -46,6 +50,14 @@ function renderCanvas(state: HeatMapState = base, props: Partial<MapCanvasProps>
   );
   return { ...utils, store };
 }
+
+// Reduced motion makes a fly-to land in one step rather than needing frames.
+beforeEach(() => {
+  vi.stubGlobal('matchMedia', () => ({
+    matches: true, addEventListener: () => {}, removeEventListener: () => {},
+  }));
+});
+afterEach(() => { vi.unstubAllGlobals(); });
 
 describe('MapCanvas', () => {
   it('renders an accessible svg', () => {
@@ -170,5 +182,71 @@ describe('MapCanvas', () => {
     renderCanvas({ ...base, level: 'ilce', transform: { k: 3, x: 0, y: 0 } });
     expect(screen.getByRole('img', { name: /Adalar/u }).getAttribute('aria-label'))
       .toContain('100');
+  });
+});
+
+describe('MapCanvas — fly-to requests from other panels', () => {
+  it('flies to a region requested through the store', () => {
+    const { store } = renderCanvas();
+    const before = store.getState().transform;
+
+    act(() => { store.dispatch({ type: 'requestFlyTo', code: '34' }); });
+    expect(store.getState().transform).not.toEqual(before);
+  });
+
+  it('clears the request so the same region can be requested again', () => {
+    const { store } = renderCanvas();
+    act(() => { store.dispatch({ type: 'requestFlyTo', code: '34' }); });
+    expect(store.getState().flyToRequest).toBeNull();
+  });
+
+  it('ignores a request for a region it has no geometry for', () => {
+    const { store } = renderCanvas();
+    const before = store.getState().transform;
+
+    act(() => { store.dispatch({ type: 'requestFlyTo', code: 'yok' }); });
+    expect(store.getState().transform).toEqual(before);
+    expect(store.getState().flyToRequest).toBeNull();
+  });
+});
+
+describe('MapCanvas — opening a region detail', () => {
+  it('opens the detail panel for a clicked province', () => {
+    const { container, store } = renderCanvas();
+    fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
+
+    expect(store.getState().detail).toEqual({ code: '34', level: 'il' });
+  });
+
+  it('also flies toward a clicked province, which crosses the district threshold', () => {
+    const { container, store } = renderCanvas();
+    const before = store.getState().transform;
+
+    fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
+
+    expect(store.getState().transform).not.toEqual(before);
+    expect(store.getState().transform.k).toBeGreaterThan(2.65);
+  });
+
+  it('keeps the province panel open through the level change the zoom causes', () => {
+    const { container, store } = renderCanvas();
+    fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
+
+    act(() => { store.dispatch({ type: 'setLevel', level: 'ilce' }); });
+    expect(store.getState().detail).toEqual({ code: '34', level: 'il' });
+  });
+
+  it('opens a district panel without flying, since it is already in view', () => {
+    const { container, store } = renderCanvas({
+      ...base, level: 'ilce', transform: { k: 3, x: 0, y: 0 },
+    });
+    const district = container.querySelector('path[role="img"]') as SVGPathElement;
+    const code = district.getAttribute('data-code')!;
+    const before = store.getState().transform;
+
+    fireEvent.click(district);
+
+    expect(store.getState().detail).toEqual({ code, level: 'ilce' });
+    expect(store.getState().transform).toEqual(before);
   });
 });

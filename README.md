@@ -2,8 +2,8 @@
 
 Türkiye suç istatistikleri için etkileşimli ısı haritası React bileşeni.
 
-> **Durum:** Geliştirme aşamasında (Aşama 2/5 tamamlandı). Harita, gösterge ve
-> ipucu çalışıyor. Kenar çubuğu, arama, filtreler ve grafikler Aşama 3'te gelir.
+> **Durum:** Geliştirme aşamasında (Aşama 4/5 tamamlandı). Açık tema, bölge
+> detay paneli ve katlanabilir filtreler eklendi.
 
 ## Kurulum
 
@@ -35,6 +35,11 @@ render'da yeniden kurulur.
 | Alan | Ne işe yarar |
 |---|---|
 | `CrimeHeatMap` | İl ve ilçe düzeyinde etkileşimli ısı haritası, gösterge ve ipucu |
+| `Sidebar`, `SearchBar`, `FilterBar` | Sıralı bölge listesi, Türkçe arama, yıl ve kategori filtreleri |
+| `CategoryPieChart`, `TrendChart` | Kategori dağılımı ve yıllara göre eğilim |
+| `CATEGORY_PALETTE`, `arcPath`, `linePath` | Doğrulanmış kategorik palet ve grafik geometrisi |
+| `buildPopulationIndex`, `toPerCapita` | 100.000 kişi başına suç oranı |
+| `RegionDetail` | Bölgeye tıklayınca açılan detay paneli: kategori tablosu, halka grafik ve yıllık eğilim |
 | `buildIndex`, `rollup`, `rankRegions`, `diffRollups` | Suç kayıtlarını doğrular, filtreler ve bölge bazında toplar |
 | `createColorScale`, `computeLegendBreaks` | Algısal olarak eşit aralıklı OKLab renk skalaları |
 | `foldTurkish`, `compareTurkish`, `searchEntities` | Türkçe'ye duyarlı arama ve sıralama |
@@ -104,6 +109,20 @@ Tek bir bozuk satır yüzünden sayfayı çökerten bir kütüphane kabul edilem
   yalnızca veri, filtre veya düzey değiştiğinde yeniden çalışır — imleç
   hareketinde asla. Haritanın anlık hissetmesiyle ağır hissetmesi arasındaki fark
   budur.
+- **Açık tema, tek tema.** Harita rampası açık zemin için yeniden türetildi:
+  her durak bir hedef parlaklığa çözüldü, böylece büyüklük yalnızca renk
+  tonuyla değil açıklıkla da okunuyor. Önceki rampa ortada açık renkliydi ve
+  açık zeminde orta değerler 1,36 kontrastla kayboluyordu.
+- **İle tıklandığında hem yakınlaşır hem detay açılır.** Detay hedefi kendi
+  düzeyini taşır; aksi hâlde yakınlaşmanın tetiklediği düzey değişimi, aynı
+  tıklamanın az önce açtığı paneli kapatırdı.
+- **Grafik renkleri seçilmedi, doğrulandı.** Sekiz renkli kategorik palet,
+  panellerin gerçekte üzerine bindiği yüzeye (`#11172b`) karşı test edildi:
+  açıklık bandı, kroma tabanı, komşu çiftlerde renk körlüğü ayrımı (en kötü
+  ΔE 8,4), normal görüşte taban (19,3) ve 3:1 kontrast — hepsi geçiyor.
+- **Renk kategoriye bağlıdır, sırasına değil.** Bir filtre bir kategoriyi
+  kaldırdığında kalanlar yeniden boyanmaz; aksi hâlde grafik kendini yeniden
+  etiketliyormuş gibi görünür.
 - **Vurgu için ayrı, saydam bir katman.** Görünen renk sınırların ötesine
   taşacak şekilde bulanıklaştırılır; isabet testi bulanık katmanda yapılsaydı
   tam bulanıklık yarıçapı kadar yanılırdı.

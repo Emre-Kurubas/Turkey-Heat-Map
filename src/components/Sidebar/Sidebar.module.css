@@ -1,0 +1,55 @@
+.sidebar { display: grid; grid-template-rows: auto 1fr; max-height: 100%; width: 240px; }
+.sidebar[data-collapsed='true'] { width: 48px; }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 8px 6px;
+}
+
+.title { margin: 0; font-size: 12px; font-weight: 600; color: var(--hm-fg); }
+.actions { display: flex; gap: 2px; }
+/* Bounded so the legend below it always has room in the same grid column. */
+.scroller { overflow-y: auto; padding: 0 4px 6px; max-height: 38vh; }
+.spacer { position: relative; width: 100%; }
+.slice { position: absolute; left: 0; right: 0; display: grid; }
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--hm-fg);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row:hover,
+.row[data-hovered='true'] { background: rgba(15, 23, 42, 0.05); }
+.row[aria-current='true'] { background: rgba(15, 23, 42, 0.09); }
+.row:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: -2px; }
+
+.rowName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rowTotal { font-variant-numeric: tabular-nums; }
+.rowShare { font-variant-numeric: tabular-nums; color: var(--hm-fg-muted); font-size: 11px; }
+
+.bar {
+  position: absolute;
+  left: 6px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 1px;
+  opacity: 0.8;
+}
+
+.empty { padding: 12px 8px; font-size: 12px; color: var(--hm-fg-muted); }

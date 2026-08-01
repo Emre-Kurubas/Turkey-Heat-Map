@@ -36,15 +36,18 @@ export function HoverTooltip({
   const [visible, setVisible] = useState(false);
 
   const hoveredCode = hover?.code ?? null;
+  // A sidebar hover highlights the map region but must not open a tooltip:
+  // there is no pointer over the map to anchor it to.
+  const fromMap = hover?.source === 'map';
 
   // Show on a timer, hide immediately. Traversing a dense district map fires
   // dozens of enters per second; without the delay the tooltip strobes.
   useEffect(() => {
-    if (hoveredCode === null) { setVisible(false); return; }
+    if (hoveredCode === null || !fromMap) { setVisible(false); return; }
 
     const timer = setTimeout(() => { setVisible(true); }, delayMs);
     return () => { clearTimeout(timer); };
-  }, [hoveredCode, delayMs]);
+  }, [hoveredCode, fromMap, delayMs]);
 
   const detail = useMemo(() => {
     if (hoveredCode === null) return null;

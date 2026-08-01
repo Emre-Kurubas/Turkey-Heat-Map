@@ -4,7 +4,7 @@
   font-size: 10px;
   line-height: 1.4;
   color: var(--hm-fg-muted);
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.75);
   border-radius: 4px;
   pointer-events: auto;
 }

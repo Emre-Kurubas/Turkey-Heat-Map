@@ -72,7 +72,10 @@ export function HitLayer({
     event: ReactPointerEvent<SVGPathElement>,
     code: string,
   ) => {
-    setHover({ type: 'enter', target: { code, x: event.clientX, y: event.clientY } });
+    setHover({
+      type: 'enter',
+      target: { code, x: event.clientX, y: event.clientY, source: 'map' },
+    });
   }, [setHover]);
 
   return (

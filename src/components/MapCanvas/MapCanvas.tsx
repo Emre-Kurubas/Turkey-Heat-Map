@@ -1,9 +1,10 @@
-import { useCallback, useId, useMemo } from 'react';
+import { useCallback, useEffect, useId, useMemo } from 'react';
 import type { RollupResult } from '@/core/aggregation/index.js';
 import type { ColorScaleName, RampFn } from '@/core/color/index.js';
 import { formatTrNumber } from '@/core/format/index.js';
 import type { CrimeCategory, CrimeRecord, Viewport } from '@/core/types/index.js';
 import { useAggregates } from '@/hooks/useAggregates.js';
+import { useFlyTo } from '@/hooks/useFlyTo.js';
 import { useHeatMapDispatch, useHeatMapState, useStrings } from '@/hooks/useHeatMapState.js';
 import { useHoverTarget } from '@/hooks/useHoverTarget.js';
 import { useMapGeometry } from '@/hooks/useMapGeometry.js';
@@ -76,18 +77,46 @@ export function MapCanvas({
   );
 
   const onSelect = useCallback((code: string | null) => {
-    dispatch({ type: 'select', code });
-    if (code === null || onRegionClick === undefined) return;
+    if (code === null) {
+      dispatch({ type: 'select', code: null });
+      dispatch({ type: 'closeDetail' });
+      return;
+    }
+
+    dispatch({ type: 'openDetail', code, level });
+
+    // A province click also zooms in. Fitting even the largest province to the
+    // viewport lands well past the 2.65 district threshold, so the level
+    // switches on its own — the detail target carries its own level precisely
+    // so that switch does not close the panel this click just opened.
+    if (level === 'il') dispatch({ type: 'requestFlyTo', code });
+
+    if (onRegionClick === undefined) return;
     onRegionClick({
       code,
       name: names.get(code) ?? code,
       value: values.get(code) ?? null,
     });
-  }, [dispatch, onRegionClick, names, values]);
+  }, [dispatch, level, onRegionClick, names, values]);
 
   const onFocusRegion = useCallback((code: string) => {
     dispatch({ type: 'focus', code });
   }, [dispatch]);
+
+  // Panels ask for a fly-to through the store rather than reaching into the
+  // map, which is what lets the sidebar and search bar move it without
+  // importing it. The request is cleared immediately so the same region can be
+  // requested again.
+  const flyTo = useFlyTo(viewport);
+  const flyToRequest = useHeatMapState((state) => state.flyToRequest);
+
+  useEffect(() => {
+    if (flyToRequest === null) return;
+
+    const bbox = geometry.bounds.get(flyToRequest);
+    if (bbox !== undefined) flyTo(bbox);
+    dispatch({ type: 'clearFlyTo' });
+  }, [flyToRequest, geometry.bounds, flyTo, dispatch]);
 
   return (
     <div ref={containerRef} className={styles.container}>

@@ -25,6 +25,10 @@ const base: HeatMapState = {
   focusedCode: null,
   selectedCode: null,
   filters: { yearRange: [2020, 2021], categories: [] },
+  defaultFilters: { yearRange: [2020, 2021], categories: [] },
+  yearBounds: [2020, 2021],
+  flyToRequest: null,
+  detail: null,
   metric: 'total',
   scaleMode: 'quantile',
 };
@@ -59,20 +63,20 @@ describe('HoverTooltip', () => {
 
   it('stays hidden during the anti-flicker delay', () => {
     const { hoverStore } = setup();
-    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10 } }); });
+    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10, source: 'map' } }); });
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 
   it('appears after the delay', () => {
     const { hoverStore } = setup();
-    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10 } }); });
+    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10, source: 'map' } }); });
     act(() => { vi.advanceTimersByTime(80); });
     expect(screen.getByRole('tooltip')).toBeInTheDocument();
   });
 
   it('names the hovered region and shows its total', () => {
     const { hoverStore } = setup();
-    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10 } }); });
+    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10, source: 'map' } }); });
     act(() => { vi.advanceTimersByTime(80); });
 
     expect(screen.getByText('İstanbul')).toBeInTheDocument();
@@ -82,7 +86,7 @@ describe('HoverTooltip', () => {
 
   it('lists the top categories with their labels', () => {
     const { hoverStore } = setup();
-    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10 } }); });
+    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10, source: 'map' } }); });
     act(() => { vi.advanceTimersByTime(80); });
     expect(screen.getByText('Hırsızlık')).toBeInTheDocument();
     expect(screen.getByText('Darp')).toBeInTheDocument();
@@ -90,7 +94,7 @@ describe('HoverTooltip', () => {
 
   it('hides immediately on leave, with no trailing delay', () => {
     const { hoverStore } = setup();
-    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10 } }); });
+    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10, source: 'map' } }); });
     act(() => { vi.advanceTimersByTime(80); });
     act(() => { hoverStore.dispatch({ type: 'leave' }); });
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
@@ -98,14 +102,14 @@ describe('HoverTooltip', () => {
 
   it('says "no data" for a region absent from the rollup', () => {
     const { hoverStore } = setup();
-    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '06', x: 10, y: 10 } }); });
+    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '06', x: 10, y: 10, source: 'map' } }); });
     act(() => { vi.advanceTimersByTime(80); });
     expect(screen.getByText(trStrings.tooltip.noData)).toBeInTheDocument();
   });
 
   it('mirrors its content into a live region for screen readers', () => {
     const { container, hoverStore } = setup();
-    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10 } }); });
+    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10, source: 'map' } }); });
     act(() => { vi.advanceTimersByTime(80); });
 
     const live = container.querySelector('[aria-live="polite"]');
@@ -114,7 +118,7 @@ describe('HoverTooltip', () => {
 
   it('cancels a pending show if the pointer leaves first', () => {
     const { hoverStore } = setup();
-    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10 } }); });
+    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10, source: 'map' } }); });
     act(() => { hoverStore.dispatch({ type: 'leave' }); });
     act(() => { vi.advanceTimersByTime(200); });
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
@@ -122,7 +126,7 @@ describe('HoverTooltip', () => {
 
   it('follows the cursor', () => {
     const { hoverStore } = setup();
-    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10 } }); });
+    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 10, y: 10, source: 'map' } }); });
     act(() => { vi.advanceTimersByTime(80); });
     const first = screen.getByRole('tooltip').style.transform;
 

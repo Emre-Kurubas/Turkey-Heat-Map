@@ -1,0 +1,45 @@
+.wrapper { display: grid; gap: 4px; }
+
+.readout {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--hm-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  position: relative;
+  height: 20px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.rail,
+.fill {
+  position: absolute;
+  top: 9px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.rail { left: 0; right: 0; background: rgba(15, 23, 42, 0.12); }
+.fill { background: var(--hm-fg); opacity: 0.7; }
+
+.handle {
+  position: absolute;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--hm-map-bg);
+  background: var(--hm-fg);
+  cursor: grab;
+}
+
+.handle:focus-visible {
+  outline: 2px solid var(--hm-focus-ring);
+  outline-offset: 2px;
+}

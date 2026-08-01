@@ -20,6 +20,8 @@ export interface ReconcileInput {
 
 export interface ReconcileResult {
   filters: FilterSet;
+  /** The data's full year span, independent of the requested filter range. */
+  yearBounds: [number, number];
   level: GeoLevel;
   metric: MetricMode;
   /** Turkish messages for onDataWarning and the debug overlay. */
@@ -80,5 +82,11 @@ export function reconcileProps(input: ReconcileInput, index: CrimeIndex): Reconc
     level = 'il';
   }
 
-  return { filters: { yearRange, categories }, level, metric, warnings };
+  return {
+    filters: { yearRange, categories },
+    yearBounds: [dataMin, dataMax],
+    level,
+    metric,
+    warnings,
+  };
 }

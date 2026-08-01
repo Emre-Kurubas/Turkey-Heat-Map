@@ -124,3 +124,20 @@ describe('reconcileProps — empty data', () => {
     expect(filters.yearRange[0]).toBeLessThanOrEqual(filters.yearRange[1]);
   });
 });
+
+describe('reconcileProps — year bounds', () => {
+  it('reports the data span regardless of the requested range', () => {
+    const { yearBounds } = reconcileProps(
+      { defaultFilters: { yearRange: [2020, 2021], categories: [] } },
+      index,
+    );
+    expect(yearBounds).toEqual([2018, 2022]);
+  });
+
+  it('reports a usable span for an empty dataset', () => {
+    const empty = buildIndex({ data: [], categories: CATEGORIES });
+    const [lo, hi] = reconcileProps({}, empty).yearBounds;
+    expect(Number.isFinite(lo)).toBe(true);
+    expect(lo).toBeLessThanOrEqual(hi);
+  });
+});

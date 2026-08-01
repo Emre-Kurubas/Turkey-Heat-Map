@@ -1,11 +1,14 @@
 import { useMemo } from 'react';
 import {
-  buildIndex, rollup, type CrimeIndex, type RollupResult,
+  buildIndex, buildPopulationIndex, rollup, toPerCapita,
+  type CrimeIndex, type RollupResult,
 } from '@/core/aggregation/index.js';
 import {
   createColorScale, type ColorScale, type ColorScaleName, type RampFn,
 } from '@/core/color/index.js';
-import type { CrimeCategory, CrimeRecord, GeoLevel } from '@/core/types/index.js';
+import type {
+  CrimeCategory, CrimeRecord, GeoLevel, RegionPopulation,
+} from '@/core/types/index.js';
 import { getLevelRegionMeta } from '@/data/geo/index.js';
 import { useHeatMapState } from './useHeatMapState.js';
 
@@ -13,6 +16,8 @@ export interface AggregatesInput {
   data: readonly CrimeRecord[];
   categories: readonly CrimeCategory[];
   colorScale: ColorScaleName | RampFn;
+  /** Required for the per-capita metric; without it the metric stays on totals. */
+  population?: readonly RegionPopulation[] | undefined;
 }
 
 export interface AggregateResult {
@@ -57,10 +62,11 @@ function namesFor(level: GeoLevel): ReadonlyMap<string, string> {
  * builds either array inline in render defeats all of this.
  */
 export function useAggregates(input: AggregatesInput): AggregateResult {
-  const { data, categories, colorScale } = input;
+  const { data, categories, colorScale, population } = input;
   const level = useHeatMapState((state) => state.level);
   const filters = useHeatMapState((state) => state.filters);
   const scaleMode = useHeatMapState((state) => state.scaleMode);
+  const metric = useHeatMapState((state) => state.metric);
 
   const index = useMemo(() => {
     const knownIlceCodes = new Set(getLevelRegionMeta('ilce').keys());
@@ -78,12 +84,31 @@ export function useAggregates(input: AggregatesInput): AggregateResult {
     [index, heatLevel, level, filters, rolled],
   );
 
+  // Per-capita restates the counts as a rate. Without population data the
+  // metric silently stays on totals — reconcileProps already warned about it,
+  // and a NaN-filled map would be a worse answer than an honest count.
+  const ratePossible = metric === 'perCapita' && population !== undefined;
+
+  const rated = useMemo(() => {
+    if (!ratePossible) return rolled;
+    return toPerCapita(rolled, buildPopulationIndex(population, level, filters.yearRange));
+  }, [ratePossible, population, rolled, level, filters.yearRange]);
+
+  const ratedHeat = useMemo(() => {
+    if (!ratePossible) return heatRolled;
+    if (heatLevel === level) return rated;
+    return toPerCapita(
+      heatRolled,
+      buildPopulationIndex(population, heatLevel, filters.yearRange),
+    );
+  }, [ratePossible, population, heatRolled, heatLevel, level, rated, filters.yearRange]);
+
   // The domain comes from the heat level alone. Mixing levels here would let
   // the colours mean one thing and the legend say another (§6.5).
   const scale = useMemo(
-    () => createColorScale({ values: heatRolled.values, mode: scaleMode, ramp: colorScale }),
-    [heatRolled, scaleMode, colorScale],
+    () => createColorScale({ values: ratedHeat.values, mode: scaleMode, ramp: colorScale }),
+    [ratedHeat, scaleMode, colorScale],
   );
 
-  return { index, rollup: rolled, heatRollup: heatRolled, scale, heatLevel, names };
+  return { index, rollup: rated, heatRollup: ratedHeat, scale, heatLevel, names };
 }

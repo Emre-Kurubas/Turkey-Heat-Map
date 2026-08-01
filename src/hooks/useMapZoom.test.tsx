@@ -13,6 +13,10 @@ const base: HeatMapState = {
   focusedCode: null,
   selectedCode: null,
   filters: { yearRange: [2015, 2024], categories: [] },
+  defaultFilters: { yearRange: [2015, 2024], categories: [] },
+  yearBounds: [2015, 2024],
+  flyToRequest: null,
+  detail: null,
   metric: 'total',
   scaleMode: 'quantile',
 };

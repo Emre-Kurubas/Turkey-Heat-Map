@@ -18,6 +18,53 @@ export interface Strings {
     /** Shown beneath the ramp so a quantile map is never read as absolute. */
     scaleNote: string;
   };
+  filters: {
+    title: string;
+    yearRange: string;
+    categories: string;
+    reset: string;
+    perCapita: string;
+    /** Shown when no category chip is selected — empty means every category. */
+    allCategories: string;
+    /** Accessible names for the collapse toggle. */
+    open: string;
+    close: string;
+  };
+  detail: {
+    close: string;
+    total: string;
+    categories: string;
+    empty: string;
+    /** Shown beside the region name so the unit is never ambiguous. */
+    levelIl: string;
+    levelIlce: string;
+  };
+  pie: {
+    title: string;
+    /** Shown when no region is selected. */
+    national: string;
+    other: string;
+    /** Accessible names for the Diğer disclosure (§7.7). */
+    expand: string;
+    collapse: string;
+    empty: string;
+  };
+  trend: { title: string; empty: string; year: string };
+  sidebar: {
+    title: string;
+    collapse: string;
+    expand: string;
+    sortByTotal: string;
+    sortByName: string;
+    empty: string;
+  };
+  search: {
+    label: string;
+    placeholder: string;
+    noResults: string;
+    /** Dropdown group headings, keyed by SearchEntityType. */
+    groups: { il: string; ilce: string; category: string; year: string };
+  };
   scaleMode: {
     linear: string;
     log: string;

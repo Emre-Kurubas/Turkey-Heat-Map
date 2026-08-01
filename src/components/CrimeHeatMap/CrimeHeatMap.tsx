@@ -1,15 +1,21 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Attribution } from '@/components/Attribution/index.js';
+import { CategoryPieChart } from '@/components/CategoryPieChart/index.js';
+import { FilterBar } from '@/components/FilterBar/index.js';
 import { HoverTooltip } from '@/components/HoverTooltip/index.js';
 import { Legend } from '@/components/Legend/index.js';
 import {
   MapCanvas, type HeatStyle, type RegionClickPayload,
 } from '@/components/MapCanvas/index.js';
+import { RegionDetail } from '@/components/RegionDetail/index.js';
+import { SearchBar } from '@/components/SearchBar/index.js';
+import { Sidebar } from '@/components/Sidebar/index.js';
+import { TrendChart } from '@/components/TrendChart/index.js';
 import { HeatMapProvider } from '@/context/HeatMapProvider.js';
 import { createHeatMapStore } from '@/context/HeatMapStore.js';
 import { createHoverStore } from '@/context/HoverStore.js';
-import { buildIndex } from '@/core/aggregation/index.js';
+import { buildIndex, rankRegions } from '@/core/aggregation/index.js';
 import type { ColorScaleName, RampFn } from '@/core/color/index.js';
 import type {
   CrimeCategory, CrimeRecord, GeoLevel, MetricMode, RegionPopulation,
@@ -17,6 +23,8 @@ import type {
 } from '@/core/types/index.js';
 import { getLevelRegionMeta } from '@/data/geo/index.js';
 import { useAggregates } from '@/hooks/useAggregates.js';
+import { useHeatMapDispatch, useHeatMapState } from '@/hooks/useHeatMapState.js';
+import { useRegionDetail } from '@/hooks/useRegionDetail.js';
 import { mergeStrings, type PartialStrings } from '@/i18n/index.js';
 import { ErrorBoundary } from './ErrorBoundary.js';
 import { reconcileProps } from './reconcile.js';
@@ -58,15 +66,52 @@ export interface CrimeHeatMapProps {
   testViewport?: Viewport;
 }
 
+interface ResolvedPanels {
+  legend: boolean;
+  tooltip: boolean;
+  sidebar: boolean;
+  search: boolean;
+  filters: boolean;
+  pie: boolean;
+  trend: boolean;
+}
+
 interface ContentProps {
   props: CrimeHeatMapProps;
-  panels: { legend: boolean; tooltip: boolean };
+  panels: ResolvedPanels;
 }
 
 /** Inner tree, so the error boundary can wrap everything that can throw. */
 function Content({ props, panels }: ContentProps) {
-  const { data, categories, colorScale = 'spectral', heatStyle = 'glow' } = props;
-  const { rollup, scale, names } = useAggregates({ data, categories, colorScale });
+  const {
+    data, categories, population, colorScale = 'spectral', heatStyle = 'glow',
+  } = props;
+  const { index, rollup, scale, names } = useAggregates({
+    data, categories, colorScale, population,
+  });
+  const dispatch = useHeatMapDispatch();
+  const selectedCode = useHeatMapState((state) => state.selectedCode);
+  const detailTarget = useHeatMapState((state) => state.detail);
+  const filters = useHeatMapState((state) => state.filters);
+  const detail = useRegionDetail(index, categories, filters, detailTarget);
+
+  // Lifted here only because two panels need it — the pie reports the hovered
+  // category and the filter bar highlights the matching chip. Neither imports
+  // the other.
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+
+  const rows = useMemo(
+    () => rankRegions(rollup, { sort: 'total-desc', names }),
+    [rollup, names],
+  );
+
+  /** Category totals for the selected region, or nationally when none. */
+  const categoryTotals = useMemo(() => {
+    const source = selectedCode === null
+      ? rollup.byCategory
+      : rollup.byRegion.get(selectedCode)?.byCategory ?? new Map<string, number>();
+    return new Map(source);
+  }, [rollup, selectedCode]);
 
   return (
     <>
@@ -80,11 +125,57 @@ function Content({ props, panels }: ContentProps) {
       />
 
       <div className="hm-overlay">
-        <div className={styles.bottomLeft}>
+        {panels.search ? (
+          <div className="hm-area-topLeft"><SearchBar categories={categories} /></div>
+        ) : null}
+
+        {panels.filters ? (
+          <div className="hm-area-topCentre">
+            <FilterBar
+              categories={categories}
+              categoryTotals={categoryTotals}
+              hasPopulation={population !== undefined && population.length > 0}
+              highlightedCategory={hoveredCategory}
+            />
+          </div>
+        ) : null}
+
+        {panels.pie ? (
+          <div className="hm-area-topRight">
+            <CategoryPieChart
+              categories={categories}
+              totals={categoryTotals}
+              regionName={selectedCode === null ? null : names.get(selectedCode) ?? null}
+              onHoverCategory={setHoveredCategory}
+            />
+          </div>
+        ) : null}
+
+        {panels.sidebar ? (
+          <div className="hm-area-left">
+            <Sidebar rows={rows} scale={scale} />
+          </div>
+        ) : null}
+
+        {panels.trend ? (
+          <div className="hm-area-right">
+            <TrendChart byYear={rollup.byYear} />
+          </div>
+        ) : null}
+
+        <div className="hm-area-bottomLeft">
           {panels.legend ? <Legend scale={scale} /> : null}
           <Attribution />
         </div>
       </div>
+
+      {detail === null ? null : (
+        <RegionDetail
+          detail={detail}
+          categories={categories}
+          onClose={() => { dispatch({ type: 'closeDetail' }); }}
+        />
+      )}
 
       {panels.tooltip ? (
         <HoverTooltip rollup={rollup} names={names} categories={categories} />
@@ -137,6 +228,12 @@ export function CrimeHeatMap(props: CrimeHeatMapProps) {
     focusedCode: null,
     selectedCode: null,
     filters: reconciled.filters,
+    // The same object, so `resetFilters` can compare by identity and no-op
+    // when nothing has changed.
+    defaultFilters: reconciled.filters,
+    yearBounds: reconciled.yearBounds,
+    flyToRequest: null,
+    detail: null,
     metric: reconciled.metric,
     scaleMode,
   }));
@@ -144,9 +241,14 @@ export function CrimeHeatMap(props: CrimeHeatMapProps) {
 
   const rootStyle = useMemo(() => ({ ...style, ...theme }), [style, theme]);
 
-  const resolvedPanels = {
+  const resolvedPanels: ResolvedPanels = {
     legend: panels?.legend ?? true,
     tooltip: panels?.tooltip ?? true,
+    sidebar: panels?.sidebar ?? true,
+    search: panels?.search ?? true,
+    filters: panels?.filters ?? true,
+    pie: panels?.pie ?? true,
+    trend: panels?.trend ?? true,
   };
 
   const onBoundaryError = useCallback((error: Error) => { onError?.(error); }, [onError]);

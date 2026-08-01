@@ -2,6 +2,18 @@ import type {
   FilterSet, GeoLevel, MetricMode, ScaleMode, Transform,
 } from '@/core/types/index.js';
 
+/**
+ * The region whose detail panel is open.
+ *
+ * Carries its own level rather than reading the active one: a province's panel
+ * stays open after the click that opened it has zoomed the map to districts,
+ * and at that point the active level no longer describes the target.
+ */
+export interface DetailTarget {
+  code: string;
+  level: GeoLevel;
+}
+
 export interface HeatMapState {
   level: GeoLevel;
   transform: Transform;
@@ -9,6 +21,16 @@ export interface HeatMapState {
   focusedCode: string | null;
   selectedCode: string | null;
   filters: FilterSet;
+  /** What `resetFilters` restores. Set once from the reconciled props. */
+  defaultFilters: FilterSet;
+  /** The data's full year span. The slider's extent, and the range clamp. */
+  yearBounds: [number, number];
+  /**
+   * A region the map has been asked to fly to, by a panel that cannot reach
+   * the map directly. The map clears it once the animation starts.
+   */
+  flyToRequest: string | null;
+  detail: DetailTarget | null;
   metric: MetricMode;
   scaleMode: ScaleMode;
 }
@@ -19,8 +41,15 @@ export type HeatMapAction =
   | { type: 'select'; code: string | null }
   | { type: 'focus'; code: string | null }
   | { type: 'setFilters'; filters: FilterSet }
+  | { type: 'setYearRange'; range: [number, number] }
+  | { type: 'toggleCategory'; id: string }
+  | { type: 'resetFilters' }
   | { type: 'setMetric'; metric: MetricMode }
   | { type: 'setScaleMode'; mode: ScaleMode }
+  | { type: 'requestFlyTo'; code: string }
+  | { type: 'clearFlyTo' }
+  | { type: 'openDetail'; code: string; level: GeoLevel }
+  | { type: 'closeDetail' }
   | { type: 'resetView' };
 
 export const IDENTITY_TRANSFORM: Transform = { k: 1, x: 0, y: 0 };
@@ -33,9 +62,18 @@ export function heatMapReducer(state: HeatMapState, action: HeatMapAction): Heat
     case 'setLevel':
       if (action.level === state.level) return state;
       // Region codes are level-specific: "34" means İstanbul at il level and
-      // nothing at all at ilçe level. Carrying a selection across would
-      // highlight a region that does not exist.
-      return { ...state, level: action.level, selectedCode: null, focusedCode: null };
+      // nothing at all at ilçe level. Carrying a selection — or a pending
+      // fly-to — across would target a region that does not exist.
+      // `detail` deliberately survives. Clicking a province zooms the map to
+      // districts, and clearing the target here would close the panel that
+      // same click just opened — which is why the target carries its own level.
+      return {
+        ...state,
+        level: action.level,
+        selectedCode: null,
+        focusedCode: null,
+        flyToRequest: null,
+      };
 
     case 'select':
       return { ...state, selectedCode: action.code };
@@ -46,11 +84,55 @@ export function heatMapReducer(state: HeatMapState, action: HeatMapAction): Heat
     case 'setFilters':
       return { ...state, filters: action.filters };
 
+    case 'setYearRange': {
+      // Normalize rather than trusting the caller: a dual-handle slider can
+      // drag its low handle past its high one, and an inverted range would
+      // silently select nothing.
+      const [lo, hi] = action.range;
+      const [minYear, maxYear] = state.yearBounds;
+      const start = Math.max(minYear, Math.min(lo, hi));
+      const end = Math.min(maxYear, Math.max(lo, hi));
+      return { ...state, filters: { ...state.filters, yearRange: [start, end] } };
+    }
+
+    case 'toggleCategory': {
+      const current = state.filters.categories;
+      const next = current.includes(action.id)
+        ? current.filter((id) => id !== action.id)
+        : [...current, action.id];
+      return { ...state, filters: { ...state.filters, categories: next } };
+    }
+
+    case 'resetFilters':
+      return state.filters === state.defaultFilters
+        ? state
+        : { ...state, filters: state.defaultFilters };
+
     case 'setMetric':
       return { ...state, metric: action.metric };
 
     case 'setScaleMode':
       return { ...state, scaleMode: action.mode };
+
+    case 'requestFlyTo':
+      // Always a new object, even for the same code: clicking the same sidebar
+      // row twice should fly twice, and identity is how the map notices.
+      return { ...state, flyToRequest: action.code };
+
+    case 'clearFlyTo':
+      return state.flyToRequest === null ? state : { ...state, flyToRequest: null };
+
+    case 'openDetail':
+      return {
+        ...state,
+        detail: { code: action.code, level: action.level },
+        // Selecting it too is what keeps the region outlined on the map while
+        // its panel is open.
+        selectedCode: action.code,
+      };
+
+    case 'closeDetail':
+      return state.detail === null ? state : { ...state, detail: null };
 
     case 'resetView':
       return {
@@ -59,6 +141,10 @@ export function heatMapReducer(state: HeatMapState, action: HeatMapAction): Heat
         level: 'il',
         selectedCode: null,
         focusedCode: null,
+        flyToRequest: null,
+        // Unlike a level change, resetting the view really does mean "put
+        // everything back", and an open panel is part of the view.
+        detail: null,
       };
 
     default:
