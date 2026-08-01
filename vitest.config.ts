@@ -3,13 +3,34 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 const rootDir = fileURLToPath(new URL('.', import.meta.url));
+const alias = { '@': resolve(rootDir, 'src') };
 
 export default defineConfig({
-  resolve: { alias: { '@': resolve(rootDir, 'src') } },
+  resolve: { alias },
   test: {
     globals: false,
-    environment: 'node',
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'scripts/**/*.test.ts'],
+    projects: [
+      {
+        resolve: { alias },
+        test: {
+          // core/ is tested in node deliberately: if a pure module ever reaches
+          // for a DOM global, it fails here rather than passing under jsdom.
+          name: 'core',
+          environment: 'node',
+          include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
+        },
+      },
+      {
+        resolve: { alias },
+        test: {
+          name: 'ui',
+          environment: 'jsdom',
+          include: ['src/**/*.test.tsx'],
+          setupFiles: ['./vitest.setup.ts'],
+          css: true,
+        },
+      },
+    ],
     coverage: {
       provider: 'v8',
       include: ['src/core/**'],

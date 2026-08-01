@@ -1,0 +1,20 @@
+.panel {
+  background: var(--hm-glass-bg-solid);
+  border: 1px solid var(--hm-glass-border);
+  border-radius: var(--hm-radius);
+  box-shadow: var(--hm-glass-shadow);
+  /* The overlay container disables pointer events so the map stays draggable
+     in the gaps between panels; each panel re-enables them for itself. */
+  pointer-events: auto;
+}
+
+/* backdrop-filter is unsupported in some embedded webviews, so the solid
+   background above is the baseline and the blur is layered on only where it
+   actually works. Text contrast never depends on the blur rendering. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .panel {
+    background: var(--hm-glass-bg);
+    -webkit-backdrop-filter: blur(var(--hm-glass-blur));
+    backdrop-filter: blur(var(--hm-glass-blur));
+  }
+}
