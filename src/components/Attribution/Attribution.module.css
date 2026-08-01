@@ -1,0 +1,10 @@
+.attribution {
+  margin: 0;
+  padding: 2px 6px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--hm-fg-muted);
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  pointer-events: auto;
+}

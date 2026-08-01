@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
@@ -8,6 +9,17 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+    },
+  },
+  {
+    // Hook rules. `exhaustive-deps` is not stylistic here: the whole render
+    // budget rests on memo dependency lists being right, and a missing dep
+    // silently serves stale geometry or a stale colour scale.
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
     },
   },
   {

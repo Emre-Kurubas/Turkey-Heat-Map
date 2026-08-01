@@ -1,0 +1,45 @@
+.tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  min-width: 180px;
+  max-width: 260px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--hm-glass-bg-solid);
+  border: 1px solid var(--hm-glass-border);
+  box-shadow: var(--hm-glass-shadow);
+  color: var(--hm-fg);
+  font-size: 12px;
+  /* The tooltip must never eat the pointer events the map needs. */
+  pointer-events: none;
+  transition: transform var(--hm-motion-hover) var(--hm-ease-hover);
+}
+
+.name { margin: 0 0 6px; font-weight: 600; font-size: 13px; }
+.total { display: flex; justify-content: space-between; gap: 12px; margin: 0; }
+.totalLabel { color: var(--hm-fg-muted); }
+.totalValue { font-variant-numeric: tabular-nums; font-weight: 600; }
+.section { margin: 8px 0 4px; font-size: 11px; color: var(--hm-fg-muted); }
+.empty { margin: 0; color: var(--hm-fg-muted); }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 11px;
+}
+
+.rowLabel { grid-column: 1; }
+.rowValue { grid-column: 2; font-variant-numeric: tabular-nums; }
+
+.bar {
+  grid-column: 1 / -1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--hm-fg-muted);
+  opacity: 0.6;
+}

@@ -2,8 +2,8 @@
 
 Türkiye suç istatistikleri için etkileşimli ısı haritası React bileşeni.
 
-> **Durum:** Geliştirme aşamasında (Aşama 1/5 tamamlandı). Bu sürüm yalnızca saf
-> hesaplama katmanını (`core/`) içerir; React bileşenleri henüz yayınlanmadı.
+> **Durum:** Geliştirme aşamasında (Aşama 2/5 tamamlandı). Harita, gösterge ve
+> ipucu çalışıyor. Kenar çubuğu, arama, filtreler ve grafikler Aşama 3'te gelir.
 
 ## Kurulum
 
@@ -11,19 +11,50 @@ Türkiye suç istatistikleri için etkileşimli ısı haritası React bileşeni.
 npm install turkiye-suc-haritasi
 ```
 
-## Şu an neler var
+## Hızlı başlangıç
 
-React'ten ve DOM'dan tamamen bağımsız, saf yardımcılar — hepsi %100 dal
-kapsamıyla test edilmiş durumda:
+```tsx
+import { CrimeHeatMap, generateMockData } from 'turkiye-suc-haritasi';
+import 'turkiye-suc-haritasi/style.css';
+
+const veri = generateMockData({ seed: 1 });
+
+<div style={{ height: 600 }}>
+  <CrimeHeatMap data={veri.records} categories={veri.categories} />
+</div>
+```
+
+Bileşen yüksekliği olan bir kapsayıcı bekler; haritayı o kapsayıcıya sığdırır.
+
+`data` ve `categories` **referans kimliğine göre** karşılaştırılır — bunları
+render içinde satır içi dizi olarak oluşturmayın, yoksa toplama indeksi her
+render'da yeniden kurulur.
+
+## Şu an neler var
 
 | Alan | Ne işe yarar |
 |---|---|
+| `CrimeHeatMap` | İl ve ilçe düzeyinde etkileşimli ısı haritası, gösterge ve ipucu |
 | `buildIndex`, `rollup`, `rankRegions`, `diffRollups` | Suç kayıtlarını doğrular, filtreler ve bölge bazında toplar |
 | `createColorScale`, `computeLegendBreaks` | Algısal olarak eşit aralıklı OKLab renk skalaları |
 | `foldTurkish`, `compareTurkish`, `searchEntities` | Türkçe'ye duyarlı arama ve sıralama |
 | `formatTrNumber`, `formatPercent`, `formatDelta` | Deterministik `tr-TR` sayı biçimlendirme |
 | `createTurkeyProjection`, `cullFeatures` | Eşit alanlı harita projeksiyonu ve görünürlük filtresi |
+| `getLevelFeatures` | Paketle gelen il/ilçe sınır verisi |
+| `trStrings`, `mergeStrings` | Türkçe metin tablosu ve `strings` prop'u ile geçersiz kılma |
 | `generateMockData` | Tohumlanmış, tekrarlanabilir örnek veri seti |
+
+`core/` katmanı React'ten ve DOM'dan tamamen bağımsızdır ve %100 dal kapsamıyla
+test edilir.
+
+## Erişilebilirlik
+
+Harita klavyeyle tam kullanılabilir: `Tab` haritaya odaklanır, ok tuşları
+bölgeler arasında gezinir, `Enter` seçer, `Esc` seçimi kaldırır. Her bölge adını
+ve değerini bildiren bir `role="img"` öğesidir; ipucu içeriği `aria-live` ile
+ekran okuyuculara yansıtılır. `prefers-reduced-motion` her yerde geçerlidir.
+
+Renk hiçbir zaman tek başına anlam taşımaz — sayı her zaman rengin yanındadır.
 
 ## Veri biçimi
 
@@ -31,34 +62,23 @@ kapsamıyla test edilmiş durumda:
 interface CrimeRecord {
   year: number;        // 2023
   ilCode: string;      // "34" — plaka kodu, 2 hane
-  ilceCode?: string;   // "3401" — TÜİK ilçe kodu, 4 hane
+  ilceCode?: string;   // "3401" — ilçe kodu, 4 hane (aşağıdaki nota bakın)
   category: string;    // CrimeCategory.id ile eşleşmeli
   count: number;       // negatif olmayan tam sayı
 }
 ```
 
+> **İlçe kodları hakkında.** Paketle gelen sınır verisindeki ilçe kodları
+> `{plaka}{sıra}` biçimindedir ve sıra, il içinde Türkçe alfabetik sıralamadan
+> gelir. Bunlar **resmî TÜİK kimlikleri değildir** — ilçe sınırlarını TÜİK
+> kodlarıyla eşleştiren kamuya açık bir veri kümesi yok. Elinizde gerçek TÜİK
+> kodlu veri varsa bir eşleme tablosuna ihtiyacınız olur; ayrıntı için
+> `scripts/README.md`.
+
 Kayıtlar önceden toplanmış sayılardır; tekil olay kayıtları değildir.
 
 **Geçersiz kayıtlar hata fırlatmaz** — atılır ve Türkçe uyarı olarak bildirilir.
 Tek bir bozuk satır yüzünden sayfayı çökerten bir kütüphane kabul edilemez.
-
-## Hızlı başlangıç
-
-```ts
-import {
-  buildIndex, rollup, rankRegions, createColorScale, generateMockData,
-} from 'turkiye-suc-haritasi';
-
-const { records, categories } = generateMockData();
-const index = buildIndex({ data: records, categories });
-
-const sonuc = rollup(index, 'il', { yearRange: [2020, 2024], categories: [] });
-const skala = createColorScale({ values: sonuc.values, mode: 'quantile', ramp: 'spectral' });
-
-for (const bolge of rankRegions(sonuc, { sort: 'total-desc', names })) {
-  console.log(bolge.rank, bolge.name, bolge.total, skala(bolge.total));
-}
-```
 
 ## Tasarım kararları
 
@@ -73,6 +93,13 @@ for (const bolge of rankRegions(sonuc, { sort: 'total-desc', names })) {
   `1,234,567` üretir.
 - **`toLowerCase()` yerine `foldTurkish`.** Yerleşik dönüşüm noktalı/noktasız
   İ/I çiftinde hatalıdır ve aramayı sessizce bozar.
+- **Kaydırma ve yakınlaştırma tek bir `transform` üzerinde.** Bulanıklık filtresi
+  yalnızca veri, filtre veya düzey değiştiğinde yeniden çalışır — imleç
+  hareketinde asla. Haritanın anlık hissetmesiyle ağır hissetmesi arasındaki fark
+  budur.
+- **Vurgu için ayrı, saydam bir katman.** Görünen renk sınırların ötesine
+  taşacak şekilde bulanıklaştırılır; isabet testi bulanık katmanda yapılsaydı
+  tam bulanıklık yarıçapı kadar yanılırdı.
 
 ## Örnek veri hakkında
 

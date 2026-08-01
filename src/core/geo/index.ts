@@ -5,3 +5,5 @@ export type { FitOptions } from './bounds.js';
 export { collectBounds, computeFitTransform, featureBounds, featureCentroid } from './bounds.js';
 export { cullFeatures, isVisible } from './viewport.js';
 export { MAX_ZOOM, MIN_ZOOM, clampTransform, deriveLevel, panBy, zoomAt } from './zoom.js';
+export type { TooltipPlacement } from './tooltipPlacement.js';
+export { placeTooltip } from './tooltipPlacement.js';

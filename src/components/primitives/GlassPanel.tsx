@@ -3,9 +3,15 @@ import styles from './GlassPanel.module.css';
 
 export interface GlassPanelProps {
   children: ReactNode;
-  className?: string;
+  /**
+   * Explicit `undefined` is allowed, not just omission. Under
+   * `exactOptionalPropertyTypes` a plain `string?` would reject both a
+   * forwarded optional prop and a CSS-Modules lookup, which
+   * `noUncheckedIndexedAccess` types as `string | undefined`.
+   */
+  className?: string | undefined;
   /** Accessible name. Omit for purely decorative containers. */
-  label?: string;
+  label?: string | undefined;
 }
 
 /** The floating glass surface every panel sits on. */

@@ -1,5 +1,9 @@
 import type { CrimeCategory, CrimeRecord, RegionPopulation } from '@/core/types/index.js';
 import { IL_REGIONS } from '@/data/geo/region-meta.js';
+// Imported from the module, not the barrel: the barrel re-exports region-meta
+// too, and going through it would make data/geo and data/mock mutually
+// reachable at load time.
+import { getLevelRegionMeta } from '@/data/geo/topology.js';
 import { MOCK_CATEGORIES } from './categories.js';
 import { createPrng } from './prng.js';
 
@@ -14,7 +18,7 @@ export interface MockDataset {
   records: CrimeRecord[];
   categories: CrimeCategory[];
   population: RegionPopulation[];
-  /** Synthetic ilçe code → name, matching the generated records. */
+  /** Ilçe code → name, taken from the shipped geography. */
   ilceNames: Map<string, string>;
 }
 
@@ -37,17 +41,23 @@ const IL_WEIGHTS: Readonly<Record<string, number>> = {
 const DEFAULT_WEIGHT = 4;
 
 /**
- * District count scales with province size, so İstanbul gets more than Bayburt.
+ * Districts come from the shipped geography rather than a synthetic count.
  *
- * Tier sizes are chosen so the totals land at 972 districts across the 81
- * provinces — within one of Turkey's real 973 — which keeps the generated
- * dataset at genuine production scale for the performance guards.
+ * An invented count only overlapped the real `{plaka}{sıra}` codes by accident:
+ * a province with more real districts than mock ones left a no-data tail on the
+ * map, and one with fewer produced records for regions that cannot be drawn.
+ * Reading the real division fixes both, and keeps the dataset at genuine
+ * production scale (973 districts) for the performance guards.
+ *
+ * Magnitudes are still shaped by IL_WEIGHTS below — only the administrative
+ * division comes from the geography.
  */
-function districtCount(weight: number): number {
-  if (weight >= 40) return 32;
-  if (weight >= 15) return 20;
-  if (weight >= 8) return 14;
-  return 10;
+function districtsOf(ilCode: string): { code: string; name: string }[] {
+  const out: { code: string; name: string }[] = [];
+  for (const [code, meta] of getLevelRegionMeta('ilce')) {
+    if (meta.parentCode === ilCode) out.push({ code, name: meta.name });
+  }
+  return out;
 }
 
 /**
@@ -71,16 +81,14 @@ export function generateMockData(options: MockDataOptions = {}): MockDataset {
 
   for (const il of IL_REGIONS) {
     const weight = IL_WEIGHTS[il.code] ?? DEFAULT_WEIGHT;
-    const districts = districtCount(weight);
 
     // A per-province multiplier so provinces of similar size still differ.
     const ilFactor = 0.7 + random() * 0.6;
 
     const codes: string[] = [];
-    for (let d = 1; d <= districts; d += 1) {
-      const ilceCode = `${il.code}${String(d).padStart(2, '0')}`;
-      codes.push(ilceCode);
-      ilceNames.set(ilceCode, `${il.name} ${d}. Bölge`);
+    for (const district of districtsOf(il.code)) {
+      codes.push(district.code);
+      ilceNames.set(district.code, district.name);
     }
 
     for (const [yearIndex, year] of years.entries()) {
@@ -103,7 +111,7 @@ export function generateMockData(options: MockDataOptions = {}): MockDataset {
         if (includeIlce) {
           for (const ilceCode of codes) {
             const share = 0.4 + random() * 1.2;
-            const count = Math.max(0, Math.round((base / districts) * share));
+            const count = Math.max(0, Math.round((base / codes.length) * share));
             records.push({ year, ilCode: il.code, ilceCode, category: category.id, count });
           }
         } else {

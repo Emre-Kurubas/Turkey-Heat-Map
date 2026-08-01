@@ -90,3 +90,22 @@ describe('public API surface', () => {
     expect(api.searchEntities(searchIndex, 'gumushane')[0]?.entity.id).toBe('29');
   });
 });
+
+describe('Phase 2 public surface', () => {
+  it('exports the component', async () => {
+    const api = await import('./index.js');
+    expect(typeof api.CrimeHeatMap).toBe('function');
+  });
+
+  it('exports the Turkish string table and its merger', async () => {
+    const api = await import('./index.js');
+    expect(api.trStrings.level.il).toBe('İl');
+    expect(typeof api.mergeStrings).toBe('function');
+  });
+
+  it('exports the bundled geography', async () => {
+    const api = await import('./index.js');
+    expect(api.getLevelFeatures('il').features).toHaveLength(81);
+    expect(api.getLevelFeatures('ilce').features).toHaveLength(973);
+  });
+});

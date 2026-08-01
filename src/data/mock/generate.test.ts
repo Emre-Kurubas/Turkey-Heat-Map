@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildIndex } from '@/core/aggregation/index.js';
 import { ilCodeFromIlceCode } from '@/data/geo/region-meta.js';
+import { getLevelRegionMeta } from '@/data/geo/topology.js';
 import { MOCK_CATEGORIES } from './categories.js';
 import { generateMockData } from './generate.js';
 
@@ -99,5 +100,39 @@ describe('generateMockData', () => {
   it('handles an empty year list without throwing', () => {
     const { records } = generateMockData({ years: [] });
     expect(records).toEqual([]);
+  });
+});
+
+describe('generateMockData — agreement with the shipped geography', () => {
+  it('emits only ilçe codes that exist in the bundled geography', () => {
+    const { records } = generateMockData({ seed: 7 });
+    const real = getLevelRegionMeta('ilce');
+
+    const unknown = new Set(
+      records
+        .map((record) => record.ilceCode)
+        .filter((code): code is string => code !== undefined)
+        .filter((code) => !real.has(code)),
+    );
+    expect([...unknown]).toEqual([]);
+  });
+
+  it('covers every real district, so no region renders as no-data by accident', () => {
+    const { records } = generateMockData({ seed: 7 });
+    const covered = new Set(records.map((record) => record.ilceCode));
+    for (const code of getLevelRegionMeta('ilce').keys()) {
+      expect(covered.has(code), code).toBe(true);
+    }
+  });
+
+  it('names districts from the geography rather than inventing labels', () => {
+    const { ilceNames } = generateMockData({ seed: 7 });
+    expect(ilceNames.get('3401')).toBe(getLevelRegionMeta('ilce').get('3401')?.name);
+    expect(ilceNames.size).toBe(973);
+  });
+
+  it('stays reproducible from a seed', () => {
+    expect(generateMockData({ seed: 99 }).records)
+      .toEqual(generateMockData({ seed: 99 }).records);
   });
 });

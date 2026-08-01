@@ -1,8 +1,9 @@
 /**
  * turkiye-suc-haritasi — public API.
  *
- * Phase 1 exposes the pure core only. React components arrive in Phase 2 and are
- * added to this barrel then.
+ * Phase 2 exposes the map: `CrimeHeatMap` with its legend, tooltip and
+ * attribution, on top of the pure core. The sidebar, search, filter bar and
+ * charts arrive in Phase 3 and are added to this barrel then.
  */
 
 // Types
@@ -60,3 +61,17 @@ export {
 // Mock data — demo only, describes nothing real
 export type { MockDataOptions, MockDataset } from './data/mock/index.js';
 export { MOCK_CATEGORIES, createPrng, generateMockData } from './data/mock/index.js';
+
+// Components
+export type { CrimeHeatMapProps, PanelFlags } from './components/CrimeHeatMap/index.js';
+export { CrimeHeatMap } from './components/CrimeHeatMap/index.js';
+export type { HeatStyle, RegionClickPayload } from './components/MapCanvas/index.js';
+
+// Strings — override any of these via the `strings` prop
+export type { PartialStrings, Strings } from './i18n/index.js';
+export { mergeStrings, trStrings } from './i18n/index.js';
+
+// Bundled geography
+export {
+  LEVELS, getLevelFeatures, getLevelRegionMeta,
+} from './data/geo/index.js';

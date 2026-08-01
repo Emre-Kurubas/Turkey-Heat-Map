@@ -1,0 +1,22 @@
+.bottomLeft {
+  grid-column: 1;
+  grid-row: 3;
+  align-self: end;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+.error {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  text-align: center;
+  padding: 24px;
+  color: var(--hm-fg);
+}
+
+.errorTitle { margin: 0; font-weight: 600; }
+.errorBody { margin: 0; color: var(--hm-fg-muted); font-size: 13px; }
