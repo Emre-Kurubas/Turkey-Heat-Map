@@ -36,12 +36,18 @@ const IL_WEIGHTS: Readonly<Record<string, number>> = {
 };
 const DEFAULT_WEIGHT = 4;
 
-/** District count scales with province size, so İstanbul gets more than Bayburt. */
+/**
+ * District count scales with province size, so İstanbul gets more than Bayburt.
+ *
+ * Tier sizes are chosen so the totals land at 972 districts across the 81
+ * provinces — within one of Turkey's real 973 — which keeps the generated
+ * dataset at genuine production scale for the performance guards.
+ */
 function districtCount(weight: number): number {
-  if (weight >= 40) return 18;
-  if (weight >= 15) return 12;
-  if (weight >= 8) return 8;
-  return 5;
+  if (weight >= 40) return 32;
+  if (weight >= 15) return 20;
+  if (weight >= 8) return 14;
+  return 10;
 }
 
 /**
