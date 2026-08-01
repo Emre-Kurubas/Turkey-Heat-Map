@@ -1,5 +1,5 @@
 import { feature } from 'topojson-client';
-import type { GeometryCollection, Topology } from 'topojson-specification';
+import type { Topology } from 'topojson-specification';
 import type { RegionMeta } from '@/core/types/index.js';
 import { ilCodeFromIlceCode } from '@/data/geo/region-meta.js';
 
@@ -40,7 +40,7 @@ export function decodeTopology(
   const object = topology.objects[objectName];
   const decoded: GeoJSON.FeatureCollection = object === undefined
     ? EMPTY
-    : (feature(topology, object as GeometryCollection) as GeoJSON.FeatureCollection);
+    : (feature(topology, object) as GeoJSON.FeatureCollection);
 
   perTopology.set(objectName, decoded);
   return decoded;
@@ -63,7 +63,8 @@ export function deriveRegionMeta(collection: GeoJSON.FeatureCollection): RegionM
     if (item.id === undefined || item.id === null) continue;
 
     const code = String(item.id);
-    const rawName = item.properties?.['name'];
+    // GeoJSON properties carry an `any` index signature; narrow it deliberately.
+    const rawName: unknown = item.properties?.['name'];
     const name = typeof rawName === 'string' && rawName !== '' ? rawName : code;
 
     metas.push({ code, name, parentCode: ilCodeFromIlceCode(code) });

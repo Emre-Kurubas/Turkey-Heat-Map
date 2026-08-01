@@ -49,7 +49,7 @@ export function collectBounds(
 /** Projected centroid, used to anchor labels and fly-to targets. */
 export function featureCentroid(path: GeoPath, feature: GeoJSON.Feature): [number, number] {
   const [x, y] = path.centroid(feature);
-  return Number.isFinite(x) && Number.isFinite(y) ? [x!, y!] : [0, 0];
+  return Number.isFinite(x) && Number.isFinite(y) ? [x, y] : [0, 0];
 }
 
 /**
