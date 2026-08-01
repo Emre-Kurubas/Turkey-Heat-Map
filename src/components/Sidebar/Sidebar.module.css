@@ -35,8 +35,8 @@
 }
 
 .row:hover,
-.row[data-hovered='true'] { background: rgba(255, 255, 255, 0.08); }
-.row[aria-current='true'] { background: rgba(255, 255, 255, 0.14); }
+.row[data-hovered='true'] { background: rgba(15, 23, 42, 0.05); }
+.row[aria-current='true'] { background: rgba(15, 23, 42, 0.09); }
 .row:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: -2px; }
 
 .rowName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

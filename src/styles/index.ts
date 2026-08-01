@@ -24,6 +24,7 @@ export const THEME_TOKEN_NAMES = [
   '--hm-font',
   '--hm-fg',
   '--hm-fg-muted',
+  '--hm-ink-inverse',
   '--hm-motion-hover',
   '--hm-motion-panel',
   '--hm-motion-color',

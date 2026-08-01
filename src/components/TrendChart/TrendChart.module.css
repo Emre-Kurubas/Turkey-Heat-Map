@@ -1,7 +1,8 @@
 .panel { padding: 10px 12px; display: grid; gap: 6px; width: 260px; }
 .title { margin: 0; font-size: 12px; font-weight: 600; color: var(--hm-fg); }
 .chart { display: block; overflow: visible; }
-.grid { stroke: rgba(255, 255, 255, 0.08); stroke-width: 1; }
+/* A hairline, not a hover wash — recessive but actually visible on a light surface. */
+.grid { stroke: rgba(15, 23, 42, 0.14); stroke-width: 1; }
 .area { fill: var(--hm-fg); opacity: 0.12; }
 .line { fill: none; stroke: var(--hm-fg); stroke-width: 2; stroke-linejoin: round; }
 .marker { fill: var(--hm-fg); }

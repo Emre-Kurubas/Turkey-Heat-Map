@@ -17,9 +17,9 @@
 .chip:hover { color: var(--hm-fg); }
 
 .chip[aria-pressed='true'] {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(15, 23, 42, 0.09);
   color: var(--hm-fg);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(15, 23, 42, 0.24);
 }
 
 /* Driven by a hovered pie slice, so the link between the two reads instantly. */

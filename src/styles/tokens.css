@@ -1,25 +1,34 @@
 :root {
-  /* Glass — §6.2 */
-  --hm-glass-bg: rgba(255, 255, 255, 0.06);
-  --hm-glass-bg-solid: rgba(18, 24, 44, 0.92);
-  --hm-glass-border: rgba(255, 255, 255, 0.12);
+  /*
+   * Glass on a light surface. The translucent fill is now a white wash over
+   * the map rather than a dark one, and the border darkens: a white hairline
+   * is invisible against a pale panel.
+   */
+  --hm-glass-bg: rgba(255, 255, 255, 0.72);
+  --hm-glass-bg-solid: #f7f8fa;
+  --hm-glass-border: rgba(15, 23, 42, 0.12);
   --hm-glass-blur: 20px;
-  --hm-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+  --hm-glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
   --hm-radius: 16px;
 
   /* Map surface */
-  --hm-map-bg: #0b1020;
-  --hm-border-stroke: rgba(255, 255, 255, 0.55);
+  --hm-map-bg: #eef1f6;
+  /*
+   * Borders are dark now. White strokes over pale fills vanish, and the
+   * boundaries are the only thing separating one region from its neighbour.
+   */
+  --hm-border-stroke: rgba(15, 23, 42, 0.45);
   --hm-border-width: 0.75;
-  --hm-focus-ring: #ffd166;
-  /* Distinct from any ramp colour: "no records" and "zero crimes" are
-     different claims and must not look alike. */
-  --hm-no-data: rgba(255, 255, 255, 0.06);
+  --hm-focus-ring: #b45309;
+  /* Distinct from every ramp step: "no records" must not read as "near zero". */
+  --hm-no-data: rgba(15, 23, 42, 0.06);
 
   /* Type */
   --hm-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --hm-fg: rgba(255, 255, 255, 0.92);
-  --hm-fg-muted: rgba(255, 255, 255, 0.62);
+  --hm-fg: #0f172a;
+  --hm-fg-muted: #64748b;
+  /* For labels that land on a dark heat fill at the top of the ramp. */
+  --hm-ink-inverse: #f8fafc;
 
   /* Motion — §6.7 */
   --hm-motion-hover: 120ms;

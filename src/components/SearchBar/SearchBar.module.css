@@ -5,7 +5,7 @@
   padding: 7px 10px;
   border-radius: 10px;
   border: 1px solid var(--hm-glass-border);
-  background: rgba(0, 0, 0, 0.25);
+  background: #ffffff;
   color: var(--hm-fg);
   font: inherit;
   font-size: 13px;
@@ -52,6 +52,6 @@
   cursor: pointer;
 }
 
-.option[aria-selected='true'] { background: rgba(255, 255, 255, 0.14); }
+.option[aria-selected='true'] { background: rgba(15, 23, 42, 0.09); }
 .parent { color: var(--hm-fg-muted); font-size: 11px; }
 .empty { padding: 10px; font-size: 12px; color: var(--hm-fg-muted); }
