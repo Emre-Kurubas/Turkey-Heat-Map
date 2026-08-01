@@ -1,11 +1,26 @@
+/*
+ * No panel behind it. A colour key is a caption for the map, not a control,
+ * and boxing it gave a legend the same visual weight as the filters and the
+ * region list. It re-enables pointer events for itself because the overlay
+ * above it disables them for the whole layer.
+ *
+ * Losing the panel means losing the panel's contrast guarantee, so every text
+ * layer here carries a white halo: the legend sits over the map, and at high
+ * zoom a dark ramp step can end up directly behind it.
+ */
 .legend {
-  padding: 10px 12px;
-  min-width: 150px;
+  padding: 2px 4px;
+  min-width: 0;
+  pointer-events: auto;
+  text-shadow:
+    0 1px 2px var(--hm-map-bg),
+    0 0 4px var(--hm-map-bg),
+    0 0 8px var(--hm-map-bg);
 }
 
 .title {
-  margin: 0 0 6px;
-  font-size: 12px;
+  margin: 0 0 4px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--hm-fg);
@@ -16,23 +31,23 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 3px;
+  gap: 1px;
 }
 
 .item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 11px;
   color: var(--hm-fg);
 }
 
 .chip {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
   flex: none;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.25);
 }
 
 .label {
@@ -41,7 +56,7 @@
 
 .empty,
 .note {
-  margin: 6px 0 0;
-  font-size: 11px;
+  margin: 4px 0 0;
+  font-size: 10px;
   color: var(--hm-fg-muted);
 }

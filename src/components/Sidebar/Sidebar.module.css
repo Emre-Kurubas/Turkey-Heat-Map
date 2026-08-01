@@ -1,4 +1,4 @@
-.sidebar { display: grid; grid-template-rows: auto 1fr; max-height: 100%; width: 240px; }
+.sidebar { display: grid; grid-template-rows: auto 1fr; height: 100%; width: 240px; }
 .sidebar[data-collapsed='true'] { width: 48px; }
 
 .header {
@@ -11,8 +11,13 @@
 
 .title { margin: 0; font-size: 12px; font-weight: 600; color: var(--hm-fg); }
 .actions { display: flex; gap: 2px; }
-/* Bounded so the legend below it always has room in the same grid column. */
-.scroller { overflow-y: auto; padding: 0 4px 6px; max-height: 38vh; }
+/*
+ * Takes whatever the grid row gives it. The old 38vh cap dated from when the
+ * legend shared this column; the legend has its own row now, so the cap only
+ * ever cut the list short — it stopped at Mersin on a 1000px window with
+ * empty space beneath.
+ */
+.scroller { overflow-y: auto; padding: 0 4px 6px; min-height: 0; }
 .spacer { position: relative; width: 100%; }
 .slice { position: absolute; left: 0; right: 0; display: grid; }
 

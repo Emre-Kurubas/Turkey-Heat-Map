@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import {
   collectBounds, createPathGenerator, createTurkeyProjection, cullFeatures,
 } from '@/core/geo/index.js';
+import type { MapFit } from '@/core/geo/index.js';
 import type { BBox, GeoLevel, Transform, Viewport } from '@/core/types/index.js';
 import { getLevelFeatures, getLevelRegionMeta } from '@/data/geo/index.js';
 
@@ -67,6 +68,7 @@ export function useMapGeometry(
   outlineLevel: GeoLevel,
   heatLevel: GeoLevel,
   transform: Transform,
+  fit: MapFit = 'contain',
 ): MapGeometry {
   const projected = useMemo(() => {
     if (viewport.width <= 0 || viewport.height <= 0) return null;
@@ -76,6 +78,7 @@ export function useMapGeometry(
     const projection = createTurkeyProjection({
       viewport,
       fitTo: getLevelFeatures('il'),
+      fit,
     });
     const path = createPathGenerator(projection);
 
@@ -103,7 +106,7 @@ export function useMapGeometry(
     // Identical levels are projected once, not twice.
     const outline = outlineLevel === heatLevel ? heat : project(outlineLevel);
     return { heat, outline };
-  }, [viewport, outlineLevel, heatLevel]);
+  }, [viewport, outlineLevel, heatLevel, fit]);
 
   const visibleHeat = useMemo(() => (
     projected === null ? EMPTY_SET : cullFeatures(projected.heat.bounds, transform, viewport)

@@ -12,7 +12,7 @@ describe('public API surface', () => {
     for (const name of ['createColorScale', 'createDiffColorScale', 'computeLegendBreaks'] as const) {
       expect(typeof api[name]).toBe('function');
     }
-    expect(Array.isArray(api.SPECTRAL_STOPS)).toBe(true);
+    expect(Array.isArray(api.EMBER_STOPS)).toBe(true);
   });
 
   it('exports the search utilities', () => {
@@ -57,7 +57,7 @@ describe('public API surface', () => {
     expect(ranked[0]!.code).toBe('34');
 
     const scale = api.createColorScale({
-      values: result.values, mode: 'quantile', ramp: 'spectral',
+      values: result.values, mode: 'quantile', ramp: 'ember',
     });
     expect(api.parseHex(scale(ranked[0]!.total))).not.toBeNull();
     expect(api.computeLegendBreaks(scale, 5)).toHaveLength(5);

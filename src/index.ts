@@ -25,7 +25,7 @@ export type {
   ColorDomain, ColorScale, ColorScaleName, ColorScaleOptions, LegendBreak, Oklab, RampFn, RGB,
 } from './core/color/index.js';
 export {
-  BLUE_RED_STOPS, DIFF_STOPS, RAMPS, SPECTRAL_STOPS, computeLegendBreaks,
+  DEEP_BLUE_STOPS, DIFF_STOPS, RAMPS, EMBER_STOPS, computeLegendBreaks,
   createColorDomain, createColorScale, createDiffColorScale, createRamp,
   interpolateOklab, oklabToRgb, parseHex, rgbToOklab, toHex,
 } from './core/color/index.js';

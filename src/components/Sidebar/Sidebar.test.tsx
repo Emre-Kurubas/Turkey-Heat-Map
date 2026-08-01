@@ -14,7 +14,7 @@ const ROWS: RankedRegion[] = [
   { code: '06', name: 'Ankara', total: 400, share: 0.27, rank: 2 },
   { code: '35', name: 'İzmir', total: 200, share: 0.13, rank: 3 },
 ];
-const SCALE = createColorScale({ values: [900, 400, 200], mode: 'quantile', ramp: 'spectral' });
+const SCALE = createColorScale({ values: [900, 400, 200], mode: 'quantile', ramp: 'ember' });
 
 const DEFAULTS = { yearRange: [2015, 2024] as [number, number], categories: [] };
 

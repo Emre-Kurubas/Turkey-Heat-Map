@@ -1,8 +1,25 @@
 /*
+ * The toggle sits in the flow of the top-centre row; the panel hangs off it.
+ * Absolute, so opening the filters does not widen the row and shove the
+ * search field sideways.
+ */
+.anchor { position: relative; }
+
+/*
  * Bounded, not stretchy. The overlay's `auto` track would otherwise let the
  * chip rows set the panel's width and push it across most of the map.
  */
-.bar { padding: 10px 12px; display: grid; gap: 10px; width: 300px; }
+.bar {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 10px 12px;
+  display: grid;
+  gap: 10px;
+  width: 300px;
+}
 
 .header {
   display: flex;

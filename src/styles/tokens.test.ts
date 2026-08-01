@@ -80,11 +80,17 @@ describe('base stylesheet', () => {
 
   it('declares every grid area the layout positions panels into', () => {
     for (const area of [
-      'hm-area-topLeft', 'hm-area-topCentre', 'hm-area-topRight',
+      'hm-area-topCentre', 'hm-area-topRight',
       'hm-area-left', 'hm-area-right', 'hm-area-bottomLeft',
     ]) {
       expect(base, area).toContain(`.${area}`);
     }
+  });
+
+  it('lets the sidebar take the full height of its row', () => {
+    // The list is the one panel whose usefulness scales with its height, and
+    // a stale 38vh cap once cut it off mid-alphabet with empty space below.
+    expect(base).toMatch(/\.hm-area-left\s*\{[^}]*align-self:\s*stretch/u);
   });
 
   it('declares no size breakpoints, since panel positions are fixed', () => {

@@ -184,7 +184,7 @@ describe('CrimeHeatMap — fixed layout', () => {
   it('places every panel in its own grid area', () => {
     const { container } = renderMap();
     for (const area of [
-      'hm-area-topLeft', 'hm-area-topCentre', 'hm-area-topRight',
+      'hm-area-topCentre', 'hm-area-topRight',
       'hm-area-left', 'hm-area-right', 'hm-area-bottomLeft',
     ]) {
       expect(container.querySelector(`.${area}`), area).not.toBeNull();

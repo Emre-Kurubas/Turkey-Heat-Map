@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseHex, rgbToOklab } from './interpolate.js';
 import {
-  BLUE_RED_STOPS, DIFF_STOPS, SPECTRAL_STOPS,
+  DEEP_BLUE_STOPS, DIFF_STOPS, EMBER_STOPS,
   createColorScale, createDiffColorScale,
 } from './scales.js';
 
@@ -15,14 +15,14 @@ function chroma(hex: string): number {
 }
 
 describe('stop definitions', () => {
-  it('defines spectral from blue to red', () => {
-    expect(SPECTRAL_STOPS.length).toBeGreaterThanOrEqual(5);
-    expect(SPECTRAL_STOPS[0]).toMatch(/^#[\da-f]{6}$/u);
-    expect(SPECTRAL_STOPS.at(-1)).toMatch(/^#[\da-f]{6}$/u);
+  it('defines the default ramp with enough steps to read as a gradient', () => {
+    expect(EMBER_STOPS.length).toBeGreaterThanOrEqual(5);
+    expect(EMBER_STOPS[0]).toMatch(/^#[\da-f]{6}$/u);
+    expect(EMBER_STOPS.at(-1)).toMatch(/^#[\da-f]{6}$/u);
   });
 
   it('gives every stop a valid hex value', () => {
-    for (const stops of [SPECTRAL_STOPS, BLUE_RED_STOPS, DIFF_STOPS]) {
+    for (const stops of [EMBER_STOPS, DEEP_BLUE_STOPS, DIFF_STOPS]) {
       for (const stop of stops) expect(parseHex(stop)).not.toBeNull();
     }
   });
@@ -36,25 +36,27 @@ describe('stop definitions', () => {
 describe('createColorScale', () => {
   const values = [0, 25, 50, 75, 100];
 
-  it('maps the lowest value to the cool end and the highest to the warm end', () => {
-    const scale = createColorScale({ values, mode: 'linear', ramp: 'spectral' });
+  it('maps the lowest value to the pale end and the highest to the dark end', () => {
+    const scale = createColorScale({ values, mode: 'linear', ramp: 'ember' });
     const low = scale(0);
     const high = scale(100);
-    expect(low).toBe(SPECTRAL_STOPS[0]);
-    expect(high).toBe(SPECTRAL_STOPS.at(-1));
-    expect(hue(low)).not.toBeCloseTo(hue(high), 1);
+    expect(low).toBe(EMBER_STOPS[0]);
+    expect(high).toBe(EMBER_STOPS.at(-1));
+    // The ends differ by lightness, not by hue — that is the point of a
+    // single-hue ramp, and the previous rainbow asserted the opposite here.
+    expect(luminance(low)).toBeGreaterThan(luminance(high));
   });
 
   it('exposes the underlying domain', () => {
-    const scale = createColorScale({ values, mode: 'quantile', ramp: 'spectral' });
+    const scale = createColorScale({ values, mode: 'quantile', ramp: 'ember' });
     expect(scale.domain.mode).toBe('quantile');
     expect(scale.domain.min).toBe(0);
     expect(scale.domain.max).toBe(100);
   });
 
   it('exposes the ramp function', () => {
-    const scale = createColorScale({ values, mode: 'linear', ramp: 'blueRed' });
-    expect(scale.ramp(0)).toBe(BLUE_RED_STOPS[0]);
+    const scale = createColorScale({ values, mode: 'linear', ramp: 'deepBlue' });
+    expect(scale.ramp(0)).toBe(DEEP_BLUE_STOPS[0]);
   });
 
   it('accepts a custom ramp function', () => {
@@ -68,19 +70,19 @@ describe('createColorScale', () => {
 
   it('produces distinct colors across a skewed distribution in quantile mode', () => {
     const skewed = [1, 2, 3, 4, 5, 6, 7, 8, 9, 5000];
-    const scale = createColorScale({ values: skewed, mode: 'quantile', ramp: 'spectral' });
+    const scale = createColorScale({ values: skewed, mode: 'quantile', ramp: 'ember' });
     const colors = skewed.map((v) => scale(v));
     expect(new Set(colors).size).toBeGreaterThanOrEqual(9);
   });
 
   it('returns a stable mid color when every value is identical', () => {
-    const scale = createColorScale({ values: [4, 4, 4], mode: 'linear', ramp: 'spectral' });
+    const scale = createColorScale({ values: [4, 4, 4], mode: 'linear', ramp: 'ember' });
     expect(scale(4)).toBe(scale(4));
     expect(parseHex(scale(4))).not.toBeNull();
   });
 
   it('returns a valid color for an empty dataset', () => {
-    const scale = createColorScale({ values: [], mode: 'quantile', ramp: 'spectral' });
+    const scale = createColorScale({ values: [], mode: 'quantile', ramp: 'ember' });
     expect(parseHex(scale(0))).not.toBeNull();
   });
 });
@@ -141,47 +143,88 @@ function contrast(a: string, b: string): number {
 /** The light map surface these ramps are drawn on. */
 const MAP_BG = '#eef1f6';
 
-describe('SPECTRAL_STOPS on a light canvas', () => {
+describe('EMBER_STOPS on a light canvas', () => {
   it('gets strictly darker as values rise', () => {
-    // Magnitude must read by lightness, not hue alone. The old dark-theme ramp
-    // was light in the middle, and on a light canvas its mid-range vanished.
-    const lums = SPECTRAL_STOPS.map(luminance);
+    // The whole ordering of the map rests on this. A ramp that brightens
+    // anywhere along its length has two steps that read as equally "high".
+    const lums = EMBER_STOPS.map(luminance);
     for (let i = 1; i < lums.length; i += 1) {
       expect(lums[i]!, `step ${i}`).toBeLessThan(lums[i - 1]!);
     }
   });
 
   it('separates every adjacent step by lightness alone', () => {
-    for (let i = 1; i < SPECTRAL_STOPS.length; i += 1) {
-      expect(contrast(SPECTRAL_STOPS[i - 1]!, SPECTRAL_STOPS[i]!), `pair ${i}`)
-        .toBeGreaterThan(1.2);
+    for (let i = 1; i < EMBER_STOPS.length; i += 1) {
+      expect(contrast(EMBER_STOPS[i - 1]!, EMBER_STOPS[i]!), `pair ${i}`)
+        .toBeGreaterThan(1.25);
     }
   });
 
+  it('holds one hue from end to end', () => {
+    // A sequential ramp encodes magnitude by lightness; a hue that drifts adds
+    // a second, meaningless signal. Tolerance is generous because maximum
+    // in-gamut chroma pulls the hue slightly at the extremes.
+    const hues = EMBER_STOPS.map(hue);
+    for (const h of hues) expect(Math.abs(h - hues[0]!)).toBeLessThan(0.35);
+  });
+
   it('makes the high end unmistakable against the surface', () => {
-    const top = SPECTRAL_STOPS[SPECTRAL_STOPS.length - 1]!;
+    const top = EMBER_STOPS[EMBER_STOPS.length - 1]!;
     expect(contrast(top, MAP_BG)).toBeGreaterThan(6);
   });
 
-  it('lets the lowest step recede toward the surface, as near-zero should', () => {
-    expect(contrast(SPECTRAL_STOPS[0]!, MAP_BG)).toBeLessThan(1.5);
+  it('keeps the lowest step readable as a value rather than as bare surface', () => {
+    // It should recede, but not vanish: an unfilled region and a
+    // barely-filled one must not look the same.
+    const bottom = EMBER_STOPS[0]!;
+    expect(contrast(bottom, MAP_BG)).toBeGreaterThan(1.1);
+    expect(contrast(bottom, MAP_BG)).toBeLessThan(1.5);
+  });
+
+  it('carries inverse ink at the top of the ramp', () => {
+    const top = EMBER_STOPS[EMBER_STOPS.length - 1]!;
+    expect(contrast(top, '#f8fafc')).toBeGreaterThan(4.5);
   });
 
   it('is all six-digit hex', () => {
-    for (const stop of SPECTRAL_STOPS) expect(stop).toMatch(/^#[0-9a-f]{6}$/u);
+    for (const stop of EMBER_STOPS) expect(stop).toMatch(/^#[0-9a-f]{6}$/u);
   });
 });
 
-describe('BLUE_RED_STOPS on a light canvas', () => {
-  it('keeps its high end visible', () => {
-    const top = BLUE_RED_STOPS[BLUE_RED_STOPS.length - 1]!;
-    expect(contrast(top, MAP_BG)).toBeGreaterThan(5);
+describe('DEEP_BLUE_STOPS on a light canvas', () => {
+  it('gets strictly darker as values rise', () => {
+    const lums = DEEP_BLUE_STOPS.map(luminance);
+    for (let i = 1; i < lums.length; i += 1) {
+      expect(lums[i]!, `step ${i}`).toBeLessThan(lums[i - 1]!);
+    }
   });
 
-  it('has no step that disappears into the surface at the top half', () => {
-    // The neutral middle may recede; the upper arm must not.
-    for (const stop of BLUE_RED_STOPS.slice(4)) {
-      expect(contrast(stop, MAP_BG), stop).toBeGreaterThan(1.6);
+  it('separates every adjacent step by lightness alone', () => {
+    for (let i = 1; i < DEEP_BLUE_STOPS.length; i += 1) {
+      expect(contrast(DEEP_BLUE_STOPS[i - 1]!, DEEP_BLUE_STOPS[i]!), `pair ${i}`)
+        .toBeGreaterThan(1.25);
+    }
+  });
+
+  it('never turns warm, which is what makes it safe under red-green CVD', () => {
+    // A warm step would be exactly the confusion the alternative ramp exists
+    // to avoid, so this guards the reason for the ramp, not just its values.
+    for (const stop of DEEP_BLUE_STOPS) {
+      const { r, b } = parseHex(stop)!;
+      expect(b, stop).toBeGreaterThanOrEqual(r);
+    }
+  });
+
+  it('keeps its high end visible', () => {
+    const top = DEEP_BLUE_STOPS[DEEP_BLUE_STOPS.length - 1]!;
+    expect(contrast(top, MAP_BG)).toBeGreaterThan(6);
+  });
+
+  it('has no false midpoint: no step is near-neutral', () => {
+    // Its predecessor ran through a pale grey centre, which announced a
+    // meaningful midpoint that crime counts do not have.
+    for (const stop of DEEP_BLUE_STOPS.slice(1)) {
+      expect(chroma(stop), stop).toBeGreaterThan(0.015);
     }
   });
 });

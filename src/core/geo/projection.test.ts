@@ -120,3 +120,76 @@ describe('createTurkeyProjection', () => {
     })).not.toThrow();
   });
 });
+
+describe('fit: fill', () => {
+  /** Taller than the country's ~2.3:1 box, so contain leaves visible bands. */
+  const TALL = { width: 800, height: 600 };
+
+  function bounds(fit: 'contain' | 'fill') {
+    const projection = createTurkeyProjection({ viewport: TALL, fitTo: TURKEY_BOX, fit });
+    return createPathGenerator(projection).bounds(TURKEY_BOX);
+  }
+
+  it('covers the viewport on both axes', () => {
+    const [[minX, minY], [maxX, maxY]] = bounds('fill');
+    expect(maxX - minX).toBeGreaterThanOrEqual(TALL.width - 16.5);
+    expect(maxY - minY).toBeGreaterThanOrEqual(TALL.height - 16.5);
+  });
+
+  it('leaves the country centred on the axis it crops', () => {
+    // Cropping only one side would hide the east and show empty sea in the
+    // west, which reads as a broken fit rather than as a deliberate zoom.
+    const [[minX, minY], [maxX, maxY]] = bounds('fill');
+    expect((minX + maxX) / 2).toBeCloseTo(TALL.width / 2, 5);
+    expect((minY + maxY) / 2).toBeCloseTo(TALL.height / 2, 5);
+  });
+
+  it('is strictly larger than contain, never smaller', () => {
+    const [[cx0], [cx1]] = bounds('contain');
+    const [[fx0], [fx1]] = bounds('fill');
+    expect(fx1 - fx0).toBeGreaterThan(cx1 - cx0);
+  });
+
+  it('stays equal-area, since the choropleth depends on it', () => {
+    // The cover pass rescales the projection; it must not touch the standard
+    // parallels, or colour would stop mapping onto honest area.
+    const projection = createTurkeyProjection({
+      viewport: TALL, fitTo: TURKEY_BOX, fit: 'fill',
+    });
+    const path = createPathGenerator(projection);
+    const geoRatio = geoArea(square(30, 40)) / geoArea(square(30, 36));
+    const pixelRatio = Math.abs(path.area(square(30, 40)))
+      / Math.abs(path.area(square(30, 36)));
+    expect(pixelRatio).toBeCloseTo(geoRatio, 2);
+  });
+
+  it('defaults to contain', () => {
+    const fallback = createTurkeyProjection({ viewport: TALL, fitTo: TURKEY_BOX });
+    const explicit = createTurkeyProjection({
+      viewport: TALL, fitTo: TURKEY_BOX, fit: 'contain',
+    });
+    expect(fallback([32, 39])).toEqual(explicit([32, 39]));
+  });
+
+  it('adds nothing of its own when the fitted bounds are degenerate', () => {
+    /*
+     * A single point has no extent, and `fitExtent` already sends the scale to
+     * Infinity on such input — that is d3's behaviour and `contain` shares it.
+     * What this pins is that the cover pass does not compound it: dividing the
+     * viewport by a zero width would produce a *different* garbage projection,
+     * and the guard makes `fill` degrade to exactly whatever `contain` did.
+     */
+    const point: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'Point', coordinates: [35, 39] },
+      }],
+    };
+    const filled = createTurkeyProjection({ viewport: TALL, fitTo: point, fit: 'fill' });
+    const contained = createTurkeyProjection({ viewport: TALL, fitTo: point, fit: 'contain' });
+    expect(filled.scale()).toBe(contained.scale());
+    expect(filled.translate()).toEqual(contained.translate());
+  });
+});
