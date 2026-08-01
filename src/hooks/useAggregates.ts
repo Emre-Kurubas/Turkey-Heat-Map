@@ -64,9 +64,9 @@ function namesFor(level: GeoLevel): ReadonlyMap<string, string> {
  * Separate memos, not one, because they invalidate on different things: the
  * index only on the data identity, each rollup on filters and its own level,
  * the scale on the heat rollup's values. Collapsing them would rebuild and
- * re-validate ~78k records on every filter tick and blow the §9 budget.
+ * re-validate ~78k records on every filter tick and blow the budget.
  *
- * `data` and `categories` are compared by reference (§8) — a consumer that
+ * `data` and `categories` are compared by reference — a consumer that
  * builds either array inline in render defeats all of this.
  */
 export function useAggregates(input: AggregatesInput): AggregateResult {
@@ -123,7 +123,7 @@ export function useAggregates(input: AggregatesInput): AggregateResult {
   }, [ratePossible, population, heatRolled, heatLevel, level, rated, filters.yearRange]);
 
   // The domain comes from the heat level alone. Mixing levels here would let
-  // the colours mean one thing and the legend say another (§6.5).
+  // the colours mean one thing and the legend say another.
   const scale = useMemo(
     () => createColorScale({ values: ratedHeat.values, mode: scaleMode, ramp: colorScale }),
     [ratedHeat, scaleMode, colorScale],

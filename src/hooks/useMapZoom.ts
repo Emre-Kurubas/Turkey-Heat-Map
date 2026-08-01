@@ -42,7 +42,7 @@ export interface MapZoom {
  * Owns pan, zoom, and the level that follows from the zoom scale.
  *
  * The drag origin lives in a ref, not state: a re-render per pointermove would
- * cost the 60 fps budget in §9, and nothing renders from it anyway.
+ * cost the 60 fps budget, and nothing renders from it anyway.
  */
 export function useMapZoom(viewport: Viewport): MapZoom {
   const transform = useHeatMapState((state) => state.transform);

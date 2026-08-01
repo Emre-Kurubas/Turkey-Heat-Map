@@ -319,7 +319,7 @@ describe('CrimeHeatMap — the consumer owns the data and the layout', () => {
 
   it('leaves nothing but the map and its attribution when every panel is off', () => {
     // The attribution is the one thing a consumer cannot remove: the boundary
-    // data is ODbL/CC-BY-SA and crediting it is a licence condition (§5.4).
+    // data is ODbL/CC-BY-SA and crediting it is a licence condition.
     const { container } = renderMap({ panels: ALL_OFF });
 
     for (const [name, query] of Object.entries(PANEL_QUERIES)) {

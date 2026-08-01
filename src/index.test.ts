@@ -3,13 +3,13 @@ import * as api from './index.js';
 
 describe('public API surface', () => {
   it('exports the aggregation pipeline', () => {
-    for (const name of ['buildIndex', 'rollup', 'rankRegions', 'diffRollups'] as const) {
+    for (const name of ['buildIndex', 'rollup', 'rankRegions', 'totalsByYear'] as const) {
       expect(typeof api[name]).toBe('function');
     }
   });
 
   it('exports the color system', () => {
-    for (const name of ['createColorScale', 'createDiffColorScale', 'computeLegendBreaks'] as const) {
+    for (const name of ['createColorScale', 'createColorDomain', 'computeLegendBreaks'] as const) {
       expect(typeof api[name]).toBe('function');
     }
     expect(Array.isArray(api.SPECTRAL_STOPS)).toBe(true);
@@ -63,17 +63,22 @@ describe('public API surface', () => {
     expect(api.computeLegendBreaks(scale, 5)).toHaveLength(5);
   });
 
-  it('drives compare mode end to end', () => {
-    const { records, categories } = api.generateMockData({ years: [2022, 2023] });
+  it('aggregates real data end to end, at both levels', () => {
+    const { records, categories } = api.generateMockData({ seed: 3, years: [2022, 2023] });
     const index = api.buildIndex({ data: records, categories });
 
-    const a = api.rollup(index, 'il', { yearRange: [2023, 2023], categories: [] });
-    const b = api.rollup(index, 'il', { yearRange: [2022, 2022], categories: [] });
-    const diff = api.diffRollups(a, b);
+    const provinces = api.rollup(index, 'il', { yearRange: [2023, 2023], categories: [] });
+    const districts = api.rollup(index, 'ilce', { yearRange: [2023, 2023], categories: [] });
 
-    expect(diff.byRegion.size).toBe(81);
-    const scale = api.createDiffColorScale(diff.maxAbsDelta);
-    expect(api.parseHex(scale(diff.byRegion.get('34')!.delta))).not.toBeNull();
+    expect(provinces.byRegion.size).toBe(81);
+    expect(districts.byRegion.size).toBeGreaterThan(900);
+    // The same records, counted two ways, must come to the same number.
+    expect(districts.total).toBe(provinces.total);
+
+    const scale = api.createColorScale({
+      values: provinces.values, mode: 'quantile', ramp: 'spectral',
+    });
+    expect(api.parseHex(scale(provinces.byRegion.get('34')!.total))).not.toBeNull();
   });
 
   it('drives Turkish search end to end against real province names', () => {
@@ -148,12 +153,12 @@ describe('public API surface — the whole list, on purpose', () => {
    */
   const EXPECTED = [
     // Aggregation
-    'buildIndex', 'buildPopulationIndex', 'diffRollups', 'rankRegions', 'rollup',
+    'buildIndex', 'buildPopulationIndex', 'rankRegions', 'rollup',
     'toPerCapita', 'totalsByYear',
     // Colour
-    'CATEGORY_PALETTE', 'DEEP_BLUE_STOPS', 'DIFF_STOPS', 'RAMPS', 'SPECTRAL_STOPS',
+    'CATEGORY_PALETTE', 'DEEP_BLUE_STOPS', 'RAMPS', 'SPECTRAL_STOPS',
     'computeLegendBreaks', 'createColorDomain', 'createColorScale',
-    'createDiffColorScale', 'createRamp', 'interpolateOklab', 'oklabToRgb',
+    'createRamp', 'interpolateOklab', 'oklabToRgb',
     'parseHex', 'rgbToOklab', 'toHex',
     // Chart geometry
     'arcPath', 'areaPath', 'categoryColor', 'collapseSlices', 'createLinearScale',

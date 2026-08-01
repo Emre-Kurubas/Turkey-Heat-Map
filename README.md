@@ -64,7 +64,7 @@ render'da yeniden kurulur.
 | `CATEGORY_PALETTE`, `arcPath`, `linePath` | Doğrulanmış kategorik palet ve grafik geometrisi |
 | `buildPopulationIndex`, `toPerCapita` | 100.000 kişi başına suç oranı |
 | `RegionDetail` | Bölgeye tıklayınca açılan detay paneli: iki grafik, ilde en çok kaydı olan ilçeler, ilçede suç türleri |
-| `buildIndex`, `rollup`, `rankRegions`, `diffRollups` | Suç kayıtlarını doğrular, filtreler ve bölge bazında toplar |
+| `buildIndex`, `rollup`, `rankRegions`, `totalsByYear` | Suç kayıtlarını doğrular, filtreler ve bölge bazında toplar |
 | `createColorScale`, `computeLegendBreaks` | Algısal olarak eşit aralıklı OKLab renk skalaları |
 | `foldTurkish`, `compareTurkish`, `searchEntities` | Türkçe'ye duyarlı arama ve sıralama |
 | `formatTrNumber`, `formatPercent`, `formatDelta` | Deterministik `tr-TR` sayı biçimlendirme |

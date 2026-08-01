@@ -222,7 +222,7 @@ function Content({ props, panels }: ContentProps) {
           They differ in one way that matters. The year range is a control like
           any other and the consumer can switch it off; the attribution cannot
           be switched off by anyone, because the boundary data is ODbL/CC-BY-SA
-          and crediting it is a licence condition rather than a courtesy (§5.4).
+          and crediting it is a licence condition rather than a courtesy.
         */}
         {panels.yearRange ? (
           <div className="hm-area-topRight">

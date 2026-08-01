@@ -12,7 +12,7 @@ interface State { hasError: boolean }
  * Contains a render failure inside the component's own box.
  *
  * This is a library dropped into someone else's page; a crash here must not
- * take that page down with it (§8).
+ * take that page down with it.
  */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
   override state: State = { hasError: false };

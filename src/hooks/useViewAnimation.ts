@@ -6,7 +6,7 @@ import { useReducedMotion } from './useReducedMotion.js';
 
 const DURATION_MS = 600;
 
-/** cubic-bezier(.4,0,.2,1) approximated as a cubic ease-in-out (§6.7). */
+/** cubic-bezier(.4,0,.2,1) approximated as a cubic ease-in-out. */
 function ease(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - ((-2 * t + 2) ** 3) / 2;
 }
@@ -30,7 +30,7 @@ export interface ViewAnimation {
  * Two independent animations would both dispatch every frame and the transform
  * would visibly fight itself.
  *
- * Under `prefers-reduced-motion` both become instant jumps, per §6.7 — the
+ * Under `prefers-reduced-motion` both become instant jumps — the
  * destination is identical either way, only the journey differs.
  */
 export function useViewAnimation(viewport: Viewport): ViewAnimation {

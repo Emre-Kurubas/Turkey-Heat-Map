@@ -32,7 +32,7 @@ export interface ReconcileResult {
 const FALLBACK_YEAR = 2024;
 
 /**
- * Applies the prop reconciliation rules from §8.
+ * Applies the prop reconciliation rules.
  *
  * Every rule resolves to a defined behaviour and a warning rather than an
  * exception: a consumer passing a stale year range should get a usable map and

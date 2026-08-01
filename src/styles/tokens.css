@@ -64,7 +64,7 @@
   --hm-chart-grid: rgba(15, 23, 42, 0.12);
   --hm-chart-marker-fill: #ffffff;
 
-  /* Motion — §6.7 */
+  /* Motion */
   --hm-motion-hover: 120ms;
   --hm-motion-panel: 240ms;
   --hm-motion-color: 400ms;

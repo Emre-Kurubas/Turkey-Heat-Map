@@ -4,7 +4,7 @@ import './base.css';
 /**
  * Every themeable custom property.
  *
- * The `theme` prop (§8) writes these onto the root element as inline styles.
+ * The `theme` prop writes these onto the root element as inline styles.
  * Keeping the list in code lets an unknown key be rejected with a real warning
  * instead of silently doing nothing, and the token test holds the list and the
  * stylesheet to each other in both directions.

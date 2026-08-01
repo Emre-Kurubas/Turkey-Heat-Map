@@ -65,7 +65,7 @@ interface ProjectedLevel {
  *
  * The split matters. Paths are projected in *untransformed* pixel space and the
  * group's `transform` moves them, so panning and zooming never re-project and
- * never re-run the blur filter (§6.3). Only the cull sets depend on the
+ * never re-run the blur filter. Only the cull sets depend on the
  * transform, and they are cheap rectangle tests over cached bounds.
  *
  * Both levels share one projection. Fitting each independently would let any

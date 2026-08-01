@@ -11,7 +11,7 @@ export interface FilterBarProps {
   categories: readonly CrimeCategory[];
   /** Total per category for the active filters, shown on each chip. */
   categoryTotals: ReadonlyMap<string, number>;
-  /** Controls whether the per-capita toggle exists at all (§6.6). */
+  /** Controls whether the per-capita toggle exists at all. */
   hasPopulation: boolean;
   /** Category whose pie slice is currently hovered, or null. */
   highlightedCategory: string | null;

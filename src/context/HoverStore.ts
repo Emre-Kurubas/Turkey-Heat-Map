@@ -41,7 +41,7 @@ export function hoverReducer(state: HoverState, action: HoverAction): HoverState
  * Hover lives in its own store so pointer movement repaints the tooltip alone.
  * Folding it into the main store would re-render every subscribed panel on
  * every pointermove — the difference between the map feeling instant and
- * feeling sluggish (§7.2).
+ * feeling sluggish.
  */
 export function createHoverStore(): Store<HoverState, HoverAction> {
   let state: HoverState = null;

@@ -9,12 +9,12 @@ export const LEVELS = ['il', 'ilce'] as const satisfies readonly GeoLevel[];
 /**
  * Zoom at which the map switches from provinces to districts, with a band
  * around it so a scroll that lands near the threshold does not flicker between
- * levels (§7.1).
+ * levels.
  */
 export const LEVEL_THRESHOLD = 2.5;
 export const LEVEL_HYSTERESIS = 0.15;
 
-/** The boundary data is ODbL/CC-BY-SA. Attribution is not optional (§5.4). */
+/** The boundary data is ODbL/CC-BY-SA. Attribution is not optional. */
 export const ATTRIBUTION_REQUIRED = true;
 
 /*

@@ -30,7 +30,7 @@ export interface LegendProps {
  *
  * Always states the active scale mode, because a quantile map answers "how does
  * this rank" while a linear map answers "how many", and reading one as the
- * other is a real analytical error (§6.5). Numbers sit along the bar for the
+ * other is a real analytical error. Numbers sit along the bar for the
  * same reason: colour is the summary, the number is the source of truth.
  */
 export function Legend({ scale, breakCount = DEFAULT_BREAKS }: LegendProps) {
@@ -110,7 +110,7 @@ export function Legend({ scale, breakCount = DEFAULT_BREAKS }: LegendProps) {
         is a thing you learn once and then re-read every time it is on screen.
         The mode itself stays: a quantile map answers "how does this rank" and a
         linear one answers "how many", and reading one as the other is a real
-        analytical error (§6.5) — so which is active is a fact, not a caption.
+        analytical error — so which is active is a fact, not a caption.
       */}
       <p className={styles.note}>{strings.scaleMode[scaleMode]}</p>
     </GlassPanel>

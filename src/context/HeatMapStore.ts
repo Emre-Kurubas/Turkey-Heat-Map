@@ -17,7 +17,7 @@ export interface DetailTarget {
 export interface HeatMapState {
   level: GeoLevel;
   transform: Transform;
-  /** Keyboard focus target. Separate from selection (§10). */
+  /** Keyboard focus target. Separate from selection. */
   focusedCode: string | null;
   selectedCode: string | null;
   filters: FilterSet;

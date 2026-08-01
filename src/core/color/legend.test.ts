@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { computeLegendBreaks } from './legend.js';
-import { createColorScale, createDiffColorScale } from './scales.js';
+import { createColorScale } from './scales.js';
 
 describe('computeLegendBreaks', () => {
   const scale = createColorScale({
@@ -77,11 +77,4 @@ describe('computeLegendBreaks', () => {
     expect(computeLegendBreaks(scale, 99).length).toBeLessThanOrEqual(12);
   });
 
-  it('renders a symmetric signed legend for the diff scale', () => {
-    const diff = createDiffColorScale(200);
-    const breaks = computeLegendBreaks(diff, 5);
-    expect(breaks[0]!.from).toBe(-200);
-    expect(breaks.at(-1)!.to).toBe(200);
-    expect(breaks[0]!.label).toContain('−');
-  });
 });

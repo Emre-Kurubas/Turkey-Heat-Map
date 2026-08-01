@@ -44,7 +44,7 @@ describe('hoverReducer', () => {
  * The store skips notifying subscribers whenever the reducer hands back the
  * state it was given, so every case below that returns the *same reference* is
  * a case where the tooltip does not repaint. That is the entire reason hover
- * lives in its own store (§7.2): pointermove fires continuously, and folding it
+ * lives in its own store: pointermove fires continuously, and folding it
  * into the main store would re-render every subscribed panel on every frame of
  * a mouse drag across the map.
  */

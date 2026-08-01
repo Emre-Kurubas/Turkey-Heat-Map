@@ -20,18 +20,18 @@ export type {
 
 // Aggregation
 export type {
-  BuildIndexOptions, CrimeIndex, DiffResult, RankedRegion, RankOptions, RankSort,
-  RegionAggregate, RegionDiff, RollupResult,
+  BuildIndexOptions, CrimeIndex, RankedRegion, RankOptions, RankSort,
+  RegionAggregate, RollupResult,
 } from './core/aggregation/index.js';
-export { buildIndex, diffRollups, rankRegions, rollup, totalsByYear } from './core/aggregation/index.js';
+export { buildIndex, rankRegions, rollup, totalsByYear } from './core/aggregation/index.js';
 
 // Color
 export type {
   ColorDomain, ColorScale, ColorScaleName, ColorScaleOptions, LegendBreak, Oklab, RampFn, RGB,
 } from './core/color/index.js';
 export {
-  DEEP_BLUE_STOPS, DIFF_STOPS, RAMPS, SPECTRAL_STOPS, computeLegendBreaks,
-  createColorDomain, createColorScale, createDiffColorScale, createRamp,
+  DEEP_BLUE_STOPS, RAMPS, SPECTRAL_STOPS, computeLegendBreaks,
+  createColorDomain, createColorScale, createRamp,
   interpolateOklab, oklabToRgb, parseHex, rgbToOklab, toHex,
 } from './core/color/index.js';
 

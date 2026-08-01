@@ -56,7 +56,7 @@ export function Sidebar({
   const strings = useStrings();
 
   // Collapse is this panel's own affair — no other panel reads it, so it stays
-  // out of the shared store (§7.8).
+  // out of the shared store.
   const [collapsed, setCollapsed] = useState(false);
 
   /*

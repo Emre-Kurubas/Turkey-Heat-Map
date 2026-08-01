@@ -218,7 +218,7 @@ export function CategoryPieChart({
             ) : null}
 
             {/*
-              "Diğer" hides real categories, so it has to be openable (§7.7) —
+              "Diğer" hides real categories, so it has to be openable —
               but only where the key it opens is on screen. Without the key it
               expanded arcs nobody could read a label off, and its coming and
               going with the data made the panel around it a different height

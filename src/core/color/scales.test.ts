@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseHex, rgbToOklab } from './interpolate.js';
-import {
-  DEEP_BLUE_STOPS, DIFF_STOPS, SPECTRAL_STOPS,
-  createColorScale, createDiffColorScale,
-} from './scales.js';
+import { DEEP_BLUE_STOPS, SPECTRAL_STOPS, createColorScale } from './scales.js';
 
 function hue(hex: string): number {
   const lab = rgbToOklab(parseHex(hex)!);
@@ -51,15 +48,11 @@ describe('stop definitions', () => {
   });
 
   it('gives every stop a valid hex value', () => {
-    for (const stops of [SPECTRAL_STOPS, DEEP_BLUE_STOPS, DIFF_STOPS]) {
+    for (const stops of [SPECTRAL_STOPS, DEEP_BLUE_STOPS]) {
       for (const stop of stops) expect(parseHex(stop)).not.toBeNull();
     }
   });
 
-  it('puts a near-neutral color at the center of the diverging diff ramp', () => {
-    const middle = DIFF_STOPS[Math.floor(DIFF_STOPS.length / 2)]!;
-    expect(chroma(middle)).toBeLessThan(0.05);
-  });
 });
 
 describe('createColorScale', () => {
@@ -118,41 +111,6 @@ describe('createColorScale', () => {
   });
 });
 
-describe('createDiffColorScale', () => {
-  const scale = createDiffColorScale(100);
-
-  it('is symmetric around zero', () => {
-    expect(scale.domain.min).toBe(-100);
-    expect(scale.domain.max).toBe(100);
-  });
-
-  it('renders zero as the near-neutral center color', () => {
-    expect(chroma(scale(0))).toBeLessThan(0.05);
-  });
-
-  it('renders increases and decreases as opposite hues', () => {
-    const increase = scale(100);
-    const decrease = scale(-100);
-    expect(Math.abs(hue(increase) - hue(decrease))).toBeGreaterThan(1);
-  });
-
-  it('clamps deltas beyond the stated maximum', () => {
-    expect(scale(500)).toBe(scale(100));
-    expect(scale(-500)).toBe(scale(-100));
-  });
-
-  it('treats a zero maximum as an all-neutral scale', () => {
-    const flat = createDiffColorScale(0);
-    expect(chroma(flat(0))).toBeLessThan(0.05);
-    expect(flat(10)).toBe(flat(0));
-  });
-
-  it('uses the absolute value of a negative maximum', () => {
-    const negative = createDiffColorScale(-100);
-    expect(negative.domain.min).toBe(-100);
-    expect(negative.domain.max).toBe(100);
-  });
-});
 
 /** WCAG relative luminance, for asserting the ramp's lightness profile. */
 function luminance(hex: string): number {

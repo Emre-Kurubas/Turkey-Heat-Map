@@ -23,7 +23,7 @@
  */
 /*
  * `auto` tracks collapse to zero when their panel is absent, so switching a
- * panel off reflows the rest rather than leaving a hole (§7.8).
+ * panel off reflows the rest rather than leaving a hole.
  */
 .hm-overlay {
   position: absolute;

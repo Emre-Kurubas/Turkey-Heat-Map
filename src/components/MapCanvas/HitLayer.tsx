@@ -22,7 +22,7 @@ export interface HitLayerProps {
  * so hit-testing it would be inaccurate by exactly the blur radius; and the
  * fills are re-coloured on every filter change, while this layer's DOM is
  * stable. Every region is a focusable `role="img"` with a name-and-value label,
- * which is what makes the map usable without sight or a pointer (§10).
+ * which is what makes the map usable without sight or a pointer.
  */
 export function HitLayer({
   features, values, visible, selectedCode, focusedCode,

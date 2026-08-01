@@ -92,7 +92,7 @@ export function HoverTooltip({
 
   return (
     <>
-      {/* Mirrors hover and focus targets for screen readers (§10). */}
+      {/* Mirrors hover and focus targets for screen readers. */}
       <div className="hm-visually-hidden" aria-live="polite">{announcement}</div>
 
       {visible && detail !== null && placement !== null ? (

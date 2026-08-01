@@ -1,6 +1,6 @@
 import type { GeoLevel, Transform, Viewport } from '@/core/types/index.js';
 
-/** Zoom range from §7.1. */
+/** Zoom range. */
 export const MIN_ZOOM = 1;
 export const MAX_ZOOM = 12;
 

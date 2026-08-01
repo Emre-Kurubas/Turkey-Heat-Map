@@ -6,7 +6,7 @@ import styles from './Attribution.module.css';
  *
  * The boundary data is ODbL/CC-BY-SA, which makes attribution a licence
  * condition rather than a courtesy. It is styleable but always rendered — there
- * is deliberately no prop to remove it (§5.4).
+ * is deliberately no prop to remove it.
  */
 export function Attribution() {
   const strings = useStrings();

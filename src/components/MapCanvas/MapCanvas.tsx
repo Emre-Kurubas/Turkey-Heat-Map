@@ -31,7 +31,7 @@ import styles from './MapCanvas.module.css';
  * a district reads the same zoomed in as it does from the country view.
  *
  * It also takes the transform out of the filter's inputs entirely, so panning
- * and zooming no longer re-run the blur at all (§6.3).
+ * and zooming no longer re-run the blur at all.
  *
  * Five rather than twelve: at twelve, neighbouring blues and reds blended into
  * a flat lavender and both the ramp's colour and the district detail underneath

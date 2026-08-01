@@ -52,7 +52,7 @@ export interface Strings {
     /** Shown when no region is selected. */
     national: string;
     other: string;
-    /** Accessible names for the Diğer disclosure (§7.7). */
+    /** Accessible names for the Diğer disclosure. */
     expand: string;
     collapse: string;
     empty: string;

@@ -1,6 +1,6 @@
 {
   "name": "turkiye-suc-haritasi",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Türkiye suç istatistikleri için etkileşimli ısı haritası React bileşeni",
   "keywords": [
     "türkiye", "turkey", "heatmap", "choropleth", "react", "map",

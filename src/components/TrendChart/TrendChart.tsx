@@ -250,7 +250,7 @@ export function TrendChart({ byYear, embedded = false }: TrendChartProps) {
                 className={styles.marker}
                 data-role="marker"
                 // The active filter range stays bright; the rest dims, so the
-                // selection is always visible in context (§7.7).
+                // selection is always visible in context.
                 data-active={
                   point.year >= activeStart && point.year <= activeEnd ? 'true' : 'false'
                 }

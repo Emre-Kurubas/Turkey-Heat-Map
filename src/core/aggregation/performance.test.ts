@@ -3,7 +3,7 @@ import { generateMockData } from '@/data/mock/index.js';
 import { getLevelRegionMeta } from '@/data/geo/index.js';
 import { IL_BY_CODE } from '@/core/geo/index.js';
 import type { CrimeCategory, CrimeRecord, FilterSet } from '@/core/types/index.js';
-import { buildIndex, diffRollups, rankRegions, rollup } from './index.js';
+import { buildIndex, rankRegions, rollup } from './index.js';
 
 /**
  * Guards the spec's performance budget: a filter change must update every panel
@@ -44,15 +44,14 @@ describe('aggregation performance at realistic scale', () => {
   });
 
   it('completes a full filter-change cycle in under 150 ms', () => {
-    // The realistic hot path: roll up, rank the sidebar, diff against a
-    // comparison range. The index is built once and reused, as in the real app.
+    // The realistic hot path: roll up at both levels and rank the sidebar. The
+    // index is built once and reused, as in the real app.
     const index = buildIndex({ data: records, categories });
     const started = performance.now();
 
-    const a = rollup(index, 'il', { yearRange: [2020, 2024], categories: ['hirsizlik'] });
-    const b = rollup(index, 'il', { yearRange: [2015, 2019], categories: ['hirsizlik'] });
-    rankRegions(a, { sort: 'total-desc', names });
-    diffRollups(a, b);
+    const outlined = rollup(index, 'il', { yearRange: [2020, 2024], categories: ['hirsizlik'] });
+    rollup(index, 'ilce', { yearRange: [2020, 2024], categories: ['hirsizlik'] });
+    rankRegions(outlined, { sort: 'total-desc', names });
 
     expect(performance.now() - started).toBeLessThan(150);
   });
