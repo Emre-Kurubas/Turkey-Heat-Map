@@ -19,6 +19,9 @@ export default defineConfig({
         'src/core/**/performance.test.ts',
         // Type-only modules compile to nothing; they report 0/0 and only add noise.
         'src/core/types/**',
+        // Barrels are re-export manifests with no logic. Bad re-exports are
+        // caught by tsc and by the public-surface test in src/index.test.ts.
+        'src/core/**/index.ts',
       ],
       thresholds: { branches: 100, functions: 100, lines: 100, statements: 100 },
       reporter: ['text', 'html'],

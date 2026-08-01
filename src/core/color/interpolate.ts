@@ -21,9 +21,10 @@ export function parseHex(hex: string): RGB | null {
   const match = HEX_PATTERN.exec(hex.trim());
   if (match === null) return null;
 
+  // The pattern's alternation guarantees exactly one group matched, so when the
+  // 3-digit group is absent the 6-digit group is necessarily present.
   const short = match[1];
-  const full = match[2] ?? (short === undefined ? undefined : short.replace(/./gu, '$&$&'));
-  if (full === undefined) return null;
+  const full = short === undefined ? match[2]! : short.replace(/./gu, '$&$&');
 
   return {
     r: Number.parseInt(full.slice(0, 2), 16),
