@@ -23,7 +23,7 @@ or magnitude, so it always states the active scale mode (§6.5).
 - Consumes: `computeLegendBreaks`, `ColorScale` from `core/color`; `useStrings`, `useHeatMapState`.
 - Produces: `Legend` — `(props: { scale: ColorScale; breakCount?: number }) => JSX.Element`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/components/Legend/Legend.test.tsx`:
 
@@ -114,12 +114,12 @@ describe('Legend', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/components/Legend/Legend.test.tsx`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement `Legend`**
+- [x] **Step 3: Implement `Legend`**
 
 ```tsx
 import { useMemo } from 'react';
@@ -185,7 +185,7 @@ export function Legend({ scale, breakCount = DEFAULT_BREAKS }: LegendProps) {
 }
 ```
 
-- [ ] **Step 4: Add `Legend.module.css`**
+- [x] **Step 4: Add `Legend.module.css`**
 
 ```css
 .legend {
@@ -237,7 +237,7 @@ export function Legend({ scale, breakCount = DEFAULT_BREAKS }: LegendProps) {
 }
 ```
 
-- [ ] **Step 5: Write the barrel and run the test**
+- [x] **Step 5: Write the barrel and run the test**
 
 `src/components/Legend/index.ts`:
 
@@ -252,7 +252,7 @@ Expected: PASS, 8 tests.
 If the "no data" test fails, check what `createColorDomain` returns for an empty
 value list and adjust the `hasData` condition to match — do not change `core/`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/components/Legend
@@ -278,7 +278,7 @@ appears after a short delay so fast traversal does not flicker (§7.2).
 - Produces (pure): `placeTooltip(point, size, viewport, offset?): { x: number; y: number; flippedX: boolean; flippedY: boolean }`
 - Produces (React): `HoverTooltip` — `(props: { rollup: RollupResult; names: ReadonlyMap<string, string>; categories: readonly CrimeCategory[]; delayMs?: number }) => JSX.Element`
 
-- [ ] **Step 1: Write the failing placement test**
+- [x] **Step 1: Write the failing placement test**
 
 Placement is pure arithmetic, so it belongs in `core/` at 100% coverage.
 
@@ -338,7 +338,7 @@ describe('placeTooltip', () => {
 });
 ```
 
-- [ ] **Step 2: Implement `src/core/geo/tooltipPlacement.ts`**
+- [x] **Step 2: Implement `src/core/geo/tooltipPlacement.ts`**
 
 ```ts
 import type { Viewport } from '@/core/types/index.js';
@@ -385,7 +385,7 @@ export type { TooltipPlacement } from './tooltipPlacement.js';
 export { placeTooltip } from './tooltipPlacement.js';
 ```
 
-- [ ] **Step 3: Run the placement test and check coverage**
+- [x] **Step 3: Run the placement test and check coverage**
 
 ```bash
 npx vitest run src/core/geo/tooltipPlacement.test.ts
@@ -394,7 +394,7 @@ npx vitest run --coverage
 
 Expected: PASS, 8 tests, `tooltipPlacement.ts` at 100%.
 
-- [ ] **Step 4: Write the failing component test**
+- [x] **Step 4: Write the failing component test**
 
 Create `src/components/HoverTooltip/HoverTooltip.test.tsx`:
 
@@ -522,7 +522,7 @@ describe('HoverTooltip', () => {
 });
 ```
 
-- [ ] **Step 5: Implement `HoverTooltip`**
+- [x] **Step 5: Implement `HoverTooltip`**
 
 ```tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -655,7 +655,7 @@ export function HoverTooltip({
 }
 ```
 
-- [ ] **Step 6: Add `HoverTooltip.module.css`**
+- [x] **Step 6: Add `HoverTooltip.module.css`**
 
 ```css
 .tooltip {
@@ -705,7 +705,7 @@ export function HoverTooltip({
 }
 ```
 
-- [ ] **Step 7: Write the barrel and run the tests**
+- [x] **Step 7: Write the barrel and run the tests**
 
 `src/components/HoverTooltip/index.ts`:
 
@@ -717,7 +717,7 @@ export { HoverTooltip } from './HoverTooltip.js';
 Run: `npx vitest run src/components/HoverTooltip`
 Expected: PASS, 9 tests.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/core/geo/tooltipPlacement.ts src/core/geo/tooltipPlacement.test.ts \
@@ -746,7 +746,7 @@ used when a region is selected, and the non-removable data credit.
   - `useFlyTo(viewport): (bbox: BBox) => void`
   - `Attribution` — `() => JSX.Element`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/hooks/useFlyTo.test.tsx`:
 
@@ -942,12 +942,12 @@ describe('Attribution', () => {
 });
 ```
 
-- [ ] **Step 2: Run both tests to verify they fail**
+- [x] **Step 2: Run both tests to verify they fail**
 
 Run: `npx vitest run src/hooks/useFlyTo.test.tsx src/components/Attribution`
 Expected: FAIL — modules not found.
 
-- [ ] **Step 3: Implement `useFlyTo`**
+- [x] **Step 3: Implement `useFlyTo`**
 
 ```ts
 import { useCallback, useEffect, useRef } from 'react';
@@ -1034,7 +1034,7 @@ export function useFlyTo(viewport: Viewport): (bbox: BBox) => void {
 here because it is never read during render — only inside the animation
 callback — so it cannot produce a torn read.
 
-- [ ] **Step 4: Implement `Attribution`**
+- [x] **Step 4: Implement `Attribution`**
 
 ```tsx
 import { useStrings } from '@/hooks/useHeatMapState.js';
@@ -1078,12 +1078,12 @@ export function Attribution() {
 export { Attribution } from './Attribution.js';
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `npx vitest run src/hooks/useFlyTo.test.tsx src/components/Attribution`
 Expected: PASS, 6 fly-to tests + 3 attribution tests.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/hooks/useFlyTo.ts src/hooks/useFlyTo.test.tsx src/components/Attribution
@@ -1107,7 +1107,7 @@ records. The demo and every future screenshot are misleading until this agrees.
 - Consumes: `getLevelRegionMeta` from Task 4.
 - Produces: unchanged public signature — `generateMockData(options): MockDataset`. `ilceNames` now carries real district names.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `src/data/mock/generate.test.ts`:
 
@@ -1149,12 +1149,12 @@ describe('generateMockData — agreement with the shipped geography', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/data/mock/generate.test.ts`
 Expected: FAIL — unknown codes present, and coverage incomplete.
 
-- [ ] **Step 3: Drive district codes from the geography**
+- [x] **Step 3: Drive district codes from the geography**
 
 In `src/data/mock/generate.ts`, replace the synthetic district loop:
 
@@ -1197,7 +1197,7 @@ import { getLevelRegionMeta } from '@/data/geo/index.js';
 `districtCount` is now unused — delete it and its `IL_WEIGHTS`-derived helper if
 nothing else references them, or ESLint will flag the dead code.
 
-- [ ] **Step 4: Watch for a circular import**
+- [x] **Step 4: Watch for a circular import**
 
 `src/data/geo/index.ts` must not import from `src/data/mock/`. Confirm:
 
@@ -1209,7 +1209,7 @@ If the run fails with an undefined import at module load, the cycle is real —
 import `getLevelRegionMeta` from `@/data/geo/topology.js` directly rather than
 through the barrel.
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 ```bash
 npx vitest run src/data/mock
@@ -1220,7 +1220,7 @@ The record count rises — 973 real districts against roughly 600 synthetic ones
 before — so any test asserting an exact record count needs its expectation
 updated to the new number rather than being deleted.
 
-- [ ] **Step 6: Confirm the performance guard still holds**
+- [x] **Step 6: Confirm the performance guard still holds**
 
 ```bash
 npx vitest run src/core/aggregation/performance.test.ts
@@ -1229,7 +1229,7 @@ npx vitest run src/core/aggregation/performance.test.ts
 The guard runs at >50,000 records and the dataset just grew. If it now exceeds
 its budget, that is a real regression to investigate, not a threshold to raise.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/data/mock
@@ -1258,7 +1258,7 @@ render failures, and lays out the map with its legend, tooltip and attribution.
   - `CrimeHeatMap` — the package's entry component
   - `reconcileProps(props, index): { filters; level; metric; warnings }`
 
-- [ ] **Step 1: Write the failing reconciliation test**
+- [x] **Step 1: Write the failing reconciliation test**
 
 Create `src/components/CrimeHeatMap/reconcile.test.ts`:
 
@@ -1379,7 +1379,7 @@ describe('reconcileProps — empty data', () => {
 });
 ```
 
-- [ ] **Step 2: Implement `reconcile.ts`**
+- [x] **Step 2: Implement `reconcile.ts`**
 
 ```ts
 import type { CrimeIndex } from '@/core/aggregation/index.js';
@@ -1461,12 +1461,12 @@ export function reconcileProps(input: ReconcileInput, index: CrimeIndex): Reconc
 }
 ```
 
-- [ ] **Step 3: Run the reconciliation test**
+- [x] **Step 3: Run the reconciliation test**
 
 Run: `npx vitest run src/components/CrimeHeatMap/reconcile.test.ts`
 Expected: PASS, 13 tests.
 
-- [ ] **Step 4: Implement the error boundary**
+- [x] **Step 4: Implement the error boundary**
 
 ```tsx
 import { Component, type ErrorInfo, type ReactNode } from 'react';
@@ -1502,7 +1502,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
 }
 ```
 
-- [ ] **Step 5: Write the failing root-component test**
+- [x] **Step 5: Write the failing root-component test**
 
 Create `src/components/CrimeHeatMap/CrimeHeatMap.test.tsx`:
 
@@ -1623,7 +1623,7 @@ describe('CrimeHeatMap', () => {
 });
 ```
 
-- [ ] **Step 6: Implement `CrimeHeatMap`**
+- [x] **Step 6: Implement `CrimeHeatMap`**
 
 ```tsx
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -1783,7 +1783,7 @@ export function CrimeHeatMap(props: CrimeHeatMapProps) {
 }
 ```
 
-- [ ] **Step 7: Add `CrimeHeatMap.module.css`**
+- [x] **Step 7: Add `CrimeHeatMap.module.css`**
 
 ```css
 .bottomLeft {
@@ -1810,7 +1810,7 @@ export function CrimeHeatMap(props: CrimeHeatMapProps) {
 .errorBody { margin: 0; color: var(--hm-fg-muted); font-size: 13px; }
 ```
 
-- [ ] **Step 8: Write the barrel and run the tests**
+- [x] **Step 8: Write the barrel and run the tests**
 
 `src/components/CrimeHeatMap/index.ts`:
 
@@ -1826,7 +1826,7 @@ The `reconcileProps(props, index)` memo depends on `props`, which is a fresh
 object every render. If profiling shows this matters, narrow the dependency list
 to the individual fields it reads — but do not do it speculatively.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/components/CrimeHeatMap
@@ -1844,7 +1844,7 @@ git commit -m "feat(component): add CrimeHeatMap root with prop reconciliation"
 - Modify: `README.md`
 - Modify: `vite.config.ts` (CSS output name)
 
-- [ ] **Step 1: Extend the public barrel**
+- [x] **Step 1: Extend the public barrel**
 
 Add to `src/index.ts`, keeping the Phase 1 exports:
 
@@ -1866,7 +1866,7 @@ export {
 } from './data/geo/index.js';
 ```
 
-- [ ] **Step 2: Extend the public-surface test**
+- [x] **Step 2: Extend the public-surface test**
 
 Add to `src/index.test.ts`:
 
@@ -1894,7 +1894,7 @@ describe('Phase 2 public surface', () => {
 Run: `npx vitest run src/index.test.ts`
 Expected: PASS.
 
-- [ ] **Step 3: Point the playground at the real component**
+- [x] **Step 3: Point the playground at the real component**
 
 Replace `playground/main.tsx`:
 
@@ -1923,7 +1923,7 @@ createRoot(root).render(
 );
 ```
 
-- [ ] **Step 4: Verify the map by eye**
+- [x] **Step 4: Verify the map by eye**
 
 Run `npm run playground` and confirm:
 
@@ -1938,13 +1938,13 @@ Run `npm run playground` and confirm:
 - clicking a province outlines it; Escape clears it
 - Tab focuses the map, arrow keys move between regions, Enter selects
 
-- [ ] **Step 5: Check accessibility by keyboard alone**
+- [x] **Step 5: Check accessibility by keyboard alone**
 
 With the pointer untouched: Tab into the map, arrow through several regions, and
 confirm the focus ring is clearly visible against both light and dark fills, and
 that a screen reader announces each region's name and value.
 
-- [ ] **Step 6: Verify the bundle**
+- [x] **Step 6: Verify the bundle**
 
 ```bash
 npm run build
@@ -1964,7 +1964,7 @@ Confirm:
 If `dist/style.css` is missing, add `cssFileName: 'style'` to `build.lib` in
 `vite.config.ts` (Vite 6+) or rename the emitted asset via `assetFileNames`.
 
-- [ ] **Step 7: Verify the package contents**
+- [x] **Step 7: Verify the package contents**
 
 ```bash
 npm pack --dry-run
@@ -1973,7 +1973,7 @@ npm pack --dry-run
 Confirm `dist/`, `README.md` and `LICENSE` ship, and nothing from `src/`,
 `scripts/`, `playground/` or `docs/`.
 
-- [ ] **Step 8: Run the full verification**
+- [x] **Step 8: Run the full verification**
 
 ```bash
 npm run verify
@@ -1992,7 +1992,7 @@ Then confirm the purity rule specifically:
 npx eslint src/core --max-warnings 0
 ```
 
-- [ ] **Step 9: Update the README**
+- [x] **Step 9: Update the README**
 
 Replace the "Şu an neler var" section to reflect that the map now renders, and
 add a quick-start:
@@ -2040,7 +2040,7 @@ harita köşesinde her zaman görünür — kaldıran bir prop bilinçli olarak 
 Ayrıntı için `scripts/README.md`.
 ````
 
-- [ ] **Step 10: Commit and tag**
+- [x] **Step 10: Commit and tag**
 
 ```bash
 git add src/index.ts src/index.test.ts playground/main.tsx README.md vite.config.ts
@@ -2054,19 +2054,19 @@ git tag phase-2-complete
 
 Each must be **verified by running it**, not assumed:
 
-- [ ] `npm run verify` passes end to end
-- [ ] `src/core` is at 100% branch coverage, including `zoom.ts` and `tooltipPlacement.ts`
-- [ ] `npx eslint src/core` is clean — no React import, no DOM global
-- [ ] `grep -c 'from "react"' dist/index.mjs` returns 0
-- [ ] `npm run build` produces ESM, CJS, types, and `dist/style.css`
-- [ ] `npm pack --dry-run` ships `dist/` only
-- [ ] The playground renders a recognisable Türkiye with varied colour at both levels
-- [ ] Wheel zoom anchors on the cursor; drag pans; borders stay hairline at k=12
-- [ ] Level switches near 2.65× and does not flicker when held at the threshold
-- [ ] Hover tooltip appears after a beat, follows the cursor, and flips at the edges
-- [ ] Map is fully keyboard-operable with a visible focus ring, and regions are announced
-- [ ] Attribution is visible and has no prop that removes it
-- [ ] Every mock district code exists in the shipped geography, and every district has data
+- [x] `npm run verify` passes end to end
+- [x] `src/core` is at 100% branch coverage, including `zoom.ts` and `tooltipPlacement.ts`
+- [x] `npx eslint src/core` is clean — no React import, no DOM global
+- [x] `grep -c 'from "react"' dist/index.mjs` returns 0
+- [x] `npm run build` produces ESM, CJS, types, and `dist/style.css`
+- [x] `npm pack --dry-run` ships `dist/` only
+- [x] The playground renders a recognisable Türkiye with varied colour at both levels
+- [x] Wheel zoom anchors on the cursor; drag pans; borders stay hairline at k=12
+- [x] Level switches near 2.65× and does not flicker when held at the threshold
+- [x] Hover tooltip appears after a beat, follows the cursor, and flips at the edges
+- [x] Map is fully keyboard-operable with a visible focus ring, and regions are announced
+- [x] Attribution is visible and has no prop that removes it
+- [x] Every mock district code exists in the shipped geography, and every district has data
 
 ## What Phase 3 needs from Phase 2
 

@@ -27,7 +27,7 @@ budget in §9 — and is why `data` and `categories` must be compared by referen
   - `useAggregates(data, categories): AggregateResult`
   - `AggregatesInput` — `{ data: readonly CrimeRecord[]; categories: readonly CrimeCategory[]; colorScale: ColorScaleName | RampFn }`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/hooks/useAggregates.test.tsx`:
 
@@ -177,12 +177,12 @@ describe('useAggregates', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/hooks/useAggregates.test.tsx`
 Expected: FAIL — cannot resolve `./useAggregates.js`.
 
-- [ ] **Step 3: Implement `src/hooks/useAggregates.ts`**
+- [x] **Step 3: Implement `src/hooks/useAggregates.ts`**
 
 ```ts
 import { useMemo } from 'react';
@@ -250,7 +250,7 @@ export function useAggregates(input: AggregatesInput): AggregateResult {
 }
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `npx vitest run src/hooks/useAggregates.test.tsx`
 Expected: PASS, 9 tests.
@@ -258,7 +258,7 @@ Expected: PASS, 9 tests.
 The "does not rebuild the index" test is the one that protects the performance
 budget. If it fails, something upstream is producing a new `data` reference.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/hooks/useAggregates.ts src/hooks/useAggregates.test.tsx
@@ -289,7 +289,7 @@ threshold does not flicker (§7.1).
   - `deriveLevel(k: number, current: GeoLevel, threshold: number, hysteresis: number): GeoLevel`
 - Produces (React): `useMapZoom(viewport): { transform, level, handlers, zoomIn, zoomOut, reset }`
 
-- [ ] **Step 1: Write the failing pure test**
+- [x] **Step 1: Write the failing pure test**
 
 Zoom math is pure, so it belongs in `core/` and must hit 100% branch coverage.
 
@@ -399,12 +399,12 @@ describe('deriveLevel', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/core/geo/zoom.test.ts`
 Expected: FAIL — cannot resolve `./zoom.js`.
 
-- [ ] **Step 3: Implement `src/core/geo/zoom.ts`**
+- [x] **Step 3: Implement `src/core/geo/zoom.ts`**
 
 ```ts
 import type { GeoLevel, Transform, Viewport } from '@/core/types/index.js';
@@ -499,7 +499,7 @@ export function deriveLevel(
 }
 ```
 
-- [ ] **Step 4: Run the pure test and check coverage**
+- [x] **Step 4: Run the pure test and check coverage**
 
 ```bash
 npx vitest run src/core/geo/zoom.test.ts
@@ -509,7 +509,7 @@ npx vitest run --coverage
 Expected: PASS, 17 tests, and `zoom.ts` at 100% on all four coverage columns.
 `core/` coverage is enforced at 100% — a missed branch fails the build.
 
-- [ ] **Step 5: Export from the geo barrel**
+- [x] **Step 5: Export from the geo barrel**
 
 Add to `src/core/geo/index.ts`:
 
@@ -517,7 +517,7 @@ Add to `src/core/geo/index.ts`:
 export { MAX_ZOOM, MIN_ZOOM, clampTransform, deriveLevel, panBy, zoomAt } from './zoom.js';
 ```
 
-- [ ] **Step 6: Write the failing hook test**
+- [x] **Step 6: Write the failing hook test**
 
 Create `src/hooks/useMapZoom.test.tsx`:
 
@@ -663,7 +663,7 @@ describe('useMapZoom', () => {
 });
 ```
 
-- [ ] **Step 7: Implement `src/hooks/useMapZoom.ts`**
+- [x] **Step 7: Implement `src/hooks/useMapZoom.ts`**
 
 ```ts
 import { useCallback, useEffect, useRef } from 'react';
@@ -767,12 +767,12 @@ export function useMapZoom(viewport: Viewport): MapZoom {
 }
 ```
 
-- [ ] **Step 8: Run the hook test to verify it passes**
+- [x] **Step 8: Run the hook test to verify it passes**
 
 Run: `npx vitest run src/hooks/useMapZoom.test.tsx`
 Expected: PASS, 9 tests.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/core/geo/zoom.ts src/core/geo/zoom.test.ts src/core/geo/index.ts \
@@ -799,7 +799,7 @@ size change rather than once per layer.
   - `MapGeometry` — `{ features: readonly RenderFeature[]; visible: ReadonlySet<string>; bounds: ReadonlyMap<string, BBox>; ready: boolean }`
   - `useMapGeometry(viewport, level, transform): MapGeometry`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/hooks/useMapGeometry.test.tsx`:
 
@@ -889,12 +889,12 @@ describe('useMapGeometry', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/hooks/useMapGeometry.test.tsx`
 Expected: FAIL — cannot resolve `./useMapGeometry.js`.
 
-- [ ] **Step 3: Implement `src/hooks/useMapGeometry.ts`**
+- [x] **Step 3: Implement `src/hooks/useMapGeometry.ts`**
 
 ```ts
 import { useMemo } from 'react';
@@ -977,7 +977,7 @@ export function useMapGeometry(
 }
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `npx vitest run src/hooks/useMapGeometry.test.tsx`
 Expected: PASS, 9 tests.
@@ -985,7 +985,7 @@ Expected: PASS, 9 tests.
 The "reuses projected paths" test is the performance contract for the whole
 phase. If it fails, `viewport` or `level` is a fresh object each render.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/hooks/useMapGeometry.ts src/hooks/useMapGeometry.test.tsx
@@ -1013,7 +1013,7 @@ tightly: one filter, applied to one group, re-rendered only when data changes.
   - `HeatLayer` — `(props: { features; values; scale; idPrefix; heatStyle; visible? }) => JSX.Element`
   - `HeatStyle = 'glow' | 'flat'`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/components/MapCanvas/HeatLayer.test.tsx`:
 
@@ -1093,12 +1093,12 @@ describe('HeatLayer', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/components/MapCanvas/HeatLayer.test.tsx`
 Expected: FAIL — cannot resolve `./HeatLayer.js`.
 
-- [ ] **Step 3: Add the no-data token**
+- [x] **Step 3: Add the no-data token**
 
 Append to `src/styles/tokens.css` inside `:root`, and add `--hm-no-data` to
 `THEME_TOKEN_NAMES` in `src/styles/index.ts` — the token test in Task 2 fails
@@ -1108,7 +1108,7 @@ otherwise, by design.
   --hm-no-data: rgba(255, 255, 255, 0.06);
 ```
 
-- [ ] **Step 4: Implement `MapDefs`**
+- [x] **Step 4: Implement `MapDefs`**
 
 ```tsx
 export interface MapDefsProps {
@@ -1146,7 +1146,7 @@ export function MapDefs({ idPrefix, blurStdDeviation, outlinePath }: MapDefsProp
 }
 ```
 
-- [ ] **Step 5: Implement `HeatLayer`**
+- [x] **Step 5: Implement `HeatLayer`**
 
 ```tsx
 import type { ColorScale } from '@/core/color/index.js';
@@ -1203,12 +1203,12 @@ export function HeatLayer({
 }
 ```
 
-- [ ] **Step 6: Run the test to verify it passes**
+- [x] **Step 6: Run the test to verify it passes**
 
 Run: `npx vitest run src/components/MapCanvas/HeatLayer.test.tsx`
 Expected: PASS, 8 tests.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/components/MapCanvas src/styles
@@ -1230,7 +1230,7 @@ diffused colour never washes out the boundaries.
 - Consumes: `RenderFeature`.
 - Produces: `BorderLayer` — `(props: { features; visible? }) => JSX.Element`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/components/MapCanvas/BorderLayer.test.tsx`:
 
@@ -1277,12 +1277,12 @@ describe('BorderLayer', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/components/MapCanvas/BorderLayer.test.tsx`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement `BorderLayer`**
+- [x] **Step 3: Implement `BorderLayer`**
 
 ```tsx
 import type { RenderFeature } from '@/hooks/useMapGeometry.js';
@@ -1325,12 +1325,12 @@ export function BorderLayer({ features, visible }: BorderLayerProps) {
 }
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `npx vitest run src/components/MapCanvas/BorderLayer.test.tsx`
 Expected: PASS, 5 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/MapCanvas/BorderLayer.tsx src/components/MapCanvas/BorderLayer.test.tsx
@@ -1354,7 +1354,7 @@ legible (§10).
 - Consumes: `RenderFeature`; `useSetHoverTarget` from Task 5; `useStrings`.
 - Produces: `HitLayer` — `(props: { features; values; names; visible?; selectedCode; focusedCode; onSelect; onFocusRegion; formatValue }) => JSX.Element`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/components/MapCanvas/HitLayer.test.tsx`:
 
@@ -1506,12 +1506,12 @@ describe('HitLayer', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/components/MapCanvas/HitLayer.test.tsx`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement `HitLayer`**
+- [x] **Step 3: Implement `HitLayer`**
 
 ```tsx
 import { useCallback } from 'react';
@@ -1626,12 +1626,12 @@ export function HitLayer({
 }
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `npx vitest run src/components/MapCanvas/HitLayer.test.tsx`
 Expected: PASS, 14 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/MapCanvas/HitLayer.tsx src/components/MapCanvas/HitLayer.test.tsx
@@ -1658,7 +1658,7 @@ the selection and hover highlights above everything.
   - `SelectionLayer` — `(props: { features; selectedCode; hoveredCode; focusedCode }) => JSX.Element`
   - `MapCanvas` — `(props: { data; categories; colorScale; heatStyle; onRegionClick? }) => JSX.Element`
 
-- [ ] **Step 1: Write the failing SelectionLayer test**
+- [x] **Step 1: Write the failing SelectionLayer test**
 
 Create `src/components/MapCanvas/SelectionLayer.test.tsx`:
 
@@ -1729,12 +1729,12 @@ describe('SelectionLayer', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/components/MapCanvas/SelectionLayer.test.tsx`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement `SelectionLayer`**
+- [x] **Step 3: Implement `SelectionLayer`**
 
 ```tsx
 import type { RenderFeature } from '@/hooks/useMapGeometry.js';
@@ -1799,7 +1799,7 @@ export function SelectionLayer({
 }
 ```
 
-- [ ] **Step 4: Write the failing MapCanvas test**
+- [x] **Step 4: Write the failing MapCanvas test**
 
 Create `src/components/MapCanvas/MapCanvas.test.tsx`:
 
@@ -1910,7 +1910,7 @@ describe('MapCanvas', () => {
 });
 ```
 
-- [ ] **Step 5: Implement `MapCanvas`**
+- [x] **Step 5: Implement `MapCanvas`**
 
 ```tsx
 import { useCallback, useId, useMemo } from 'react';
@@ -2048,7 +2048,7 @@ export function MapCanvas({
 }
 ```
 
-- [ ] **Step 6: Add `MapCanvas.module.css`**
+- [x] **Step 6: Add `MapCanvas.module.css`**
 
 ```css
 .container {
@@ -2078,7 +2078,7 @@ export function MapCanvas({
 }
 ```
 
-- [ ] **Step 7: Write the barrel `src/components/MapCanvas/index.ts`**
+- [x] **Step 7: Write the barrel `src/components/MapCanvas/index.ts`**
 
 ```ts
 export type { HeatStyle } from './HeatLayer.js';
@@ -2086,13 +2086,13 @@ export type { MapCanvasProps, RegionClickPayload } from './MapCanvas.js';
 export { MapCanvas } from './MapCanvas.js';
 ```
 
-- [ ] **Step 8: Run the tests to verify they pass**
+- [x] **Step 8: Run the tests to verify they pass**
 
 Run: `npx vitest run src/components/MapCanvas`
 Expected: PASS — 7 SelectionLayer tests, 8 MapCanvas tests, plus the earlier
 layer tests.
 
-- [ ] **Step 9: See it in the playground**
+- [x] **Step 9: See it in the playground**
 
 Replace `playground/main.tsx` so it mounts the real map with mock data:
 
@@ -2161,7 +2161,7 @@ Run `npm run playground` and confirm, by eye:
 This is the first point where the phase is visually verifiable. Do not move on
 if the map does not look like Türkiye.
 
-- [ ] **Step 10: Run the full verification and commit**
+- [x] **Step 10: Run the full verification and commit**
 
 ```bash
 npm run typecheck && npm run lint && npx vitest run
