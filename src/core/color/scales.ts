@@ -10,25 +10,43 @@ export type ColorScaleName = 'spectral' | 'blueRed';
  * Matches the reference design. Note that rainbow ramps are not fully
  * colorblind-safe, which is why the UI always shows numbers alongside color.
  */
+/**
+ * The default map ramp, for a light canvas.
+ *
+ * Each stop is solved to a target luminance rather than picked by eye, so the
+ * ramp darkens monotonically from 0.782 to 0.061 while keeping the spectral
+ * hue journey. That matters more here than on a dark canvas: with a pale
+ * background, magnitude has to read by lightness as well as hue, and the
+ * previous ramp — dark blue, light yellow, dark red — had its lightest stops
+ * in the middle, so mid-range values washed out at 1.36 contrast.
+ *
+ * The lowest stop deliberately sits close to the surface. On a choropleth,
+ * "near zero" is supposed to recede.
+ */
 export const SPECTRAL_STOPS: readonly string[] = [
-  '#2b4bd8', // koyu mavi   — en düşük
-  '#2e8fd4',
-  '#3fbfae',
-  '#8ed44f',
-  '#e8d13a',
-  '#ef8c31',
-  '#d93a2b', // koyu kırmızı — en yüksek
+  '#dbe6f4', // solmuş mavi  — en düşük
+  '#acd0ea',
+  '#5ac0cf',
+  '#39ab72',
+  '#9c7a16',
+  '#a14e12',
+  '#871d13', // koyu kırmızı — en yüksek
 ];
 
-/** Colorblind-friendlier alternative: no green, relies on the blue↔red axis. */
+/**
+ * Colorblind-friendlier alternative: no green, relies on the blue↔red axis.
+ * Re-stepped for the light canvas — the original's pale middle and light arms
+ * were built against a dark background, where they read as bright rather than
+ * as absent.
+ */
 export const BLUE_RED_STOPS: readonly string[] = [
-  '#2166ac',
-  '#67a9cf',
-  '#d1e5f0',
-  '#f7f7f7',
-  '#fddbc7',
-  '#ef8a62',
-  '#b2182b',
+  '#c6dbef',
+  '#83aed4',
+  '#4a80b4',
+  '#dcdcdc',
+  '#d98f77',
+  '#bf5b40',
+  '#93231a',
 ];
 
 /** Diverging ramp for compare mode: blue = decrease, neutral = unchanged, red = increase. */

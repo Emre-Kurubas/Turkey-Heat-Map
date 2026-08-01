@@ -1,11 +1,15 @@
 /**
  * Categorical hues for the charts, in fixed order.
  *
- * Stepped for a dark surface and validated as a set against the panels'
- * composited background (`#11172b` — the glass fill over the map): every slot
- * sits in the L 0.48–0.67 band, clears the chroma floor, holds >= 3:1 contrast,
- * and the worst adjacent pair measures ΔE 8.4 under simulated colour-vision
- * deficiency and 19.3 under normal vision.
+ * Stepped for a **light** surface and validated as a set against the panel
+ * background (`#f7f8fa`): every slot sits in the L 0.43–0.77 band, clears the
+ * chroma floor, and the worst adjacent pair measures ΔE 9.1 under simulated
+ * colour-vision deficiency and 19.6 under normal vision.
+ *
+ * Three slots — aqua (2.65), yellow (2.04) and magenta (2.53) — fall below 3:1
+ * against the surface. That is legal here and only here: the pie's legend
+ * prints a label and a number beside every swatch, so no slice depends on
+ * colour alone. Strip those labels and this becomes a real defect.
  *
  * **The order is the safety mechanism, not decoration.** Adjacent slots are the
  * pairs a reader compares — neighbouring arcs, neighbouring chips — and the
@@ -16,14 +20,14 @@
  * an existing slot under CVD; the ninth category folds into "Diğer" instead.
  */
 export const CATEGORY_PALETTE = [
-  '#3987e5', // blue
-  '#d95926', // orange
-  '#199e70', // aqua
-  '#c98500', // yellow
-  '#d55181', // magenta
+  '#2a78d6', // blue
+  '#eb6834', // orange
+  '#1baf7a', // aqua
+  '#eda100', // yellow
+  '#e87ba4', // magenta
   '#008300', // green
-  '#9085e9', // violet
-  '#e66767', // red
+  '#4a3aa7', // violet
+  '#e34948', // red
 ] as const satisfies readonly `#${string}`[];
 
 /**

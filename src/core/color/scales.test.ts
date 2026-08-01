@@ -120,3 +120,68 @@ describe('createDiffColorScale', () => {
     expect(negative.domain.max).toBe(100);
   });
 });
+
+/** WCAG relative luminance, for asserting the ramp's lightness profile. */
+function luminance(hex: string): number {
+  const channel = (c: number): number => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  const r = channel(parseInt(hex.slice(1, 3), 16));
+  const g = channel(parseInt(hex.slice(3, 5), 16));
+  const b = channel(parseInt(hex.slice(5, 7), 16));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi! + 0.05) / (lo! + 0.05);
+}
+
+/** The light map surface these ramps are drawn on. */
+const MAP_BG = '#eef1f6';
+
+describe('SPECTRAL_STOPS on a light canvas', () => {
+  it('gets strictly darker as values rise', () => {
+    // Magnitude must read by lightness, not hue alone. The old dark-theme ramp
+    // was light in the middle, and on a light canvas its mid-range vanished.
+    const lums = SPECTRAL_STOPS.map(luminance);
+    for (let i = 1; i < lums.length; i += 1) {
+      expect(lums[i]!, `step ${i}`).toBeLessThan(lums[i - 1]!);
+    }
+  });
+
+  it('separates every adjacent step by lightness alone', () => {
+    for (let i = 1; i < SPECTRAL_STOPS.length; i += 1) {
+      expect(contrast(SPECTRAL_STOPS[i - 1]!, SPECTRAL_STOPS[i]!), `pair ${i}`)
+        .toBeGreaterThan(1.2);
+    }
+  });
+
+  it('makes the high end unmistakable against the surface', () => {
+    const top = SPECTRAL_STOPS[SPECTRAL_STOPS.length - 1]!;
+    expect(contrast(top, MAP_BG)).toBeGreaterThan(6);
+  });
+
+  it('lets the lowest step recede toward the surface, as near-zero should', () => {
+    expect(contrast(SPECTRAL_STOPS[0]!, MAP_BG)).toBeLessThan(1.5);
+  });
+
+  it('is all six-digit hex', () => {
+    for (const stop of SPECTRAL_STOPS) expect(stop).toMatch(/^#[0-9a-f]{6}$/u);
+  });
+});
+
+describe('BLUE_RED_STOPS on a light canvas', () => {
+  it('keeps its high end visible', () => {
+    const top = BLUE_RED_STOPS[BLUE_RED_STOPS.length - 1]!;
+    expect(contrast(top, MAP_BG)).toBeGreaterThan(5);
+  });
+
+  it('has no step that disappears into the surface at the top half', () => {
+    // The neutral middle may recede; the upper arm must not.
+    for (const stop of BLUE_RED_STOPS.slice(4)) {
+      expect(contrast(stop, MAP_BG), stop).toBeGreaterThan(1.6);
+    }
+  });
+});

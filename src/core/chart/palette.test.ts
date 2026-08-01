@@ -36,3 +36,29 @@ describe('categoryColor', () => {
     expect(categoryColor(-1)).toBe(CATEGORY_PALETTE[0]);
   });
 });
+
+function luminance(hex: string): number {
+  const channel = (c: number): number => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(parseInt(hex.slice(1, 3), 16))
+    + 0.7152 * channel(parseInt(hex.slice(3, 5), 16))
+    + 0.0722 * channel(parseInt(hex.slice(5, 7), 16));
+}
+
+describe('CATEGORY_PALETTE on a light panel', () => {
+  it('is stepped for a light surface, not a dark one', () => {
+    // The dark column sits lighter than these; if this passes with the dark
+    // hexes still in place, the swap did not happen.
+    expect(CATEGORY_PALETTE).toContain('#2a78d6');
+    expect(CATEGORY_PALETTE).not.toContain('#3987e5');
+  });
+
+  it('keeps every hue mid-toned, so none reads as ink or as background', () => {
+    for (const hex of CATEGORY_PALETTE) {
+      expect(luminance(hex), hex).toBeGreaterThan(0.05);
+      expect(luminance(hex), hex).toBeLessThan(0.6);
+    }
+  });
+});
