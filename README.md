@@ -116,6 +116,96 @@ Hepsi kapalıyken geriye yalnızca harita ve **atıf** kalır. Atıf kaldırıla
 sınır verisi ODbL/CC-BY-SA lisanslıdır ve kaynağı belirtmek nezaket değil,
 lisans şartıdır (§5.4).
 
+## Props
+
+`data` ve `categories` dışında hepsi isteğe bağlıdır.
+
+| Prop | Tip | Varsayılan | Ne yapar |
+|---|---|---|---|
+| `data` | `CrimeRecord[]` | — | **Zorunlu.** Önceden toplanmış suç sayıları. |
+| `categories` | `CrimeCategory[]` | — | **Zorunlu.** Suç türleri; renkler bu sıraya göre atanır. |
+| `population` | `RegionPopulation[]` | — | Kişi başı ölçüm için nüfus. Yoksa `metric` toplama düşer. |
+| `panels` | `PanelFlags` | hepsi açık | Panelleri tek tek kapatır; yukarıdaki tabloya bakın. |
+| `defaultFilters` | `{ yearRange?, categories? }` | verinin tam aralığı | Açılıştaki filtre. Veriyle örtüşmezse uyarı verip tam aralığa döner. |
+| `defaultView` | `{ level?, focusedIl? }` | `{ level: 'il' }` | Açılış düzeyi. Veride ilçe kodu yoksa il düzeyine döner. |
+| `colorScale` | `'spectral' \| 'deepBlue' \| RampFn` | `'spectral'` | Isı rampası. `deepBlue` renk körlüğüne karşı güvenli seçenek. |
+| `scaleMode` | `'quantile' \| 'linear' \| 'log'` | `'quantile'` | Değerlerin renge nasıl dağıldığı. |
+| `heatStyle` | `'glow' \| 'flat'` | `'glow'` | Isının bulanık mı yoksa keskin mi çizileceği. |
+| `fit` | `'contain' \| 'fill'` | `'contain'` | Ülkenin kaba sığması mı, kabı doldurup kırpması mı. |
+| `metric` | `'total' \| 'perCapita'` | `'total'` | Toplam sayı mı, 100.000 kişi başına oran mı. |
+| `strings` | `PartialStrings` | Türkçe tablo | Herhangi bir metni değiştirir; derin birleştirilir. |
+| `theme` | `Record<string, string>` | — | `--hm-*` tasarım jetonlarını kök öğeye yazar (32 jeton). |
+| `className` | `string` | — | Kök öğeye eklenir; bileşenin kendi sınıfı korunur. |
+| `style` | `CSSProperties` | — | Kök öğeye satır içi stil. |
+| `onRegionClick` | `(r) => void` | — | Bir bölgeye tıklandığında `{ code, name, value }`. |
+| `onDataWarning` | `(w: string[]) => void` | — | Atılan kayıtlar ve düzeltilen proplar için Türkçe uyarılar. |
+| `onError` | `(e: Error) => void` | — | Alt ağaçta bir işleme hatası olursa. Bileşen kendi kutusunda kalır. |
+
+Geçersiz proplar hata fırlatmaz: en yakın geçerli değere düşer ve
+`onDataWarning` ile bildirilir.
+
+## Projeye bağlama
+
+### Next.js (App Router)
+
+Bileşen durum ve efekt kullanır, dolayısıyla bir istemci bileşenidir. Onu
+kullanan dosyanın başına `'use client'` ekleyin:
+
+```tsx
+'use client';
+
+import { CrimeHeatMap } from 'turkiye-suc-haritasi';
+import 'turkiye-suc-haritasi/style.css';
+
+export function SucHaritasi({ kayitlar, turler }) {
+  return (
+    <div style={{ height: '80vh' }}>
+      <CrimeHeatMap data={kayitlar} categories={turler} />
+    </div>
+  );
+}
+```
+
+CSS'i uygulama genelinde bir kez içe aktarmak yeterlidir; `layout.tsx` da olur.
+
+### Vite / CRA
+
+Ek bir adım yok. `style.css`'i giriş dosyanızda bir kez içe aktarın.
+
+### Verinin kimliği önemlidir
+
+`data` ve `categories` **referans kimliğine göre** karşılaştırılır. Render
+içinde satır içi dizi oluşturmayın; toplama indeksi her render'da yeniden
+kurulur:
+
+```tsx
+// Yanlış: her render'da yeni dizi
+<CrimeHeatMap data={kayitlar.filter(k => k.year > 2020)} categories={turler} />
+
+// Doğru
+const filtrelenmis = useMemo(() => kayitlar.filter(k => k.year > 2020), [kayitlar]);
+<CrimeHeatMap data={filtrelenmis} categories={turler} />
+```
+
+### Görünümü uyarlamak
+
+```tsx
+<CrimeHeatMap
+  data={kayitlar}
+  categories={turler}
+  colorScale="deepBlue"
+  theme={{ '--hm-radius': '8px', '--hm-chart-line': '#e2702e' }}
+  strings={{ sidebar: { title: 'Genel bakış' } }}
+  onRegionClick={(bolge) => router.push(`/il/${bolge.code}`)}
+  onDataWarning={(uyarilar) => console.warn(uyarilar)}
+/>
+```
+
+Jetonlar yalnızca bileşenin kök öğesine yazılır; sayfanızın geri kalanına
+sızmaz. Geçerli adların tamamı `THEME_TOKEN_NAMES` olarak dışa aktarılır ve
+`theme` prop'u bu adlarla tiplenmiştir — yanlış yazılan bir jeton sessizce hiçbir
+şey yapmak yerine derleme hatası verir.
+
 ## Erişilebilirlik
 
 Harita klavyeyle tam kullanılabilir: `Tab` haritaya odaklanır, ok tuşları

@@ -175,6 +175,8 @@ describe('public API surface — the whole list, on purpose', () => {
     'mergeStrings', 'trStrings',
     // Mock data
     'MOCK_CATEGORIES', 'createPrng', 'generateMockData',
+    // Theming
+    'THEME_TOKEN_NAMES',
     // The component
     'CrimeHeatMap',
   ].sort();

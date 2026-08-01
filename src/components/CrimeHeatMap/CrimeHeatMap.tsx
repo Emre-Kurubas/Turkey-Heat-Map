@@ -26,6 +26,7 @@ import { useAggregates } from '@/hooks/useAggregates.js';
 import { useHeatMapDispatch, useHeatMapState } from '@/hooks/useHeatMapState.js';
 import { useRegionDetail } from '@/hooks/useRegionDetail.js';
 import { mergeStrings, type PartialStrings } from '@/i18n/index.js';
+import type { ThemeTokenName } from '@/styles/index.js';
 import { ErrorBoundary } from './ErrorBoundary.js';
 import { reconcileProps } from './reconcile.js';
 import styles from './CrimeHeatMap.module.css';
@@ -75,10 +76,16 @@ export interface CrimeHeatMapProps {
   fit?: MapFit;
   metric?: MetricMode;
   strings?: PartialStrings;
-  theme?: Record<string, string>;
+  /**
+   * Design-token overrides, written onto this component's root element only.
+   *
+   * Keyed by token name rather than by `string`, so a typo is a compile error
+   * instead of a declaration that silently does nothing. `THEME_TOKEN_NAMES`
+   * exports the same list at runtime.
+   */
+  theme?: Partial<Record<ThemeTokenName, string>>;
   className?: string;
   style?: CSSProperties;
-  debug?: boolean;
   onRegionClick?: (region: RegionClickPayload) => void;
   onDataWarning?: (warnings: readonly string[]) => void;
   onError?: (error: Error) => void;

@@ -74,6 +74,16 @@ export type { PartialStrings, Strings } from './i18n/index.js';
 export { mergeStrings, trStrings } from './i18n/index.js';
 
 /*
+ * Design tokens — every name the `theme` prop accepts.
+ *
+ * Exported because the prop is otherwise unusable from the outside: the token
+ * list lives in a stylesheet that is not published as source, so without this a
+ * consumer would be guessing at names.
+ */
+export type { ThemeTokenName } from './styles/index.js';
+export { THEME_TOKEN_NAMES } from './styles/index.js';
+
+/*
  * Bundled geography.
  *
  * `peekLevelFeatures` is synchronous and returns null for a level whose chunk
