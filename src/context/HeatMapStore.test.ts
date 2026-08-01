@@ -1,12 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createHeatMapStore, heatMapReducer, type HeatMapState } from './HeatMapStore.js';
 
+const DEFAULT_FILTERS = { yearRange: [2015, 2024] as [number, number], categories: [] };
+
 const base: HeatMapState = {
   level: 'il',
   transform: { k: 1, x: 0, y: 0 },
   focusedCode: null,
   selectedCode: null,
-  filters: { yearRange: [2015, 2024], categories: [] },
+  filters: DEFAULT_FILTERS,
+  defaultFilters: DEFAULT_FILTERS,
+  yearBounds: [2015, 2024],
   metric: 'total',
   scaleMode: 'quantile',
 };
@@ -70,6 +74,60 @@ describe('heatMapReducer', () => {
     expect(next.level).toBe('il');
     expect(next.selectedCode).toBeNull();
     expect(next.filters).toBe(dirty.filters);
+  });
+
+  it('sets a year range', () => {
+    const next = heatMapReducer(base, { type: 'setYearRange', range: [2018, 2020] });
+    expect(next.filters.yearRange).toEqual([2018, 2020]);
+  });
+
+  it('normalizes a reversed year range rather than producing an empty selection', () => {
+    const next = heatMapReducer(base, { type: 'setYearRange', range: [2020, 2018] });
+    expect(next.filters.yearRange).toEqual([2018, 2020]);
+  });
+
+  it('clamps a year range to the data bounds', () => {
+    const next = heatMapReducer(base, { type: 'setYearRange', range: [1900, 2999] });
+    expect(next.filters.yearRange).toEqual(base.yearBounds);
+  });
+
+  it('adds a category on first toggle', () => {
+    const next = heatMapReducer(base, { type: 'toggleCategory', id: 'hirsizlik' });
+    expect(next.filters.categories).toEqual(['hirsizlik']);
+  });
+
+  it('removes a category on second toggle', () => {
+    const on = heatMapReducer(base, { type: 'toggleCategory', id: 'hirsizlik' });
+    const off = heatMapReducer(on, { type: 'toggleCategory', id: 'hirsizlik' });
+    expect(off.filters.categories).toEqual([]);
+  });
+
+  it('keeps other categories when toggling one', () => {
+    let state = heatMapReducer(base, { type: 'toggleCategory', id: 'a' });
+    state = heatMapReducer(state, { type: 'toggleCategory', id: 'b' });
+    state = heatMapReducer(state, { type: 'toggleCategory', id: 'a' });
+    expect(state.filters.categories).toEqual(['b']);
+  });
+
+  it('preserves the year range when toggling a category', () => {
+    const ranged = heatMapReducer(base, { type: 'setYearRange', range: [2018, 2019] });
+    const toggled = heatMapReducer(ranged, { type: 'toggleCategory', id: 'a' });
+    expect(toggled.filters.yearRange).toEqual([2018, 2019]);
+  });
+
+  it('restores the defaults on reset without touching the view', () => {
+    let state = heatMapReducer(base, { type: 'setYearRange', range: [2018, 2018] });
+    state = heatMapReducer(state, { type: 'toggleCategory', id: 'a' });
+    state = heatMapReducer(state, { type: 'setTransform', transform: { k: 4, x: -1, y: -2 } });
+
+    const reset = heatMapReducer(state, { type: 'resetFilters' });
+    expect(reset.filters).toEqual(base.defaultFilters);
+    // Resetting filters is not resetting the map.
+    expect(reset.transform).toEqual({ k: 4, x: -1, y: -2 });
+  });
+
+  it('returns the same object when reset changes nothing', () => {
+    expect(heatMapReducer(base, { type: 'resetFilters' })).toBe(base);
   });
 
   it('ignores an unknown action rather than throwing', () => {

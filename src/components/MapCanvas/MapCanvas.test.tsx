@@ -20,6 +20,8 @@ const base: HeatMapState = {
   focusedCode: null,
   selectedCode: null,
   filters: { yearRange: [2020, 2020], categories: [] },
+  defaultFilters: { yearRange: [2020, 2020], categories: [] },
+  yearBounds: [2020, 2020],
   metric: 'total',
   scaleMode: 'quantile',
 };

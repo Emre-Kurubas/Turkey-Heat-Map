@@ -9,6 +9,10 @@ export interface HeatMapState {
   focusedCode: string | null;
   selectedCode: string | null;
   filters: FilterSet;
+  /** What `resetFilters` restores. Set once from the reconciled props. */
+  defaultFilters: FilterSet;
+  /** The data's full year span. The slider's extent, and the range clamp. */
+  yearBounds: [number, number];
   metric: MetricMode;
   scaleMode: ScaleMode;
 }
@@ -19,6 +23,9 @@ export type HeatMapAction =
   | { type: 'select'; code: string | null }
   | { type: 'focus'; code: string | null }
   | { type: 'setFilters'; filters: FilterSet }
+  | { type: 'setYearRange'; range: [number, number] }
+  | { type: 'toggleCategory'; id: string }
+  | { type: 'resetFilters' }
   | { type: 'setMetric'; metric: MetricMode }
   | { type: 'setScaleMode'; mode: ScaleMode }
   | { type: 'resetView' };
@@ -45,6 +52,30 @@ export function heatMapReducer(state: HeatMapState, action: HeatMapAction): Heat
 
     case 'setFilters':
       return { ...state, filters: action.filters };
+
+    case 'setYearRange': {
+      // Normalize rather than trusting the caller: a dual-handle slider can
+      // drag its low handle past its high one, and an inverted range would
+      // silently select nothing.
+      const [lo, hi] = action.range;
+      const [minYear, maxYear] = state.yearBounds;
+      const start = Math.max(minYear, Math.min(lo, hi));
+      const end = Math.min(maxYear, Math.max(lo, hi));
+      return { ...state, filters: { ...state.filters, yearRange: [start, end] } };
+    }
+
+    case 'toggleCategory': {
+      const current = state.filters.categories;
+      const next = current.includes(action.id)
+        ? current.filter((id) => id !== action.id)
+        : [...current, action.id];
+      return { ...state, filters: { ...state.filters, categories: next } };
+    }
+
+    case 'resetFilters':
+      return state.filters === state.defaultFilters
+        ? state
+        : { ...state, filters: state.defaultFilters };
 
     case 'setMetric':
       return { ...state, metric: action.metric };

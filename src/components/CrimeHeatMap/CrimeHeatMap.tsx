@@ -137,6 +137,10 @@ export function CrimeHeatMap(props: CrimeHeatMapProps) {
     focusedCode: null,
     selectedCode: null,
     filters: reconciled.filters,
+    // The same object, so `resetFilters` can compare by identity and no-op
+    // when nothing has changed.
+    defaultFilters: reconciled.filters,
+    yearBounds: reconciled.yearBounds,
     metric: reconciled.metric,
     scaleMode,
   }));
