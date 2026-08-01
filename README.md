@@ -2,14 +2,37 @@
 
 Türkiye suç istatistikleri için etkileşimli ısı haritası React bileşeni.
 
-> **Durum:** Geliştirme aşamasında (Aşama 4/5 tamamlandı). Açık tema, bölge
-> detay paneli ve katlanabilir filtreler eklendi.
+> **Durum:** Geliştirme aşamasında. Paket henüz npm'e yayımlanmadı; aşağıdaki
+> GitHub kurulumu şu an çalışan yoldur.
 
 ## Kurulum
+
+Depodan doğrudan:
+
+```bash
+npm install github:Emre-Kurubas/Turkey-Heat-Map
+```
+
+npm'e yayımlandıktan sonra:
 
 ```bash
 npm install turkiye-suc-haritasi
 ```
+
+React 18 veya 19 bir **peer dependency**'dir; projenizde zaten kurulu olması
+beklenir. Paket hem ESM hem CJS olarak gelir ve tip tanımlarını içerir.
+
+### Sunucu tarafı işleme
+
+Bileşen sunucuda güvenle işlenir: işleme sırasında `window`, `document` veya
+`matchMedia`'ya dokunulmaz. Sunucuda kapsayıcının boyutu bilinemeyeceği için
+harita "yükleniyor" durumunu basar ve istemcide ölçüldüğünde çizilir.
+
+### Paket boyutu
+
+İlk yük ~78 KB gzip. İlçe geometrisi (~76 KB gzip) ayrı bir parça olarak,
+haritanın ilçe sınırlarına ihtiyacı olduğunda yüklenir — ayrıntı için aşağıdaki
+tasarım kararlarına bakın.
 
 ## Hızlı başlangıç
 

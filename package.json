@@ -2,6 +2,17 @@
   "name": "turkiye-suc-haritasi",
   "version": "0.1.0",
   "description": "Türkiye suç istatistikleri için etkileşimli ısı haritası React bileşeni",
+  "keywords": [
+    "türkiye", "turkey", "heatmap", "choropleth", "react", "map",
+    "crime", "suç", "istatistik", "topojson", "d3-geo"
+  ],
+  "author": "Emre Kurubaş",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Emre-Kurubas/Turkey-Heat-Map.git"
+  },
+  "homepage": "https://github.com/Emre-Kurubas/Turkey-Heat-Map#readme",
+  "bugs": "https://github.com/Emre-Kurubas/Turkey-Heat-Map/issues",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -37,7 +48,8 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "verify": "npm run typecheck && npm run lint && npm run test:coverage"
+    "verify": "npm run typecheck && npm run lint && npm run test:coverage",
+    "prepublishOnly": "npm run verify && npm run build"
   },
   "peerDependencies": {
     "react": ">=18",
