@@ -109,3 +109,24 @@ describe('Phase 2 public surface', () => {
     expect(api.getLevelFeatures('ilce').features).toHaveLength(973);
   });
 });
+
+describe('Phase 3 public surface', () => {
+  it('exports the validated categorical palette', async () => {
+    const api = await import('./index.js');
+    expect(api.CATEGORY_PALETTE).toHaveLength(8);
+    expect(api.categoryColor(0)).toBe(api.CATEGORY_PALETTE[0]);
+  });
+
+  it('exports the chart geometry helpers', async () => {
+    const api = await import('./index.js');
+    expect(typeof api.arcPath).toBe('function');
+    expect(typeof api.linePath).toBe('function');
+    expect(api.niceMax(87)).toBe(100);
+  });
+
+  it('exports the per-capita helpers', async () => {
+    const api = await import('./index.js');
+    expect(typeof api.buildPopulationIndex).toBe('function');
+    expect(typeof api.toPerCapita).toBe('function');
+  });
+});

@@ -1,4 +1,8 @@
-.bar { padding: 10px 12px; display: grid; gap: 10px; min-width: 260px; }
+/*
+ * Bounded, not stretchy. The overlay's `auto` track would otherwise let the
+ * chip rows set the panel's width and push it across most of the map.
+ */
+.bar { padding: 10px 12px; display: grid; gap: 10px; width: 300px; }
 
 .header {
   display: flex;

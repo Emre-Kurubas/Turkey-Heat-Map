@@ -59,7 +59,7 @@ charts stay thin.
   - `CATEGORY_PALETTE: readonly string[]` (8 hues)
   - `categoryColor(index: number): string`
 
-- [ ] **Step 1: Write the failing arc test**
+- [x] **Step 1: Write the failing arc test**
 
 Create `src/core/chart/arc.test.ts`:
 
@@ -130,7 +130,7 @@ describe('arcPath', () => {
 });
 ```
 
-- [ ] **Step 2: Implement `arc.ts`**
+- [x] **Step 2: Implement `arc.ts`**
 
 ```ts
 export interface ArcOptions {
@@ -195,7 +195,7 @@ export function arcPath(options: ArcOptions): string {
 }
 ```
 
-- [ ] **Step 3: Write the failing collapse test**
+- [x] **Step 3: Write the failing collapse test**
 
 Create `src/core/chart/collapse.test.ts`:
 
@@ -305,7 +305,7 @@ describe('collapseSlices', () => {
 });
 ```
 
-- [ ] **Step 4: Implement `collapse.ts`**
+- [x] **Step 4: Implement `collapse.ts`**
 
 ```ts
 export interface Slice {
@@ -393,7 +393,7 @@ export function collapseSlices(
 }
 ```
 
-- [ ] **Step 5: Write the failing palette test**
+- [x] **Step 5: Write the failing palette test**
 
 Create `src/core/chart/palette.test.ts`:
 
@@ -438,7 +438,7 @@ describe('categoryColor', () => {
 });
 ```
 
-- [ ] **Step 6: Implement `palette.ts`**
+- [x] **Step 6: Implement `palette.ts`**
 
 ```ts
 /**
@@ -484,7 +484,7 @@ export function categoryColor(index: number): string {
 }
 ```
 
-- [ ] **Step 7: Extend the barrel, run, check coverage**
+- [x] **Step 7: Extend the barrel, run, check coverage**
 
 Add to `src/core/chart/index.ts`:
 
@@ -504,7 +504,7 @@ npx vitest run --coverage
 Expected: PASS — 8 arc, 11 collapse, 7 palette tests — and every `core/chart`
 file at 100%.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/core/chart
@@ -530,7 +530,7 @@ git commit -m "feat(chart): add arc geometry, share collapsing and validated pal
   pie: { title: string; national: string; other: string; empty: string };
   ```
 
-- [ ] **Step 1: Add the strings**
+- [x] **Step 1: Add the strings**
 
 `src/i18n/types.ts`:
 
@@ -574,7 +574,7 @@ The `Strings` entry gains the two labels as well:
 
 Add `pie: mergeGroup('pie', overrides),` to `src/i18n/index.ts`.
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 Create `src/components/CategoryPieChart/CategoryPieChart.test.tsx`:
 
@@ -754,7 +754,7 @@ describe('CategoryPieChart', () => {
 });
 ```
 
-- [ ] **Step 3: Implement the chart**
+- [x] **Step 3: Implement the chart**
 
 `src/components/CategoryPieChart/CategoryPieChart.module.css`:
 
@@ -960,7 +960,7 @@ export function CategoryPieChart({
 }
 ```
 
-- [ ] **Step 4: Write the barrel, run and commit**
+- [x] **Step 4: Write the barrel, run and commit**
 
 `src/components/CategoryPieChart/index.ts`:
 
@@ -1004,7 +1004,7 @@ git commit -m "feat(charts): add category donut with entity-stable colours"
 - Produces (React): `TrendChart` — `(props: { byYear: ReadonlyMap<number, number> }) => JSX.Element`
 - Produces, added to `Strings`: `trend: { title: string; empty: string; year: string }`
 
-- [ ] **Step 1: Write the failing line test**
+- [x] **Step 1: Write the failing line test**
 
 Create `src/core/chart/line.test.ts`:
 
@@ -1071,7 +1071,7 @@ describe('niceMax', () => {
 });
 ```
 
-- [ ] **Step 2: Implement `line.ts`**
+- [x] **Step 2: Implement `line.ts`**
 
 ```ts
 export interface Point {
@@ -1127,7 +1127,7 @@ export type { Point } from './line.js';
 export { areaPath, linePath, niceMax } from './line.js';
 ```
 
-- [ ] **Step 3: Run the line test and check coverage**
+- [x] **Step 3: Run the line test and check coverage**
 
 ```bash
 npx vitest run src/core/chart/line.test.ts
@@ -1136,7 +1136,7 @@ npx vitest run --coverage
 
 Expected: PASS, 10 tests, `line.ts` at 100%.
 
-- [ ] **Step 4: Add the strings**
+- [x] **Step 4: Add the strings**
 
 `src/i18n/types.ts`:
 
@@ -1152,7 +1152,7 @@ Expected: PASS, 10 tests, `line.ts` at 100%.
 
 Add `trend: mergeGroup('trend', overrides),` to `src/i18n/index.ts`.
 
-- [ ] **Step 5: Write the failing TrendChart test**
+- [x] **Step 5: Write the failing TrendChart test**
 
 Create `src/components/TrendChart/TrendChart.test.tsx`:
 
@@ -1261,7 +1261,7 @@ describe('TrendChart', () => {
 });
 ```
 
-- [ ] **Step 6: Implement the chart**
+- [x] **Step 6: Implement the chart**
 
 `src/components/TrendChart/TrendChart.module.css`:
 
@@ -1454,7 +1454,7 @@ export function TrendChart({ byYear }: TrendChartProps) {
 }
 ```
 
-- [ ] **Step 7: Write the barrel, run and commit**
+- [x] **Step 7: Write the barrel, run and commit**
 
 `src/components/TrendChart/index.ts`:
 
@@ -1503,7 +1503,7 @@ computation lands here rather than being deferred.
 - Adds to `AggregateResult`: nothing new — `rollup` and `heatRollup` are already
   rate-valued when the metric is `perCapita`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/core/aggregation/perCapita.test.ts`:
 
@@ -1616,7 +1616,7 @@ describe('toPerCapita', () => {
 });
 ```
 
-- [ ] **Step 2: Implement `perCapita.ts`**
+- [x] **Step 2: Implement `perCapita.ts`**
 
 ```ts
 import type { GeoLevel, RegionPopulation } from '@/core/types/index.js';
@@ -1711,7 +1711,7 @@ export type { PopulationIndex } from './perCapita.js';
 export { buildPopulationIndex, toPerCapita } from './perCapita.js';
 ```
 
-- [ ] **Step 3: Run the test and check coverage**
+- [x] **Step 3: Run the test and check coverage**
 
 ```bash
 npx vitest run src/core/aggregation/perCapita.test.ts
@@ -1720,7 +1720,7 @@ npx vitest run --coverage
 
 Expected: PASS, 14 tests, `perCapita.ts` at 100%.
 
-- [ ] **Step 4: Apply the metric in `useAggregates`**
+- [x] **Step 4: Apply the metric in `useAggregates`**
 
 Add `population` to `AggregatesInput`:
 
@@ -1759,7 +1759,7 @@ Pass the prop through in `CrimeHeatMap`'s `Content`:
   });
 ```
 
-- [ ] **Step 5: Cover the wiring**
+- [x] **Step 5: Cover the wiring**
 
 Add to `src/hooks/useAggregates.test.tsx`:
 
@@ -1810,7 +1810,7 @@ const POPULATION: RegionPopulation[] = [
 ];
 ```
 
-- [ ] **Step 6: Run and commit**
+- [x] **Step 6: Run and commit**
 
 ```bash
 npx vitest run src/core/aggregation src/hooks/useAggregates.test.tsx
@@ -1837,7 +1837,7 @@ panel is off, and proves the whole thing in a browser.
 - Modify: `src/index.ts`, `src/index.test.ts`
 - Modify: `playground/main.tsx`, `README.md`
 
-- [ ] **Step 1: Give the overlay named grid areas**
+- [x] **Step 1: Give the overlay named grid areas**
 
 Replace the `.hm-overlay` rule in `src/styles/base.css`:
 
@@ -1887,7 +1887,7 @@ Replace the `.hm-overlay` rule in `src/styles/base.css`:
 }
 ```
 
-- [ ] **Step 2: Mount the panels**
+- [x] **Step 2: Mount the panels**
 
 In `src/components/CrimeHeatMap/CrimeHeatMap.tsx`, replace `Content` with the
 full layout. Each panel is mounted only when its flag is on — an unmounted panel
@@ -1998,7 +1998,7 @@ Widen `resolvedPanels` in `CrimeHeatMap` to cover every flag, all defaulting to
 
 and change `ContentProps.panels` to `Record<keyof typeof resolvedPanels, boolean>`.
 
-- [ ] **Step 3: Write the panel matrix test**
+- [x] **Step 3: Write the panel matrix test**
 
 Add to `src/components/CrimeHeatMap/CrimeHeatMap.test.tsx`:
 
@@ -2071,7 +2071,7 @@ const DATA: CrimeRecord[] = [
 ];
 ```
 
-- [ ] **Step 4: Run the matrix and fix what it finds**
+- [x] **Step 4: Run the matrix and fix what it finds**
 
 ```bash
 npx vitest run src/components/CrimeHeatMap
@@ -2081,7 +2081,7 @@ Expected: PASS. The "leaves the other panels mounted" cases are the ones that
 catch accidental coupling — if switching the pie off also removes the trend
 chart, the shared `hm-area-right` wrapper is being gated on the wrong flag.
 
-- [ ] **Step 5: Extend the public API**
+- [x] **Step 5: Extend the public API**
 
 Add to `src/index.ts`:
 
@@ -2116,7 +2116,7 @@ describe('Phase 3 public surface', () => {
 });
 ```
 
-- [ ] **Step 6: Run the full verification**
+- [x] **Step 6: Run the full verification**
 
 ```bash
 npm run verify
@@ -2134,7 +2134,7 @@ Every line must pass:
 npx eslint src/core --max-warnings 0
 ```
 
-- [ ] **Step 7: Check the bundle against the budget**
+- [x] **Step 7: Check the bundle against the budget**
 
 ```bash
 npm run build
@@ -2145,7 +2145,7 @@ Phase 2 left 30 KB of the 60 KB code budget used. Five panels and the chart
 geometry will add to that. If the remainder exceeds 60 KB, record the number in
 the commit message rather than quietly accepting it.
 
-- [ ] **Step 8: Verify in a browser**
+- [x] **Step 8: Verify in a browser**
 
 Run `npm run playground` and confirm by eye:
 
@@ -2163,7 +2163,7 @@ Run `npm run playground` and confirm by eye:
 - narrowing the window below 1024px moves the sidebar and charts below the map;
   below 640px only the map, search and legend remain
 
-- [ ] **Step 9: Update the README and commit**
+- [x] **Step 9: Update the README and commit**
 
 Replace the "Şu an neler var" table's status line and add the new rows:
 
@@ -2188,23 +2188,23 @@ git tag phase-3-complete
 
 Each verified by running it:
 
-- [ ] `npm run verify` passes end to end
-- [ ] `src/core` at 100% branch coverage, including all six new pure modules
-- [ ] `npx eslint src/core` clean
-- [ ] Every panel mounts by default; each one disabled leaves **no DOM** and the
+- [x] `npm run verify` passes end to end
+- [x] `src/core` at 100% branch coverage, including all six new pure modules
+- [x] `npx eslint src/core` clean
+- [x] Every panel mounts by default; each one disabled leaves **no DOM** and the
       others still mount
-- [ ] The per-capita toggle actually changes the numbers, and the legend follows
-- [ ] `Diğer` opens to reveal the categories it folded, and they keep their own
+- [x] The per-capita toggle actually changes the numbers, and the legend follows
+- [x] `Diğer` opens to reveal the categories it folded, and they keep their own
       palette slots
-- [ ] The map and the attribution render with every panel disabled
-- [ ] Search finds `Şişli` from `sisli`, `Ağrı` from `agri`, `İstanbul` from `istanbul`
-- [ ] Sidebar row hover highlights the map without opening a tooltip
-- [ ] Sidebar row click flies the map
-- [ ] Pie slice hover highlights the matching filter chip
-- [ ] Trend chart year click narrows the filter
-- [ ] Category colours stay put when a filter removes a different category
-- [ ] The 973-row sidebar renders a window, not every row
-- [ ] Layout reflows below 1024px and 640px
+- [x] The map and the attribution render with every panel disabled
+- [x] Search finds `Şişli` from `sisli`, `Ağrı` from `agri`, `İstanbul` from `istanbul`
+- [x] Sidebar row hover highlights the map without opening a tooltip
+- [x] Sidebar row click flies the map
+- [x] Pie slice hover highlights the matching filter chip
+- [x] Trend chart year click narrows the filter
+- [x] Category colours stay put when a filter removes a different category
+- [x] The 973-row sidebar renders a window, not every row
+- [x] Layout reflows below 1024px and 640px
 
 ## What Phase 4 needs from Phase 3
 

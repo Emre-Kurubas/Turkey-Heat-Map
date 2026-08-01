@@ -21,6 +21,9 @@ const EIGHT: CrimeCategory[] = Array.from({ length: 8 }, (_, i) => ({
 }));
 const EIGHT_TOTALS = new Map(EIGHT.map((c, i) => [c.id, 100 - i]));
 
+/** One dominant category and a tail of slivers, each well under 3%. */
+const TAILED_TOTALS = new Map(EIGHT.map((c, i) => [c.id, i === 0 ? 900 : 10]));
+
 const DEFAULTS = { yearRange: [2015, 2024] as [number, number], categories: [] };
 
 const base: HeatMapState = {
@@ -137,15 +140,27 @@ describe('CategoryPieChart', () => {
     expect(container.querySelectorAll('path[data-dimmed="true"]')).toHaveLength(2);
   });
 
-  it('folds a long tail into Diğer', () => {
-    renderPie({ categories: EIGHT, totals: EIGHT_TOTALS });
-    // Six visible slices: five named plus Diğer.
-    expect(screen.getAllByRole('listitem')).toHaveLength(6);
+  it('folds a tail of slivers into Diğer', () => {
+    renderPie({ categories: EIGHT, totals: TAILED_TOTALS });
+    // The dominant category plus one Diğer holding the seven slivers.
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);
     expect(screen.getByText(trStrings.pie.other)).toBeInTheDocument();
   });
 
-  it('expands Diğer on click, revealing what it hid', () => {
+  /**
+   * Folding is only an improvement when the tail it hides is genuinely small.
+   * Türkiye's crime categories are near-equal, and a cap tight enough to fold
+   * them produced a Diğer larger than every real category — the biggest thing
+   * in the chart, meaning nothing.
+   */
+  it('does not fold near-equal categories, which would make Diğer the largest slice', () => {
     renderPie({ categories: EIGHT, totals: EIGHT_TOTALS });
+    expect(screen.getAllByRole('listitem')).toHaveLength(8);
+    expect(screen.queryByText(trStrings.pie.other)).not.toBeInTheDocument();
+  });
+
+  it('expands Diğer on click, revealing what it hid', () => {
+    renderPie({ categories: EIGHT, totals: TAILED_TOTALS });
     fireEvent.click(otherToggle());
 
     expect(screen.getAllByRole('listitem')).toHaveLength(8);
@@ -153,14 +168,14 @@ describe('CategoryPieChart', () => {
   });
 
   it('collapses Diğer again on a second click', () => {
-    renderPie({ categories: EIGHT, totals: EIGHT_TOTALS });
+    renderPie({ categories: EIGHT, totals: TAILED_TOTALS });
     fireEvent.click(otherToggle());
     fireEvent.click(screen.getByRole('button', { name: trStrings.pie.collapse }));
-    expect(screen.getAllByRole('listitem')).toHaveLength(6);
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);
   });
 
   it('keeps expanded slices in their own palette slots, not recoloured by rank', () => {
-    const { container } = renderPie({ categories: EIGHT, totals: EIGHT_TOTALS });
+    const { container } = renderPie({ categories: EIGHT, totals: TAILED_TOTALS });
     fireEvent.click(otherToggle());
     expect(container.querySelector('path[data-slice="k7"]')?.getAttribute('fill'))
       .toBe(CATEGORY_PALETTE[7]);

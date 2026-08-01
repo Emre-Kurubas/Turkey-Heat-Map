@@ -32,7 +32,7 @@ subscribes to and which the map (always mounted) can act on.
 - Produces, changed on `HoverTarget`:
   - `source: 'map' | 'list'` — where the hover came from
 
-- [ ] **Step 1: Write the failing store tests**
+- [x] **Step 1: Write the failing store tests**
 
 Add to `src/context/HeatMapStore.test.ts`:
 
@@ -68,7 +68,7 @@ describe('fly-to requests', () => {
 
 Add `flyToRequest: null` to the shared `base` fixture.
 
-- [ ] **Step 2: Implement the store changes**
+- [x] **Step 2: Implement the store changes**
 
 In `src/context/HeatMapStore.ts`, add to `HeatMapState`:
 
@@ -114,7 +114,7 @@ means nothing once districts are the active level:
       };
 ```
 
-- [ ] **Step 3: Tag hover targets with their source**
+- [x] **Step 3: Tag hover targets with their source**
 
 In `src/context/HoverStore.ts`, extend `HoverTarget`:
 
@@ -133,7 +133,7 @@ export interface HoverTarget {
 }
 ```
 
-- [ ] **Step 4: Make the map honour the fly-to request**
+- [x] **Step 4: Make the map honour the fly-to request**
 
 In `src/components/MapCanvas/MapCanvas.tsx`, add the effect. `useFlyTo` and
 `geometry.bounds` are both already available here:
@@ -157,7 +157,7 @@ In `src/components/MapCanvas/MapCanvas.tsx`, add the effect. `useFlyTo` and
 Add `useEffect` to the React import and
 `import { useFlyTo } from '@/hooks/useFlyTo.js';`.
 
-- [ ] **Step 5: Tag the map's own hovers**
+- [x] **Step 5: Tag the map's own hovers**
 
 In `src/components/MapCanvas/HitLayer.tsx`, both `setHover` calls need the new
 field:
@@ -168,7 +168,7 @@ field:
 
 The `move` action carries no source, so it needs no change.
 
-- [ ] **Step 6: Make the tooltip ignore list hovers**
+- [x] **Step 6: Make the tooltip ignore list hovers**
 
 In `src/components/HoverTooltip/HoverTooltip.tsx`, the effect that shows the
 tooltip becomes:
@@ -186,7 +186,7 @@ tooltip becomes:
   }, [hoveredCode, fromMap, delayMs]);
 ```
 
-- [ ] **Step 7: Cover the map's half of the wiring**
+- [x] **Step 7: Cover the map's half of the wiring**
 
 Add to `src/components/MapCanvas/MapCanvas.test.tsx`:
 
@@ -228,7 +228,7 @@ beforeEach(() => {
 afterEach(() => { vi.unstubAllGlobals(); });
 ```
 
-- [ ] **Step 8: Run everything and commit**
+- [x] **Step 8: Run everything and commit**
 
 ```bash
 npx vitest run src/context src/components/MapCanvas src/components/HoverTooltip
@@ -272,7 +272,7 @@ Selecting a place flies the map; selecting a category or year applies a filter.
   };
   ```
 
-- [ ] **Step 1: Add the strings**
+- [x] **Step 1: Add the strings**
 
 `src/i18n/types.ts`:
 
@@ -304,7 +304,7 @@ overriding `search` replaces `groups` wholesale rather than merging into it.
 That is acceptable and consistent with every other group; document it by
 leaving the existing `mergeStrings` doc comment as-is.
 
-- [ ] **Step 2: Write the failing index test**
+- [x] **Step 2: Write the failing index test**
 
 Create `src/hooks/useSearchIndex.test.tsx`:
 
@@ -349,7 +349,7 @@ describe('useSearchIndex', () => {
 });
 ```
 
-- [ ] **Step 3: Implement `useSearchIndex`**
+- [x] **Step 3: Implement `useSearchIndex`**
 
 ```ts
 import { useMemo } from 'react';
@@ -381,12 +381,12 @@ export function useSearchIndex(
 }
 ```
 
-- [ ] **Step 4: Run the index test**
+- [x] **Step 4: Run the index test**
 
 Run: `npx vitest run src/hooks/useSearchIndex.test.tsx`
 Expected: PASS, 5 tests.
 
-- [ ] **Step 5: Write the failing SearchBar test**
+- [x] **Step 5: Write the failing SearchBar test**
 
 Create `src/components/SearchBar/SearchBar.test.tsx`:
 
@@ -543,7 +543,7 @@ describe('SearchBar', () => {
 });
 ```
 
-- [ ] **Step 6: Implement `SearchBar`**
+- [x] **Step 6: Implement `SearchBar`**
 
 `src/components/SearchBar/SearchBar.module.css`:
 
@@ -772,7 +772,7 @@ export function SearchBar({ categories }: SearchBarProps) {
 }
 ```
 
-- [ ] **Step 7: Write the barrel, run and commit**
+- [x] **Step 7: Write the barrel, run and commit**
 
 `src/components/SearchBar/index.ts`:
 
@@ -834,7 +834,7 @@ pure and goes in `core/`.
   };
   ```
 
-- [ ] **Step 1: Write the failing window test**
+- [x] **Step 1: Write the failing window test**
 
 Create `src/core/list/window.test.ts`:
 
@@ -913,7 +913,7 @@ describe('computeWindow', () => {
 });
 ```
 
-- [ ] **Step 2: Implement the window**
+- [x] **Step 2: Implement the window**
 
 `src/core/list/window.ts`:
 
@@ -979,7 +979,7 @@ export type { ListWindow, WindowOptions } from './window.js';
 export { computeWindow } from './window.js';
 ```
 
-- [ ] **Step 3: Run the window test and check coverage**
+- [x] **Step 3: Run the window test and check coverage**
 
 ```bash
 npx vitest run src/core/list/window.test.ts
@@ -988,7 +988,7 @@ npx vitest run --coverage
 
 Expected: PASS, 12 tests, `window.ts` at 100%.
 
-- [ ] **Step 4: Implement `useVirtualList`**
+- [x] **Step 4: Implement `useVirtualList`**
 
 ```ts
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -1039,7 +1039,7 @@ export function useVirtualList(rowHeight: number, count: number): VirtualList {
 }
 ```
 
-- [ ] **Step 5: Add the sidebar strings**
+- [x] **Step 5: Add the sidebar strings**
 
 `src/i18n/types.ts`:
 
@@ -1071,7 +1071,7 @@ export function useVirtualList(rowHeight: number, count: number): VirtualList {
 
 Add `sidebar: mergeGroup('sidebar', overrides),` to `src/i18n/index.ts`.
 
-- [ ] **Step 6: Write the failing Sidebar test**
+- [x] **Step 6: Write the failing Sidebar test**
 
 Create `src/components/Sidebar/Sidebar.test.tsx`:
 
@@ -1213,7 +1213,7 @@ describe('Sidebar', () => {
 });
 ```
 
-- [ ] **Step 7: Implement the row**
+- [x] **Step 7: Implement the row**
 
 `src/components/Sidebar/SidebarRow.tsx`:
 
@@ -1262,7 +1262,7 @@ export function SidebarRow({
 }
 ```
 
-- [ ] **Step 8: Implement the Sidebar**
+- [x] **Step 8: Implement the Sidebar**
 
 `src/components/Sidebar/Sidebar.module.css`:
 
@@ -1427,7 +1427,7 @@ export function Sidebar({ rows, scale }: SidebarProps) {
 }
 ```
 
-- [ ] **Step 9: Write the barrel, run and commit**
+- [x] **Step 9: Write the barrel, run and commit**
 
 `src/components/Sidebar/index.ts`:
 

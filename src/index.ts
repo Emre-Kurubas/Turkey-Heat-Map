@@ -75,3 +75,15 @@ export { mergeStrings, trStrings } from './i18n/index.js';
 export {
   LEVELS, getLevelFeatures, getLevelRegionMeta,
 } from './data/geo/index.js';
+
+// Chart geometry and the validated categorical palette, for consumers building
+// their own panels against the same visual language.
+export type { CollapsedSlice, LinearScale, Point, Slice } from './core/chart/index.js';
+export {
+  CATEGORY_PALETTE, arcPath, areaPath, categoryColor, collapseSlices,
+  createLinearScale, linePath, niceMax, snapToStep,
+} from './core/chart/index.js';
+export type { ListWindow } from './core/list/index.js';
+export { computeWindow } from './core/list/index.js';
+export type { PopulationIndex } from './core/aggregation/index.js';
+export { buildPopulationIndex, toPerCapita } from './core/aggregation/index.js';

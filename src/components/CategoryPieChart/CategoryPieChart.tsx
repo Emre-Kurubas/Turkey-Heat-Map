@@ -10,8 +10,19 @@ const SIZE = 132;
 const OUTER = 62;
 const INNER = 38;
 const MIN_SHARE = 0.03;
-/** Past six segments adjacent hues blur and the donut stops being readable. */
-const MAX_SLICES = 6;
+/**
+ * The palette ceiling, not a readability limit.
+ *
+ * A tighter cap looked right on paper and was wrong on screen. Türkiye's crime
+ * categories are near-equal, so capping at six folded three of eight into a
+ * `Diğer` worth 36% — larger than every real category and meaning nothing. A
+ * fold is only an improvement when the tail it hides is genuinely small, which
+ * is what the 3% floor already decides.
+ *
+ * Eight is safe rather than arbitrary: the categorical palette was validated on
+ * its *adjacent* pairs, which is exactly what a donut asks a reader to compare.
+ */
+const MAX_SLICES = 8;
 /** A 2px gap keeps neighbouring arcs from bleeding into one another. */
 const GAP_RADIANS = 2 / OUTER;
 

@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
-import type { CrimeCategory, CrimeRecord } from '@/core/types/index.js';
+import type { CrimeCategory, CrimeRecord, RegionPopulation } from '@/core/types/index.js';
 import { HeatMapProvider } from '@/context/HeatMapProvider.js';
 import { createHeatMapStore, type HeatMapState } from '@/context/HeatMapStore.js';
 import { createHoverStore } from '@/context/HoverStore.js';
@@ -162,5 +162,61 @@ describe('useAggregates', () => {
     );
     expect(result.current.rollup.total).toBe(0);
     expect(() => result.current.scale(0)).not.toThrow();
+  });
+});
+
+const POPULATION: RegionPopulation[] = [
+  { ilCode: '34', ilceCode: '3401', year: 2020, population: 1_000_000 },
+  { ilCode: '06', ilceCode: '0601', year: 2020, population: 500_000 },
+  { ilCode: '34', ilceCode: '3401', year: 2021, population: 1_000_000 },
+  { ilCode: '06', ilceCode: '0601', year: 2021, population: 500_000 },
+];
+
+describe('useAggregates — per-capita metric', () => {
+  it('leaves totals alone while the metric is total', () => {
+    const { wrapper } = setup();
+    const { result } = renderHook(
+      () => useAggregates({ ...INPUT, population: POPULATION }),
+      { wrapper },
+    );
+    expect(result.current.rollup.byRegion.get('34')?.total).toBe(110);
+  });
+
+  it('restates totals as a rate once the metric is per-capita', () => {
+    const { wrapper } = setup({ ...base, metric: 'perCapita' });
+    const { result } = renderHook(
+      () => useAggregates({ ...INPUT, population: POPULATION }),
+      { wrapper },
+    );
+    // 110 per 1,000,000 residents is 11 per 100,000.
+    expect(result.current.rollup.byRegion.get('34')?.total).toBeCloseTo(11);
+  });
+
+  it('falls back to totals when per-capita is asked for with no population', () => {
+    const { wrapper } = setup({ ...base, metric: 'perCapita' });
+    const { result } = renderHook(() => useAggregates(INPUT), { wrapper });
+    expect(result.current.rollup.byRegion.get('34')?.total).toBe(110);
+  });
+
+  it('builds the colour scale from the rate, so the legend matches the map', () => {
+    const { wrapper } = setup({ ...base, metric: 'perCapita' });
+    const { result } = renderHook(
+      () => useAggregates({ ...INPUT, population: POPULATION }),
+      { wrapper },
+    );
+    expect(result.current.scale.domain.max).toBeLessThan(110);
+  });
+
+  it('reorders regions by rate, which is the whole point of the metric', () => {
+    const { wrapper } = setup({ ...base, metric: 'perCapita' });
+    const { result } = renderHook(
+      () => useAggregates({ ...INPUT, population: POPULATION }),
+      { wrapper },
+    );
+    // 110/1M = 11 per 100k; 40/500k = 8 per 100k.
+    const istanbul = result.current.rollup.byRegion.get('34')!.total;
+    const ankara = result.current.rollup.byRegion.get('06')!.total;
+    expect(istanbul).toBeCloseTo(11);
+    expect(ankara).toBeCloseTo(8);
   });
 });

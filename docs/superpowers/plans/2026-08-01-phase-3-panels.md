@@ -85,7 +85,7 @@ change. Defaults move into the store so `Sıfırla` has something to reset to.
   - `defaultFilters: FilterSet` — what `resetFilters` restores
   - `yearBounds: [number, number]` — the data's full span, for the slider's extent
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add to `src/context/HeatMapStore.test.ts`, inside the existing
 `describe('heatMapReducer')`:
@@ -162,13 +162,13 @@ const base: HeatMapState = {
 };
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/context/HeatMapStore.test.ts`
 Expected: FAIL — `defaultFilters` and `yearBounds` are not on `HeatMapState`,
 and the three new action types do not exist.
 
-- [ ] **Step 3: Extend the state and action types**
+- [x] **Step 3: Extend the state and action types**
 
 In `src/context/HeatMapStore.ts`, add to `HeatMapState`:
 
@@ -187,7 +187,7 @@ and to `HeatMapAction`:
   | { type: 'resetFilters' }
 ```
 
-- [ ] **Step 4: Implement the cases**
+- [x] **Step 4: Implement the cases**
 
 Add to the `switch` in `heatMapReducer`, before `default`:
 
@@ -216,7 +216,7 @@ Add to the `switch` in `heatMapReducer`, before `default`:
       return { ...state, filters: state.defaultFilters };
 ```
 
-- [ ] **Step 5: Seed the new state from the reconciled props**
+- [x] **Step 5: Seed the new state from the reconciled props**
 
 In `src/components/CrimeHeatMap/CrimeHeatMap.tsx`, the store is created from
 `reconciled`. Add the two new fields:
@@ -237,7 +237,7 @@ In `src/components/CrimeHeatMap/CrimeHeatMap.tsx`, the store is created from
   }));
 ```
 
-- [ ] **Step 6: Return the bounds from reconciliation**
+- [x] **Step 6: Return the bounds from reconciliation**
 
 In `src/components/CrimeHeatMap/reconcile.ts`, add to `ReconcileResult`:
 
@@ -256,7 +256,7 @@ and return it — `dataMin` and `dataMax` are already computed:
   };
 ```
 
-- [ ] **Step 7: Cover the new field**
+- [x] **Step 7: Cover the new field**
 
 Add to `src/components/CrimeHeatMap/reconcile.test.ts`:
 
@@ -279,7 +279,7 @@ describe('reconcileProps — year bounds', () => {
 });
 ```
 
-- [ ] **Step 8: Run everything and commit**
+- [x] **Step 8: Run everything and commit**
 
 ```bash
 npx vitest run src/context src/components/CrimeHeatMap
@@ -315,7 +315,7 @@ panel invents its own.
   - `Chip` — `(props: { label: string; selected: boolean; onToggle: () => void; color?: string | undefined; count?: string | undefined; highlighted?: boolean | undefined }) => JSX.Element`
   - `IconButton` — `(props: { label: string; onClick: () => void; children: ReactNode; pressed?: boolean | undefined; className?: string | undefined }) => JSX.Element`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/components/primitives/Chip.test.tsx`:
 
@@ -409,12 +409,12 @@ describe('IconButton', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/components/primitives`
 Expected: FAIL — modules not found.
 
-- [ ] **Step 3: Implement `Chip`**
+- [x] **Step 3: Implement `Chip`**
 
 `src/components/primitives/Chip.module.css`:
 
@@ -504,7 +504,7 @@ export function Chip({ label, selected, onToggle, color, count, highlighted }: C
 }
 ```
 
-- [ ] **Step 4: Implement `IconButton`**
+- [x] **Step 4: Implement `IconButton`**
 
 `src/components/primitives/IconButton.module.css`:
 
@@ -574,7 +574,7 @@ export function IconButton({ label, onClick, children, pressed, className }: Ico
 }
 ```
 
-- [ ] **Step 5: Run the tests and commit**
+- [x] **Step 5: Run the tests and commit**
 
 Run: `npx vitest run src/components/primitives`
 Expected: PASS — 7 Chip tests, 5 IconButton tests, 4 GlassPanel tests.
@@ -608,7 +608,7 @@ component to handle only pointers and focus.
   - `snapToStep(value: number, min: number, step: number): number`
 - Produces (React): `RangeSlider` — `(props: { min: number; max: number; value: [number, number]; onChange: (range: [number, number]) => void; label: string; formatValue: (v: number) => string }) => JSX.Element`
 
-- [ ] **Step 1: Write the failing scale test**
+- [x] **Step 1: Write the failing scale test**
 
 Create `src/core/chart/scale.test.ts`:
 
@@ -695,12 +695,12 @@ describe('snapToStep', () => {
 });
 ```
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `npx vitest run src/core/chart/scale.test.ts`
 Expected: FAIL — cannot resolve `./scale.js`.
 
-- [ ] **Step 3: Implement the scale**
+- [x] **Step 3: Implement the scale**
 
 `src/core/chart/scale.ts`:
 
@@ -760,7 +760,7 @@ export function snapToStep(value: number, min: number, step: number): number {
 }
 ```
 
-- [ ] **Step 4: Run the scale test and check coverage**
+- [x] **Step 4: Run the scale test and check coverage**
 
 ```bash
 npx vitest run src/core/chart/scale.test.ts
@@ -769,7 +769,7 @@ npx vitest run --coverage
 
 Expected: PASS, and `scale.ts` at 100% on all four columns.
 
-- [ ] **Step 5: Write the barrel**
+- [x] **Step 5: Write the barrel**
 
 `src/core/chart/index.ts`:
 
@@ -778,7 +778,7 @@ export type { LinearScale } from './scale.js';
 export { createLinearScale, snapToStep } from './scale.js';
 ```
 
-- [ ] **Step 6: Write the failing slider test**
+- [x] **Step 6: Write the failing slider test**
 
 Create `src/components/primitives/RangeSlider.test.tsx`:
 
@@ -900,7 +900,7 @@ describe('RangeSlider', () => {
 });
 ```
 
-- [ ] **Step 7: Implement the slider**
+- [x] **Step 7: Implement the slider**
 
 `src/components/primitives/RangeSlider.module.css`:
 
@@ -1080,7 +1080,7 @@ export function RangeSlider({
 }
 ```
 
-- [ ] **Step 8: Run the tests and commit**
+- [x] **Step 8: Run the tests and commit**
 
 Run: `npx vitest run src/core/chart src/components/primitives`
 Expected: PASS — 14 scale tests, 12 slider tests, plus the earlier primitives.
@@ -1115,7 +1115,7 @@ consumer supplied population.
   };
   ```
 
-- [ ] **Step 1: Add the strings**
+- [x] **Step 1: Add the strings**
 
 In `src/i18n/types.ts`, add to `Strings`:
 
@@ -1147,7 +1147,7 @@ In `src/i18n/tr.ts`, add the matching group:
 `mergeStrings` lists its groups explicitly, so add `filters: mergeGroup('filters', overrides),`
 to `src/i18n/index.ts` — TypeScript will flag it as missing until you do.
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 Create `src/components/FilterBar/FilterBar.test.tsx`:
 
@@ -1295,12 +1295,12 @@ describe('FilterBar', () => {
 });
 ```
 
-- [ ] **Step 3: Run it to verify it fails**
+- [x] **Step 3: Run it to verify it fails**
 
 Run: `npx vitest run src/components/FilterBar`
 Expected: FAIL — module not found.
 
-- [ ] **Step 4: Implement `FilterBar`**
+- [x] **Step 4: Implement `FilterBar`**
 
 `src/components/FilterBar/FilterBar.module.css`:
 
@@ -1441,7 +1441,7 @@ export function FilterBar({
 }
 ```
 
-- [ ] **Step 5: Write the barrel**
+- [x] **Step 5: Write the barrel**
 
 `src/components/FilterBar/index.ts`:
 
@@ -1450,7 +1450,7 @@ export type { FilterBarProps } from './FilterBar.js';
 export { FilterBar } from './FilterBar.js';
 ```
 
-- [ ] **Step 6: Run the tests and commit**
+- [x] **Step 6: Run the tests and commit**
 
 ```bash
 npx vitest run src/components/FilterBar src/i18n

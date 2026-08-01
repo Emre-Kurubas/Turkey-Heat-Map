@@ -21,6 +21,10 @@
  * not intercept drags: the map stays grabbable in the gaps between panels.
  * GlassPanel re-enables pointer events for itself.
  */
+/*
+ * `auto` tracks collapse to zero when their panel is absent, so switching a
+ * panel off reflows the rest rather than leaving a hole (§7.8).
+ */
 .hm-overlay {
   position: absolute;
   inset: 0;
@@ -28,8 +32,53 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "topLeft    topCentre  topRight"
+    "left       centre     right"
+    "bottomLeft bottomCtr  bottomRight";
   gap: 12px;
   padding: 12px;
+}
+
+/*
+ * Panels are spread across the corners rather than stacked down one side.
+ * Stacking the two charts in a single row overflowed an 800px viewport and
+ * pushed the legend off the bottom of the screen.
+ */
+.hm-area-topLeft { grid-area: topLeft; align-self: start; }
+.hm-area-topCentre { grid-area: topCentre; align-self: start; justify-self: center; }
+.hm-area-topRight { grid-area: topRight; align-self: start; justify-self: end; }
+.hm-area-left { grid-area: left; align-self: start; min-height: 0; }
+.hm-area-right { grid-area: right; align-self: end; justify-self: end; }
+.hm-area-bottomLeft {
+  grid-area: bottomLeft;
+  align-self: end;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+/*
+ * Below 1024px the sidebar and charts move below the map so it keeps most of
+ * the frame (§6.1).
+ */
+@media (max-width: 1023px) {
+  .hm-overlay {
+    grid-template-columns: 1fr;
+    grid-template-areas: "topCentre" "centre" "bottomCtr";
+  }
+
+  .hm-area-topLeft,
+  .hm-area-topCentre,
+  .hm-area-topRight { grid-area: topCentre; justify-self: stretch; }
+
+  .hm-area-left,
+  .hm-area-right { grid-area: bottomCtr; justify-self: stretch; }
+}
+
+/* Below 640px only the map, search and legend remain. */
+@media (max-width: 639px) {
+  .hm-hide-compact { display: none; }
 }
 
 .hm-visually-hidden {
