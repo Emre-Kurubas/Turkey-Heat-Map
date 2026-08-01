@@ -91,24 +91,63 @@ describe('useMapZoom', () => {
     expect(result.current.transform).toEqual({ k: 1, x: 0, y: 0 });
   });
 
+  /** Attaches a real <svg> to the hook's callback ref so the wheel listener binds. */
+  function attachSvg(svgRef: (node: SVGSVGElement | null) => void): SVGSVGElement {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    document.body.appendChild(svg);
+    act(() => { svgRef(svg); });
+    return svg;
+  }
+
+  function wheel(deltaY: number): WheelEvent {
+    return new WheelEvent('wheel', {
+      deltaY, clientX: 200, clientY: 150, bubbles: true, cancelable: true,
+    });
+  }
+
   it('zooms toward the pointer on wheel', () => {
     const { wrapper } = setup();
     const { result } = renderHook(() => useMapZoom(VIEWPORT), { wrapper });
+    const svg = attachSvg(result.current.svgRef);
 
-    act(() => {
-      result.current.handlers.onWheel(pointer({ deltaY: -100, clientX: 200, clientY: 150 }));
-    });
+    act(() => { svg.dispatchEvent(wheel(-100)); });
     expect(result.current.transform.k).toBeGreaterThan(1);
   });
 
   it('zooms out on a downward wheel', () => {
     const { wrapper } = setup({ ...base, transform: { k: 4, x: -100, y: -100 } });
     const { result } = renderHook(() => useMapZoom(VIEWPORT), { wrapper });
+    const svg = attachSvg(result.current.svgRef);
 
-    act(() => {
-      result.current.handlers.onWheel(pointer({ deltaY: 100, clientX: 200, clientY: 150 }));
-    });
+    act(() => { svg.dispatchEvent(wheel(100)); });
     expect(result.current.transform.k).toBeLessThan(4);
+  });
+
+  /**
+   * React registers wheel listeners as passive, so an `onWheel` prop cannot
+   * cancel the page scroll — the map would zoom while the host page scrolled
+   * underneath. The listener must be bound non-passively for this to hold.
+   */
+  it('cancels the default so the host page does not scroll while zooming', () => {
+    const { wrapper } = setup();
+    const { result } = renderHook(() => useMapZoom(VIEWPORT), { wrapper });
+    const svg = attachSvg(result.current.svgRef);
+
+    const event = wheel(-100);
+    act(() => { svg.dispatchEvent(event); });
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('detaches the wheel listener when the node goes away', () => {
+    const { wrapper } = setup();
+    const { result } = renderHook(() => useMapZoom(VIEWPORT), { wrapper });
+    const svg = attachSvg(result.current.svgRef);
+
+    act(() => { result.current.svgRef(null); });
+    const event = wheel(-100);
+    act(() => { svg.dispatchEvent(event); });
+    expect(event.defaultPrevented).toBe(false);
+    expect(result.current.transform.k).toBe(1);
   });
 
   it('pans on pointer drag', () => {

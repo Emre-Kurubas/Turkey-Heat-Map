@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef } from 'react';
-import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { deriveLevel, panBy, zoomAt } from '@/core/geo/index.js';
 import type { GeoLevel, Transform, Viewport } from '@/core/types/index.js';
 import { LEVEL_HYSTERESIS, LEVEL_THRESHOLD } from '@/data/geo/index.js';
@@ -10,7 +10,6 @@ const WHEEL_STEP = 1.2;
 const BUTTON_STEP = 1.5;
 
 export interface MapZoomHandlers {
-  onWheel: (event: ReactWheelEvent<SVGSVGElement>) => void;
   onPointerDown: (event: ReactPointerEvent<SVGSVGElement>) => void;
   onPointerMove: (event: ReactPointerEvent<SVGSVGElement>) => void;
   onPointerUp: (event: ReactPointerEvent<SVGSVGElement>) => void;
@@ -20,6 +19,11 @@ export interface MapZoom {
   transform: Transform;
   level: GeoLevel;
   handlers: MapZoomHandlers;
+  /**
+   * Callback ref for the `<svg>`. Carries the wheel listener, which cannot go
+   * through React's `onWheel`.
+   */
+  svgRef: (node: SVGSVGElement | null) => void;
   zoomIn: () => void;
   zoomOut: () => void;
   reset: () => void;
@@ -54,12 +58,29 @@ export function useMapZoom(viewport: Viewport): MapZoom {
     });
   }, [dispatch, viewport]);
 
-  const onWheel = useCallback((event: ReactWheelEvent<SVGSVGElement>) => {
-    event.preventDefault();
-    const rect = event.currentTarget.getBoundingClientRect();
-    const factor = event.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
-    applyZoom(factor, [event.clientX - rect.left, event.clientY - rect.top]);
-  }, [applyZoom]);
+  /*
+   * Wheel is bound imperatively, not through React's `onWheel`.
+   *
+   * React registers wheel listeners as passive, so `preventDefault()` inside a
+   * JSX handler is ignored and logs a console error — the map would zoom while
+   * the host page also scrolled underneath it. Only an explicitly non-passive
+   * listener can cancel the default, and that requires the DOM node.
+   */
+  const [svgNode, setSvgNode] = useState<SVGSVGElement | null>(null);
+
+  useEffect(() => {
+    if (svgNode === null) return;
+
+    const onWheel = (event: WheelEvent): void => {
+      event.preventDefault();
+      const rect = svgNode.getBoundingClientRect();
+      const factor = event.deltaY < 0 ? WHEEL_STEP : 1 / WHEEL_STEP;
+      applyZoom(factor, [event.clientX - rect.left, event.clientY - rect.top]);
+    };
+
+    svgNode.addEventListener('wheel', onWheel, { passive: false });
+    return () => { svgNode.removeEventListener('wheel', onWheel); };
+  }, [svgNode, applyZoom]);
 
   const onPointerDown = useCallback((event: ReactPointerEvent<SVGSVGElement>) => {
     if (event.button !== 0) return;
@@ -99,7 +120,8 @@ export function useMapZoom(viewport: Viewport): MapZoom {
   return {
     transform,
     level,
-    handlers: { onWheel, onPointerDown, onPointerMove, onPointerUp },
+    handlers: { onPointerDown, onPointerMove, onPointerUp },
+    svgRef: setSvgNode,
     zoomIn,
     zoomOut,
     reset,

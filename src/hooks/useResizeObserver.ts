@@ -1,4 +1,4 @@
-import { type RefObject, useEffect, useRef, useState } from 'react';
+import { type MutableRefObject, useEffect, useRef, useState } from 'react';
 import type { Viewport } from '@/core/types/index.js';
 
 const UNMEASURED: Viewport = { width: 0, height: 0 };
@@ -15,7 +15,9 @@ const UNMEASURED: Viewport = { width: 0, height: 0 };
  * projection and re-run the blur filter for no visible benefit.
  */
 export function useResizeObserver<T extends Element>(): [
-  RefObject<T | null>,
+  // MutableRefObject, not RefObject: a read-only RefObject<T | null> is not
+  // assignable to React's `ref` prop, which expects to be able to write to it.
+  MutableRefObject<T | null>,
   Viewport,
 ] {
   const ref = useRef<T | null>(null);
