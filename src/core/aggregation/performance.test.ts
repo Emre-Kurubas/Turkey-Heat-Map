@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { generateMockData } from '@/data/mock/index.js';
 import { getLevelRegionMeta } from '@/data/geo/index.js';
-import { IL_BY_CODE } from '@/data/geo/region-meta.js';
+import { IL_BY_CODE } from '@/core/geo/index.js';
 import type { CrimeCategory, CrimeRecord, FilterSet } from '@/core/types/index.js';
 import { buildIndex, diffRollups, rankRegions, rollup } from './index.js';
 

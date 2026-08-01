@@ -1,7 +1,6 @@
 import type { Topology } from 'topojson-specification';
-import { decodeTopology } from '@/core/geo/index.js';
+import { IL_BY_CODE, decodeTopology, ilCodeFromIlceCode } from '@/core/geo/index.js';
 import type { GeoLevel, RegionMeta } from '@/core/types/index.js';
-import { IL_BY_CODE, ilCodeFromIlceCode } from './region-meta.js';
 import ilTopology from './turkiye-il.topo.json';
 import ilceNames from './turkiye-ilce.names.json';
 

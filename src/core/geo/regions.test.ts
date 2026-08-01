@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { foldTurkish } from '@/core/search/normalize.js';
-import { IL_BY_CODE, IL_REGIONS, ilCodeFromIlceCode, isValidIlCode } from './region-meta.js';
+import { IL_BY_CODE, IL_REGIONS, ilCodeFromIlceCode, isValidIlCode } from './regions.js';
 
 describe('IL_REGIONS', () => {
   it('contains exactly 81 provinces', () => {

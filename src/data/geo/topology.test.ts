@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { IL_BY_CODE, ilCodeFromIlceCode } from './region-meta.js';
+import { IL_BY_CODE, ilCodeFromIlceCode } from '@/core/geo/index.js';
 import {
   LEVEL_HYSTERESIS, LEVEL_THRESHOLD, LEVELS,
   getLevelRegionMeta, loadLevelFeatures, peekLevelFeatures,

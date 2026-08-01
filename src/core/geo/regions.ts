@@ -1,5 +1,20 @@
 import type { RegionMeta } from '@/core/types/index.js';
 
+/*
+ * The 81 provinces, and the rules for reading a Turkish administrative code.
+ *
+ * In `core/` rather than in `data/` because `core/` needs it: the record
+ * validator has to know a real plaka code from a typo, and `deriveRegionMeta`
+ * has to know that a district's parent is its first two digits. Those are the
+ * country's own numbering rules, as fixed as the projection `core/geo` already
+ * carries — not geometry that happens to be bundled.
+ *
+ * It sat in `data/` and left the two layers pointing at each other: `core`
+ * reached down for these helpers while `data/geo` reached up for
+ * `decodeTopology`. Nothing was circular at file level, but the direction of
+ * the dependency was no longer a fact anyone could state.
+ */
+
 /** Province name by official plaka code. Reference data; do not reorder. */
 const IL_NAMES: Readonly<Record<string, string>> = {
   '01': 'Adana',        '02': 'Adıyaman',      '03': 'Afyonkarahisar', '04': 'Ağrı',

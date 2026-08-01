@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { buildSearchIndex, type SearchEntity } from '@/core/search/index.js';
 import type { CrimeCategory } from '@/core/types/index.js';
-import { IL_REGIONS, getLevelRegionMeta } from '@/data/geo/index.js';
+import { IL_REGIONS } from '@/core/geo/index.js';
+import { getLevelRegionMeta } from '@/data/geo/index.js';
 
 /**
  * The flat entity list the search bar matches against.

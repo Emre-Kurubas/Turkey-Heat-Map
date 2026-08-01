@@ -2,6 +2,9 @@ export type { ProjectionOptions } from './projection.js';
 export { createPathGenerator, createTurkeyProjection } from './projection.js';
 export type { MapFit } from './projection.js';
 export { decodeTopology, deriveRegionMeta, regionNameMap } from './topology.js';
+export {
+  IL_BY_CODE, IL_REGIONS, ilCodeFromIlceCode, isValidIlCode,
+} from './regions.js';
 export type { FitOptions } from './bounds.js';
 export { collectBounds, computeFitTransform, featureBounds, featureCentroid } from './bounds.js';
 export { cullFeatures, isVisible } from './viewport.js';

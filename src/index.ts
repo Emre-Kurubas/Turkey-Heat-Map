@@ -38,9 +38,10 @@ export {
 // Geo
 export type { FitOptions, MapFit, ProjectionOptions } from './core/geo/index.js';
 export {
-  collectBounds, computeFitTransform, createPathGenerator, createTurkeyProjection,
-  cullFeatures, decodeTopology, deriveRegionMeta, featureBounds, featureCentroid,
-  isVisible, regionNameMap,
+  IL_BY_CODE, IL_REGIONS, collectBounds, computeFitTransform, createPathGenerator,
+  createTurkeyProjection, cullFeatures, decodeTopology, deriveRegionMeta,
+  featureBounds, featureCentroid, ilCodeFromIlceCode, isValidIlCode, isVisible,
+  regionNameMap,
 } from './core/geo/index.js';
 
 // Search
@@ -58,10 +59,6 @@ export {
   formatTrDecimal, formatTrNumber, formatYearRange,
 } from './core/format/index.js';
 
-// Region metadata
-export {
-  IL_BY_CODE, IL_REGIONS, ilCodeFromIlceCode, isValidIlCode,
-} from './data/geo/region-meta.js';
 
 // Mock data — demo only, describes nothing real
 export type { MockDataOptions, MockDataset } from './data/mock/index.js';

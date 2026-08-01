@@ -1,8 +1,7 @@
 import type { CrimeCategory, CrimeRecord, RegionPopulation } from '@/core/types/index.js';
-import { IL_REGIONS } from '@/data/geo/region-meta.js';
-// Imported from the module, not the barrel: the barrel re-exports region-meta
-// too, and going through it would make data/geo and data/mock mutually
-// reachable at load time.
+import { IL_REGIONS } from '@/core/geo/index.js';
+// From the module rather than the barrel: the barrel also pulls in the province
+// topology, and the generator has no use for geometry.
 import { getLevelRegionMeta } from '@/data/geo/topology.js';
 import { MOCK_CATEGORIES } from './categories.js';
 import { createPrng } from './prng.js';

@@ -1,7 +1,7 @@
 import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 import type { RegionMeta } from '@/core/types/index.js';
-import { ilCodeFromIlceCode } from '@/data/geo/region-meta.js';
+import { ilCodeFromIlceCode } from './regions.js';
 
 const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
 

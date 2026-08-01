@@ -16,7 +16,7 @@ import { resolve } from 'node:path';
 import process from 'node:process';
 import { compareTurkish } from '../src/core/search/collate.js';
 import { foldTurkish } from '../src/core/search/normalize.js';
-import { IL_BY_CODE, IL_REGIONS } from '../src/data/geo/region-meta.js';
+import { IL_BY_CODE, IL_REGIONS } from '../src/core/geo/regions.js';
 import {
   bboxOf, pointInPolygons, polygonsOf, representativePoint,
   type PolygonRings, type Position,

@@ -1,4 +1,4 @@
-import { ilCodeFromIlceCode, isValidIlCode } from '@/data/geo/region-meta.js';
+import { ilCodeFromIlceCode, isValidIlCode } from '@/core/geo/index.js';
 import type {
   CrimeCategory, CrimeRecord, DataWarning, DataWarningCode, NormalizedRecord,
 } from '@/core/types/index.js';

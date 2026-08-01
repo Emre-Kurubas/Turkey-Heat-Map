@@ -5,7 +5,8 @@ import {
 } from '@/core/aggregation/index.js';
 import { compareTurkish } from '@/core/search/index.js';
 import type { CrimeCategory, FilterSet, GeoLevel } from '@/core/types/index.js';
-import { getLevelRegionMeta, ilCodeFromIlceCode } from '@/data/geo/index.js';
+import { ilCodeFromIlceCode } from '@/core/geo/index.js';
+import { getLevelRegionMeta } from '@/data/geo/index.js';
 
 export interface DetailCategory {
   id: string;

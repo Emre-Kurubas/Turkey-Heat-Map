@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildIndex } from '@/core/aggregation/index.js';
-import { ilCodeFromIlceCode } from '@/data/geo/region-meta.js';
+import { ilCodeFromIlceCode } from '@/core/geo/index.js';
 import { getLevelRegionMeta } from '@/data/geo/topology.js';
 import { MOCK_CATEGORIES } from './categories.js';
 import { generateMockData } from './generate.js';

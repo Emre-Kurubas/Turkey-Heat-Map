@@ -19,7 +19,7 @@ import { topology } from 'topojson-server';
 import {
   filter, filterAttachedWeight, planarRingArea, presimplify, simplify,
 } from 'topojson-simplify';
-import { IL_BY_CODE, ilCodeFromIlceCode, isValidIlCode } from '../src/data/geo/region-meta.js';
+import { IL_BY_CODE, ilCodeFromIlceCode, isValidIlCode } from '../src/core/geo/regions.js';
 import { rewindGeometry } from './geo/planar.js';
 
 export type GeoLevelName = 'il' | 'ilce';
