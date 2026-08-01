@@ -1,5 +1,5 @@
 import { categoryColor } from '@/core/chart/index.js';
-import { formatPercent, formatTrNumber } from '@/core/format/index.js';
+import { formatTrNumber } from '@/core/format/index.js';
 import type { CrimeCategory } from '@/core/types/index.js';
 import { useStrings } from '@/hooks/useHeatMapState.js';
 import type { DetailCategory } from '@/hooks/useRegionDetail.js';
@@ -14,8 +14,13 @@ export interface RegionCategoryListProps {
 /**
  * The region's categories as a table.
  *
- * A table rather than a list because it is three aligned columns of numbers,
- * and because it doubles as the accessible equivalent of the donut beside it.
+ * A table rather than a list because it is aligned columns of numbers, and
+ * because it doubles as the accessible equivalent of the donut beside it.
+ *
+ * No share column. It sits next to a donut of exactly these values, which is
+ * the proportion drawn rather than written — and the 42px it took were coming
+ * out of the label, which is the column a reader actually needs whole. Half a
+ * category name and an exact percentage is the wrong trade.
  */
 export function RegionCategoryList({ categories, order }: RegionCategoryListProps) {
   const strings = useStrings();
@@ -28,8 +33,13 @@ export function RegionCategoryList({ categories, order }: RegionCategoryListProp
   ]));
 
   return (
-    <table className={styles.table}>
-      <caption className={styles.tableCaption}>{strings.detail.categories}</caption>
+    <table className={styles.table} data-role="category-table">
+      {/*
+        Hidden, not deleted. The section above the table already carries this
+        heading, so on the page it was the same three words twice in a row —
+        but a table still needs an accessible name, and this is it.
+      */}
+      <caption className="hm-visually-hidden">{strings.detail.categories}</caption>
       <tbody>
         {categories.map((category) => (
           <tr key={category.id} className={styles.row}>
@@ -42,7 +52,6 @@ export function RegionCategoryList({ categories, order }: RegionCategoryListProp
             </td>
             <th scope="row" className={styles.rowLabel}>{category.label}</th>
             <td className={styles.rowValue}>{formatTrNumber(category.value)}</td>
-            <td className={styles.rowShare}>{formatPercent(category.share)}</td>
           </tr>
         ))}
       </tbody>

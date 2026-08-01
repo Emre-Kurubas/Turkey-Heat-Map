@@ -7,7 +7,11 @@ import type { CrimeCategory } from '@/core/types/index.js';
 import { useStrings } from '@/hooks/useHeatMapState.js';
 import type { RegionDetailData } from '@/hooks/useRegionDetail.js';
 import { RegionCategoryList } from './RegionCategoryList.js';
+import { RegionChildList } from './RegionChildList.js';
 import styles from './RegionDetail.module.css';
+
+/** How many districts a province's panel lists. */
+const TOP_CHILDREN = 10;
 
 export interface RegionDetailProps {
   detail: RegionDetailData;
@@ -35,6 +39,7 @@ export function RegionDetail({ detail, categories, onClose }: RegionDetailProps)
   );
 
   const isEmpty = detail.total === 0;
+  const isProvince = detail.level === 'il';
 
   return (
     <div
@@ -46,15 +51,19 @@ export function RegionDetail({ detail, categories, onClose }: RegionDetailProps)
       className={styles.panel}
       onKeyDown={onKeyDown}
     >
+      {/*
+        Place and size on one line, exactly as the rail states the country and
+        its total. Drilling into a region should change the numbers, not the
+        shape they are written in.
+
+        The "Toplam" label is kept for screen readers only: on the page the
+        number sits beside a place name on a crime map and needs no introduction,
+        but read aloud on its own it would be a bare figure.
+      */}
       <header className={styles.header}>
-        <div className={styles.identity}>
-          <h2 className={styles.name}>{detail.name}</h2>
-          <span className={styles.level}>
-            {detail.level === 'il' ? strings.detail.levelIl : strings.detail.levelIlce}
-          </span>
-        </div>
-        <p className={styles.total}>
-          <span className={styles.totalLabel}>{strings.detail.total}</span>
+        <h2 className={styles.name}>{detail.name}</h2>
+        <p className={styles.total} data-role="scope-total">
+          <span className="hm-visually-hidden">{strings.detail.total}</span>
           <span className={styles.totalValue}>{formatTrNumber(detail.total)}</span>
         </p>
         <button
@@ -70,19 +79,68 @@ export function RegionDetail({ detail, categories, onClose }: RegionDetailProps)
       {isEmpty ? (
         <p className={styles.empty}>{strings.detail.empty}</p>
       ) : (
+        /*
+         * The year series first, as in the left rail, then whatever the level
+         * has underneath it.
+         *
+         * A province gets two more bands, because its list and its donut are
+         * different cuts: districts below it, categories across it. A district
+         * gets one, because its list and its donut are the *same* cut — the
+         * donut is the shape of the table and the table is the numbers behind
+         * the donut. Ruling a line between them would be separating a drawing
+         * from its own key.
+         */
         <div className={styles.body}>
-          <div className={styles.listColumn}>
-            <RegionCategoryList categories={detail.categories} order={categories} />
+          {/* Each band wrapped, exactly as in the left rail: the divider has to
+              live on a plain element, because a flat GlassPanel's `border: 0`
+              sits at the same specificity and would cancel it. */}
+          <div className={styles.band}>
+            <TrendChart embedded byYear={detail.byYear} />
           </div>
-          <CategoryPieChart
-            categories={categories}
-            totals={totals}
-            regionName={detail.name}
-            onHoverCategory={() => {}}
-            // The table on the left already lists every category and number.
-            showLegend={false}
-          />
-          <TrendChart byYear={detail.byYear} />
+
+          {/* Holds room for ten rows however few it draws, which is what keeps
+              the panel the same height from one region to the next. */}
+          <div className={`${styles.band} ${styles.listBand}`}>
+            <section className={styles.section}>
+              <h3 className={styles.sectionTitle}>
+                {isProvince ? strings.detail.districts : strings.detail.categories}
+              </h3>
+              {isProvince ? (
+                <RegionChildList districts={detail.children.slice(0, TOP_CHILDREN)} />
+              ) : (
+                <div className={styles.pairing} data-role="category-pairing">
+                  {/* Drawing on the left, its numbers on the right. */}
+                  <CategoryPieChart
+                    embedded
+                    categories={categories}
+                    totals={totals}
+                    regionName={detail.name}
+                    onHoverCategory={() => {}}
+                    // The table beside it is the key, and a better one: it lists
+                    // every category rather than folding the small ones into
+                    // "Diğer".
+                    showLegend={false}
+                  />
+                  <RegionCategoryList categories={detail.categories} order={categories} />
+                </div>
+              )}
+            </section>
+          </div>
+
+          {isProvince ? (
+            <div className={styles.band}>
+              {/* Embedded: a bordered card inside a bordered panel reads as a
+                  rendering fault, not as depth. */}
+              <CategoryPieChart
+                embedded
+                legendPlacement="beside"
+                categories={categories}
+                totals={totals}
+                regionName={detail.name}
+                onHoverCategory={() => {}}
+              />
+            </div>
+          ) : null}
         </div>
       )}
     </div>

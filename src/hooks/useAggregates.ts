@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import {
-  buildIndex, buildPopulationIndex, rollup, toPerCapita,
+  buildIndex, buildPopulationIndex, rollup, toPerCapita, totalsByYear,
   type CrimeIndex, type RollupResult,
 } from '@/core/aggregation/index.js';
 import {
@@ -43,6 +43,13 @@ export interface AggregateResult {
   heatLevel: GeoLevel;
   /** Region code → display name at the outline level. */
   names: ReadonlyMap<string, string>;
+  /**
+   * Total per year across the whole data span, with the category filter applied
+   * and the year filter deliberately not. What the trend chart plots — see
+   * `totalsByYear` for why a year selector cannot be filtered by its own
+   * selection.
+   */
+  byYearAll: ReadonlyMap<number, number>;
 }
 
 function namesFor(level: GeoLevel): ReadonlyMap<string, string> {
@@ -110,5 +117,10 @@ export function useAggregates(input: AggregatesInput): AggregateResult {
     [ratedHeat, scaleMode, colorScale],
   );
 
-  return { index, rollup: rated, heatRollup: ratedHeat, scale, heatLevel, names };
+  const byYearAll = useMemo(
+    () => totalsByYear(index, { categories: filters.categories }),
+    [index, filters.categories],
+  );
+
+  return { index, rollup: rated, heatRollup: ratedHeat, scale, heatLevel, names, byYearAll };
 }

@@ -28,6 +28,7 @@ const base: HeatMapState = {
   defaultFilters: { yearRange: [2020, 2021], categories: [] },
   yearBounds: [2020, 2021],
   flyToRequest: null,
+  viewResetRequest: 0,
   detail: null,
   metric: 'total',
   scaleMode: 'quantile',

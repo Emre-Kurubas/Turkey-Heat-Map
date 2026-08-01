@@ -1,4 +1,17 @@
-.wrapper { display: grid; gap: 4px; }
+/*
+ * The accent the fill, the dividers and the handles share. Left as a local
+ * variable with a fallback rather than a theme token: it is this control's
+ * business what colour it draws its selection in, and a caller that wants to
+ * tie it to something — the year range takes the trend chart's cyan, because
+ * both are about the same years — sets it on the wrapper.
+ */
+.wrapper {
+  display: grid;
+  gap: 4px;
+  /* The handle knobs sit above the track; this is the room they need. */
+  padding-top: 5px;
+  --accent: var(--slider-fill, var(--hm-fg));
+}
 
 .readout {
   display: flex;
@@ -8,38 +21,158 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * A pill, not a hairline. The whole 24px is the click target, and a band deep
+ * enough to hold a gradient is what lets the selection read as a filled span
+ * of the scale rather than as a line between two dots.
+ */
 .track {
   position: relative;
-  height: 20px;
+  height: 24px;
   cursor: pointer;
+  /* Without this the browser claims the gesture for scrolling and the drag
+     never reaches the handler on a touch screen. */
   touch-action: none;
 }
 
-.rail,
+/* The pill itself, and the only element that clips. */
+.groove {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+  pointer-events: none;
+}
+
+/*
+ * Square-edged, and rounded only by the groove clipping it.
+ *
+ * Between the ends that means a flat vertical edge flush against each handle
+ * stem; at an end it means the fill takes the pill's own cap, which is what
+ * lets a full selection fill the bar edge to edge. Rounding the fill itself
+ * would instead put a curve mid-bar wherever a handle happens to sit.
+ *
+ * The gradient is the reference design's own idea and a good one: it runs from
+ * nearly nothing at the low end to full accent at the high end, so the bar
+ * carries a direction as well as an extent. The flat colour underneath it is
+ * what a browser without `color-mix` falls back to.
+ */
 .fill {
   position: absolute;
-  top: 9px;
-  height: 3px;
-  border-radius: 2px;
+  top: 0;
+  bottom: 0;
+  background: var(--accent);
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--accent) 14%, white),
+    var(--accent)
+  );
 }
 
-.rail { left: 0; right: 0; background: rgba(15, 23, 42, 0.12); }
-.fill { background: var(--hm-fg); opacity: 0.7; }
+/*
+ * One divider per step, over both the empty track and the fill, so the scale
+ * is legible either side of a handle. This is what makes the control read as a
+ * row of years rather than as a continuous 0–100 bar.
+ */
+.tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: rgba(255, 255, 255, 0.85);
+}
 
+/* Over the fill the divider needs less contrast to separate the segments. */
+.tick[data-inside='true'] { background: rgba(255, 255, 255, 0.5); }
+
+/*
+ * The stem: the selection boundary, marked down the depth of the track rather
+ * than at one point, so you can see exactly which segment a handle closes.
+ *
+ * It is a child of the groove, not of the button, which is what makes it clip
+ * to the pill. At either end the cap curves away and the stem shortens with it
+ * instead of standing proud of a rounded edge.
+ */
+.stem {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+/*
+ * The knob is what you reach for, and it sits proud of the track so it never
+ * disappears into the fill behind it — so it stays on the button, outside the
+ * clip that shortens the stem.
+ *
+ * The button itself is a transparent 18px column: far wider than anything it
+ * draws, because the drawn width is not a hit target.
+ */
 .handle {
   position: absolute;
-  top: 3px;
-  width: 14px;
-  height: 14px;
-  margin-left: -7px;
+  top: -5px;
+  height: calc(100% + 5px);
+  width: 18px;
+  margin-left: -9px;
   padding: 0;
-  border-radius: 50%;
-  border: 2px solid var(--hm-map-bg);
-  background: var(--hm-fg);
+  border: 0;
+  background: transparent;
   cursor: grab;
+  touch-action: none;
 }
 
-.handle:focus-visible {
+
+.handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 11px;
+  height: 11px;
+  margin-left: -5.5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+  /*
+   * Only the knob reacts. Position is deliberately not transitioned: the handle
+   * has to sit under the cursor on the frame the pointer moves, and easing it
+   * there would make a drag feel like it is lagging behind the hand.
+   */
+  transition: transform var(--hm-motion-hover) var(--hm-ease-hover);
+}
+
+.handle:hover::after { transform: scale(1.15); }
+
+.handle[data-dragging='true'] { cursor: grabbing; }
+.handle[data-dragging='true']::after { transform: scale(1.25); }
+
+.handle:focus-visible { outline: none; }
+.handle:focus-visible::after {
   outline: 2px solid var(--hm-focus-ring);
   outline-offset: 2px;
 }
+
+/*
+ * The scale, positioned against the track rather than spread evenly — a label
+ * has to sit under the step it names, and the two are only the same thing when
+ * every step is labelled.
+ */
+.scale {
+  position: relative;
+  height: 13px;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--hm-fg-muted);
+}
+
+.scaleLabel { position: absolute; top: 0; white-space: nowrap; }
+
+/* Inside the selection, so the scale reports the range as well as the fill. */
+.scaleLabel[data-inside='true'] { color: var(--hm-fg); font-weight: 600; }

@@ -11,6 +11,7 @@ import './base.css';
  */
 export const THEME_TOKEN_NAMES = [
   '--hm-glass-bg',
+  '--hm-glass-bg-strong',
   '--hm-glass-bg-solid',
   '--hm-glass-border',
   '--hm-glass-blur',
@@ -27,6 +28,10 @@ export const THEME_TOKEN_NAMES = [
   '--hm-fg',
   '--hm-fg-muted',
   '--hm-ink-inverse',
+  '--hm-chart-line',
+  '--hm-chart-axis',
+  '--hm-chart-grid',
+  '--hm-chart-marker-fill',
   '--hm-motion-hover',
   '--hm-motion-panel',
   '--hm-motion-color',

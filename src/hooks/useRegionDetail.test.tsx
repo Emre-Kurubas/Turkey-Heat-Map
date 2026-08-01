@@ -112,3 +112,64 @@ describe('useRegionDetail', () => {
     expect(result.current).toBe(before);
   });
 });
+
+describe('useRegionDetail — the districts inside a province', () => {
+  function children(code: string, filters: FilterSet = FILTERS) {
+    const { result } = renderHook(
+      () => useRegionDetail(index, CATEGORIES, filters, { code, level: 'il' }),
+    );
+    return result.current?.children ?? [];
+  }
+
+  it('ranks them biggest first', () => {
+    const rows = children('34');
+    expect(rows.map((row) => row.code)).toEqual(['3401', '3402']);
+    expect(rows.map((row) => row.total)).toEqual([160, 40]);
+  });
+
+  it('names them from the shipped geography', () => {
+    expect(children('34')[0]?.name).toBe('Adalar');
+  });
+
+  it('shares them against the province, not the country', () => {
+    // 160 of İstanbul's 200, not 160 of the national 210. A national
+    // denominator would print a share that answers a question nobody asked.
+    const rows = children('34');
+    expect(rows[0]?.share).toBeCloseTo(0.8, 5);
+    expect(rows[1]?.share).toBeCloseTo(0.2, 5);
+  });
+
+  it('sums its shares to one', () => {
+    const total = children('34').reduce((sum, row) => sum + row.share, 0);
+    expect(total).toBeCloseTo(1, 5);
+  });
+
+  it('excludes districts of every other province', () => {
+    // '0601' belongs to Ankara and shares no prefix with '34'.
+    expect(children('34').some((row) => row.code === '0601')).toBe(false);
+  });
+
+  it('respects the active filters', () => {
+    const rows = children('34', { yearRange: [2020, 2020], categories: [] });
+    expect(rows.map((row) => row.total)).toEqual([60, 40]);
+  });
+
+  it('is empty for a province whose districts are all filtered out', () => {
+    expect(children('34', { yearRange: [1999, 1999], categories: [] })).toEqual([]);
+  });
+
+  it('is empty for a province the data never mentions', () => {
+    expect(children('01')).toEqual([]);
+  });
+
+  it('is empty for a district target, which has nothing below it', () => {
+    const { result } = renderHook(
+      () => useRegionDetail(index, CATEGORIES, FILTERS, { code: '3401', level: 'ilce' }),
+    );
+    expect(result.current?.children).toEqual([]);
+  });
+
+  it('numbers the ranks from one', () => {
+    expect(children('34').map((row) => row.rank)).toEqual([1, 2]);
+  });
+});

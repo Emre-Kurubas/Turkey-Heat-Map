@@ -103,9 +103,16 @@ export function Legend({ scale, breakCount = DEFAULT_BREAKS }: LegendProps) {
         <p className={styles.empty}>{strings.legend.noData}</p>
       )}
 
-      <p className={styles.note}>
-        {strings.scaleMode[scaleMode]} · {strings.legend.scaleNote}
-      </p>
+      {/*
+        The mode, and nothing else.
+
+        The sentence that followed it explained how to read a colour ramp, which
+        is a thing you learn once and then re-read every time it is on screen.
+        The mode itself stays: a quantile map answers "how does this rank" and a
+        linear one answers "how many", and reading one as the other is a real
+        analytical error (§6.5) — so which is active is a fact, not a caption.
+      */}
+      <p className={styles.note}>{strings.scaleMode[scaleMode]}</p>
     </GlassPanel>
   );
 }

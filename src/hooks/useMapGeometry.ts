@@ -28,6 +28,15 @@ export interface MapGeometry {
   outline: readonly RenderFeature[];
   /** Codes from `outline` currently in view. */
   visibleOutline: ReadonlySet<string>;
+  /**
+   * Provinces, always, whatever the outlined level.
+   *
+   * Two callers need them at district zoom, when they are not the outline: the
+   * heat's clip path, which is the union of the country, and the boundary of
+   * the province the reader has drilled into — the one line that says where
+   * they are once the province borders are gone.
+   */
+  provinces: readonly RenderFeature[];
   /** Bounds of the outline level, for fly-to. */
   bounds: ReadonlyMap<string, BBox>;
   /** False until the container has a real size. */
@@ -40,6 +49,7 @@ const EMPTY: MapGeometry = {
   visibleHeat: EMPTY_SET,
   outline: [],
   visibleOutline: EMPTY_SET,
+  provinces: [],
   bounds: new Map(),
   ready: false,
 };
@@ -105,7 +115,11 @@ export function useMapGeometry(
     const heat = project(heatLevel);
     // Identical levels are projected once, not twice.
     const outline = outlineLevel === heatLevel ? heat : project(outlineLevel);
-    return { heat, outline };
+    // Likewise: at country zoom the provinces *are* one of the two above.
+    const provinces = outlineLevel === 'il'
+      ? outline
+      : (heatLevel === 'il' ? heat : project('il'));
+    return { heat, outline, provinces };
   }, [viewport, outlineLevel, heatLevel, fit]);
 
   const visibleHeat = useMemo(() => (
@@ -126,6 +140,7 @@ export function useMapGeometry(
       visibleHeat,
       outline: projected.outline.features,
       visibleOutline,
+      provinces: projected.provinces.features,
       bounds: projected.outline.bounds,
       ready: true,
     }

@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useId, useMemo } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef } from 'react';
+import { IDENTITY_TRANSFORM } from '@/context/HeatMapStore.js';
 import type { RollupResult } from '@/core/aggregation/index.js';
 import type { ColorScaleName, RampFn } from '@/core/color/index.js';
 import { formatTrNumber } from '@/core/format/index.js';
 import type { MapFit } from '@/core/geo/index.js';
 import type { CrimeCategory, CrimeRecord, Viewport } from '@/core/types/index.js';
 import { useAggregates } from '@/hooks/useAggregates.js';
-import { useFlyTo } from '@/hooks/useFlyTo.js';
+import { useViewAnimation } from '@/hooks/useViewAnimation.js';
 import { useHeatMapDispatch, useHeatMapState, useStrings } from '@/hooks/useHeatMapState.js';
 import { useHoverTarget } from '@/hooks/useHoverTarget.js';
 import { useMapGeometry } from '@/hooks/useMapGeometry.js';
@@ -18,15 +19,23 @@ import { MapDefs } from './MapDefs.js';
 import { SelectionLayer } from './SelectionLayer.js';
 import styles from './MapCanvas.module.css';
 
-/** Blur radius at k=1, in projected pixels. */
 /*
- * Gaussian std-dev for the heat glow, in projected pixels, divided by the zoom
- * so the softness stays constant on screen.
+ * Gaussian std-dev for the heat glow, in projected pixels — the space the paths
+ * are generated in, before the group's transform.
  *
- * Was 12, which at province scale averaged across whole districts: neighbouring
- * blues and reds blended into a flat lavender, so both the ramp's colour and
- * the district-level detail underneath it were lost. Five keeps the soft
- * heat-map read without dissolving the thing being measured.
+ * Constant, deliberately. It used to be divided by the zoom so the blur stayed
+ * the same number of *screen* pixels at every scale, which meant that zooming
+ * in sharpened the heat until districts were flat polygons with hard edges: the
+ * thing stopped looking like a heat map exactly where the detail was. Holding it
+ * in projected space instead keeps the softness proportional to the regions, so
+ * a district reads the same zoomed in as it does from the country view.
+ *
+ * It also takes the transform out of the filter's inputs entirely, so panning
+ * and zooming no longer re-run the blur at all (§6.3).
+ *
+ * Five rather than twelve: at twelve, neighbouring blues and reds blended into
+ * a flat lavender and both the ramp's colour and the district detail underneath
+ * were lost.
  */
 const BASE_BLUR = 5;
 
@@ -83,9 +92,25 @@ export function MapCanvas({
   // used regardless of the outlined level: they tile the same country with far
   // fewer path segments than the districts do.
   const clipPath = useMemo(
-    () => geometry.outline.map((feature) => feature.d).join(' '),
-    [geometry.outline],
+    () => geometry.provinces.map((feature) => feature.d).join(' '),
+    [geometry.provinces],
   );
+
+  /*
+   * The boundary of the province being explored, once districts are what is
+   * outlined.
+   *
+   * Zoomed in, nothing on the map says where one province ends any more — the
+   * province borders are gone and the district mesh looks the same either side
+   * of them. This puts the one line back that the reader still needs. It comes
+   * from the open detail panel rather than from the selection, because the
+   * selection is cleared by the level change that the drill-in itself causes.
+   */
+  const detailTarget = useHeatMapState((state) => state.detail);
+  const contextFeature = useMemo(() => {
+    if (level === 'il' || detailTarget === null || detailTarget.level !== 'il') return undefined;
+    return geometry.provinces.find((feature) => feature.code === detailTarget.code);
+  }, [level, detailTarget, geometry.provinces]);
 
   const onSelect = useCallback((code: string | null) => {
     if (code === null) {
@@ -118,7 +143,7 @@ export function MapCanvas({
   // map, which is what lets the sidebar and search bar move it without
   // importing it. The request is cleared immediately so the same region can be
   // requested again.
-  const flyTo = useFlyTo(viewport);
+  const { flyTo, glideTo } = useViewAnimation(viewport);
   const flyToRequest = useHeatMapState((state) => state.flyToRequest);
 
   useEffect(() => {
@@ -128,6 +153,23 @@ export function MapCanvas({
     if (bbox !== undefined) flyTo(bbox);
     dispatch({ type: 'clearFlyTo' });
   }, [flyToRequest, geometry.bounds, flyTo, dispatch]);
+
+  /*
+   * The same channel for the return trip: closing the detail panel asks for the
+   * whole country back, and the map flies there rather than cutting.
+   *
+   * A counter, and the previous value in a ref, rather than a nullable request
+   * that gets cleared. Clearing would take a second dispatch and a second render
+   * per reset, and there is nothing to clear — the number *is* the signal.
+   */
+  const viewResetRequest = useHeatMapState((state) => state.viewResetRequest);
+  const lastResetSeen = useRef(viewResetRequest);
+
+  useEffect(() => {
+    if (viewResetRequest === lastResetSeen.current) return;
+    lastResetSeen.current = viewResetRequest;
+    glideTo(IDENTITY_TRANSFORM);
+  }, [viewResetRequest, glideTo]);
 
   return (
     <div ref={containerRef} className={styles.container}>
@@ -145,9 +187,7 @@ export function MapCanvas({
         >
           <MapDefs
             idPrefix={idPrefix}
-            // Perceived softness must stay constant across zoom, so the radius
-            // shrinks as the group scales up (§6.3).
-            blurStdDeviation={BASE_BLUR / transform.k}
+            blurStdDeviation={BASE_BLUR}
             outlinePath={clipPath}
           />
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
@@ -177,6 +217,7 @@ export function MapCanvas({
               selectedCode={selectedCode}
               hoveredCode={hover?.code ?? null}
               focusedCode={focusedCode}
+              contextFeature={contextFeature}
             />
           </g>
         </svg>

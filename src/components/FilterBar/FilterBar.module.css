@@ -59,10 +59,127 @@
 .reset:hover { color: var(--hm-fg); background: rgba(15, 23, 42, 0.05); }
 .reset:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
 
-.section { display: grid; gap: 5px; }
+.section { display: grid; gap: 6px; }
 .sectionLabel { font-size: 12px; color: var(--hm-fg-muted); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .perCapita { justify-self: start; }
+
+/* ---- Category picker ---------------------------------------------------- */
+
+.categoryHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.selectionCount { font-size: 12px; color: var(--hm-fg-muted); }
+
+/*
+ * What is currently chosen, pinned above the search box. A selection that has
+ * scrolled out of the list — or been hidden by a query — is otherwise
+ * invisible, and the only way to undo it would be to clear everything.
+ */
+.selectedChips { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.selectedChip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border: 1px solid var(--hm-glass-border);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--hm-fg);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background var(--hm-motion-hover) var(--hm-ease-hover);
+}
+
+.selectedChip:hover { background: rgba(15, 23, 42, 0.1); }
+.selectedChip:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
+.chipSwatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.chipLabel { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.clearChips {
+  padding: 2px 7px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--hm-fg-muted);
+  font: inherit;
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.clearChips:hover { color: var(--hm-fg); }
+.clearChips:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
+
+.categorySearch {
+  width: 100%;
+  padding: 6px 9px;
+  border: 1px solid var(--hm-glass-border);
+  border-radius: 8px;
+  background: var(--hm-glass-bg-solid);
+  color: var(--hm-fg);
+  font: inherit;
+  font-size: 13px;
+}
+
+.categorySearch::placeholder { color: var(--hm-fg-muted); }
+.categorySearch:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 1px; }
+
+/*
+ * Capped in height, not in rows: the list is already cut to a readable number,
+ * and this stops a full one from pushing the per-capita toggle off the panel.
+ */
+.categoryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.categoryRow {
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--hm-fg);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--hm-motion-hover) var(--hm-ease-hover);
+}
+
+.categoryRow:hover,
+.categoryRow[data-highlighted='true'] { background: rgba(15, 23, 42, 0.06); }
+.categoryRow:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: -2px; }
+
+/* Tinted with the category's own colour, so the tick and the map agree. */
+.categoryBox {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid;
+  border-radius: 3px;
+}
+
+.categoryLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.categoryCount { font-variant-numeric: tabular-nums; color: var(--hm-fg-muted); }
+
+.noMatches { margin: 0; padding: 8px 6px; font-size: 12px; color: var(--hm-fg-muted); }
+
+/* A truncated list that says nothing reads as a complete one. */
+.moreResults { margin: 0; font-size: 11px; color: var(--hm-fg-muted); }
 
 .collapsed { padding: 0; width: auto; }
 

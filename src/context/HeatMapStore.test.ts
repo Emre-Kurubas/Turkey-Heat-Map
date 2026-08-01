@@ -12,6 +12,7 @@ const base: HeatMapState = {
   defaultFilters: DEFAULT_FILTERS,
   yearBounds: [2015, 2024],
   flyToRequest: null,
+  viewResetRequest: 0,
   detail: null,
   metric: 'total',
   scaleMode: 'quantile',
@@ -241,5 +242,41 @@ describe('region detail', () => {
   it('closes when the view is reset', () => {
     const open = heatMapReducer(base, { type: 'openDetail', code: '34', level: 'il' });
     expect(heatMapReducer(open, { type: 'resetView' }).detail).toBeNull();
+  });
+});
+
+describe('requestViewReset', () => {
+  const drilled = (): HeatMapState => ({
+    ...base,
+    transform: { k: 6, x: -800, y: -400 },
+    level: 'ilce',
+    selectedCode: '34',
+    focusedCode: '34',
+    detail: { code: '34', level: 'il' },
+  });
+
+  it('clears everything the drill-in set', () => {
+    const next = heatMapReducer(drilled(), { type: 'requestViewReset' });
+    expect(next.detail).toBeNull();
+    expect(next.selectedCode).toBeNull();
+    expect(next.focusedCode).toBeNull();
+    expect(next.flyToRequest).toBeNull();
+  });
+
+  it('leaves the transform alone, because only the map can animate it', () => {
+    const before = drilled();
+    const next = heatMapReducer(before, { type: 'requestViewReset' });
+    // `resetView` is the snapping version; this one hands the journey to
+    // MapCanvas, which eases the transform home over 600ms.
+    expect(next.transform).toBe(before.transform);
+  });
+
+  it('counts up, so two consecutive requests are both seen', () => {
+    // A boolean would collapse them: the second request would find the flag
+    // already set and the map would never hear about it.
+    const once = heatMapReducer(base, { type: 'requestViewReset' });
+    const twice = heatMapReducer(once, { type: 'requestViewReset' });
+    expect(once.viewResetRequest).toBe(base.viewResetRequest + 1);
+    expect(twice.viewResetRequest).toBe(once.viewResetRequest + 1);
   });
 });

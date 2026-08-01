@@ -30,6 +30,15 @@ export interface HeatMapState {
    * the map directly. The map clears it once the animation starts.
    */
   flyToRequest: string | null;
+  /**
+   * Bumped whenever a panel asks the map to travel back to the default view.
+   *
+   * A counter rather than a boolean, for the same reason `flyToRequest` is
+   * always a fresh object: two consecutive requests must both be seen, and the
+   * map notices by the value changing. Unlike `resetView`, this does not touch
+   * the transform — the map owns that, because only the map can animate it.
+   */
+  viewResetRequest: number;
   detail: DetailTarget | null;
   metric: MetricMode;
   scaleMode: ScaleMode;
@@ -50,6 +59,7 @@ export type HeatMapAction =
   | { type: 'clearFlyTo' }
   | { type: 'openDetail'; code: string; level: GeoLevel }
   | { type: 'closeDetail' }
+  | { type: 'requestViewReset' }
   | { type: 'resetView' };
 
 export const IDENTITY_TRANSFORM: Transform = { k: 1, x: 0, y: 0 };
@@ -133,6 +143,25 @@ export function heatMapReducer(state: HeatMapState, action: HeatMapAction): Heat
 
     case 'closeDetail':
       return state.detail === null ? state : { ...state, detail: null };
+
+    /*
+     * Everything `resetView` clears, except the transform.
+     *
+     * Closing the detail panel should leave the reader looking at the whole
+     * country again, but snapping there is disorienting — they arrived by a
+     * 600ms flight and would leave by a jump cut. So the selection goes now and
+     * the transform is left for MapCanvas to animate; the level follows the
+     * scale on its own once it lands.
+     */
+    case 'requestViewReset':
+      return {
+        ...state,
+        viewResetRequest: state.viewResetRequest + 1,
+        selectedCode: null,
+        focusedCode: null,
+        flyToRequest: null,
+        detail: null,
+      };
 
     case 'resetView':
       return {

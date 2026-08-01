@@ -6,7 +6,7 @@ describe('computeLegendBreaks', () => {
   const scale = createColorScale({
     values: [0, 100, 200, 300, 400, 500],
     mode: 'linear',
-    ramp: 'ember',
+    ramp: 'spectral',
   });
 
   it('returns the requested number of buckets', () => {
@@ -48,7 +48,7 @@ describe('computeLegendBreaks', () => {
     const skewed = createColorScale({
       values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 5000],
       mode: 'quantile',
-      ramp: 'ember',
+      ramp: 'spectral',
     });
     const breaks = computeLegendBreaks(skewed, 5);
     const widths = breaks.map((b) => b.to - b.from);
@@ -57,7 +57,7 @@ describe('computeLegendBreaks', () => {
   });
 
   it('produces a single neutral bucket when every value is identical', () => {
-    const flat = createColorScale({ values: [7, 7, 7], mode: 'linear', ramp: 'ember' });
+    const flat = createColorScale({ values: [7, 7, 7], mode: 'linear', ramp: 'spectral' });
     const breaks = computeLegendBreaks(flat, 5);
     expect(breaks).toHaveLength(1);
     expect(breaks[0]!.from).toBe(7);
@@ -66,7 +66,7 @@ describe('computeLegendBreaks', () => {
   });
 
   it('produces a single bucket for an empty dataset', () => {
-    const empty = createColorScale({ values: [], mode: 'quantile', ramp: 'ember' });
+    const empty = createColorScale({ values: [], mode: 'quantile', ramp: 'spectral' });
     expect(computeLegendBreaks(empty, 5)).toHaveLength(1);
   });
 

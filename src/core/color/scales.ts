@@ -3,42 +3,44 @@ import { type ColorDomain, createColorDomain } from './domain.js';
 import { createRamp } from './interpolate.js';
 
 export type RampFn = (t: number) => string;
-export type ColorScaleName = 'ember' | 'deepBlue';
+export type ColorScaleName = 'spectral' | 'deepBlue';
 
 /**
- * The default map ramp: blue for low, red for high, continuous in between.
+ * The default map ramp: blue for low, red for high, the spectrum in between.
  *
  * The stops are control points, not the palette. `createRamp` interpolates
- * between them in OKLab, so the map paints every tone along the path — the
- * nine values below are just where the curve is pinned.
+ * between them in OKLab, so the map paints every tone along the path — the ten
+ * values below are just where the curve is pinned.
  *
- * Three things make a blue→red ramp work rather than turn to mud. The hue path
- * runs 264° → 392° through violet and magenta, never through grey or olive,
- * which is where two-hue ramps usually die. Lightness falls the whole way,
- * 0.682 → 0.057, so magnitude still reads if hue does not: the ramp survives
- * greyscale printing and red-green colour blindness even though it is built
- * from exactly the two hues that confusion affects.
+ * This is a spectral ramp, and that is a deliberate trade. A single-hue ramp
+ * orders itself by lightness alone, which no reader has to be taught; a
+ * spectral one does not, so the legend carries more of the load. What it buys
+ * is that adjacent levels are far easier to tell apart — on a country of 81
+ * provinces where most values crowd the low end, hue separates neighbours that
+ * lightness alone leaves nearly identical.
  *
- * And chroma dips through the middle rather than peaking there. Following the
- * gamut ceiling put a neon violet across the mid-range that shouted louder
- * than the dark red at the top, which inverts what the map is trying to say.
- * The first attempt overcorrected the other way: holding chroma low at the
- * pale end made the bottom half a wash of grey-lavender with no blue visible
- * anywhere, so the ramp read as one colour rather than two.
+ * Two properties keep it from turning to mud. The hue path advances in one
+ * direction at every step, 262° through cyan, green and yellow down to 31°,
+ * never doubling back — a ramp that reverses hue has two stops that read as the
+ * same value. And chroma never falls below 0.10, so no stop drifts toward the
+ * neutral surface underneath it and reads as "no data".
  *
- * Every adjacent pair clears 1.22 contrast and the lowest stop clears the map
- * surface by 1.27, so "few records" reads as a value rather than as a hole.
+ * The cost is lightness: the yellow through the middle clears the map surface
+ * by only 1.27, against 4.21 at the blue end and 4.62 at the red. Magnitude
+ * therefore reads by hue, not by darkness, which is why `deepBlue` exists as
+ * the colourblind-safe alternative.
  */
-export const EMBER_STOPS: readonly string[] = [
-  '#cbd8f1', // mavi        — en düşük
-  '#b7c3e8',
-  '#aaacdd',
-  '#a492d3',
-  '#ab6ecc',
-  '#ab53a4',
-  '#a14075',
-  '#942e46',
-  '#7e2314', // koyu kırmızı — en yüksek
+export const SPECTRAL_STOPS: readonly string[] = [
+  '#3b6fd4', // mavi    — en düşük
+  '#3a95cf',
+  '#3fb5c1', // camgöbeği
+  '#56c79a',
+  '#86d266', // yeşil
+  '#bcdb4e',
+  '#f0d848', // sarı
+  '#f2a63c',
+  '#e2702e', // turuncu
+  '#c93520', // kırmızı — en yüksek
 ];
 
 /**
@@ -72,7 +74,7 @@ export const DIFF_STOPS: readonly string[] = [
 ];
 
 export const RAMPS: Readonly<Record<ColorScaleName, RampFn>> = {
-  ember: createRamp(EMBER_STOPS),
+  spectral: createRamp(SPECTRAL_STOPS),
   deepBlue: createRamp(DEEP_BLUE_STOPS),
 };
 

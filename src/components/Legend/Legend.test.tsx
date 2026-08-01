@@ -17,6 +17,7 @@ const base: HeatMapState = {
   defaultFilters: { yearRange: [2015, 2024], categories: [] },
   yearBounds: [2015, 2024],
   flyToRequest: null,
+  viewResetRequest: 0,
   detail: null,
   metric: 'total',
   scaleMode: 'quantile',
@@ -25,7 +26,7 @@ const base: HeatMapState = {
 const SCALE = createColorScale({
   values: [10, 40, 90, 250, 900],
   mode: 'quantile',
-  ramp: 'ember',
+  ramp: 'spectral',
 });
 
 function renderLegend(scale = SCALE, state: HeatMapState = base) {
@@ -63,7 +64,7 @@ describe('Legend', () => {
   it('samples the ramp itself rather than letting CSS interpolate', () => {
     // CSS gradients blend in sRGB; this ramp is built in OKLab. Two stops and a
     // browser blend would not be the colours the map is painted with.
-    const scale = createColorScale({ values: [0, 50, 100], mode: 'linear', ramp: 'ember' });
+    const scale = createColorScale({ values: [0, 50, 100], mode: 'linear', ramp: 'spectral' });
     const { container } = renderLegend(scale);
     const bar = container.querySelector('[data-role="ramp"]') as HTMLElement;
     const stops = bar.style.background.match(/#[\da-f]{6}/gu) ?? [];
@@ -83,7 +84,7 @@ describe('Legend', () => {
     // while occupying a seventh of the bar. Evenly spaced labels would sit
     // above colours they do not name.
     const skewed = createColorScale({
-      values: [1, 2, 3, 4, 5, 900], mode: 'quantile', ramp: 'ember',
+      values: [1, 2, 3, 4, 5, 900], mode: 'quantile', ramp: 'spectral',
     });
     const { container } = renderLegend(skewed);
     const lefts = [...container.querySelectorAll('[data-role="tick"]')]
@@ -100,19 +101,19 @@ describe('Legend', () => {
   });
 
   it('names the linear mode when that is active', () => {
-    const linear = createColorScale({ values: [1, 2, 3], mode: 'linear', ramp: 'ember' });
+    const linear = createColorScale({ values: [1, 2, 3], mode: 'linear', ramp: 'spectral' });
     renderLegend(linear, { ...base, scaleMode: 'linear' });
     expect(screen.getByText(new RegExp(trStrings.scaleMode.linear, 'u'))).toBeInTheDocument();
   });
 
   it('says "no data" for an empty domain rather than rendering an empty ramp', () => {
-    const empty = createColorScale({ values: [], mode: 'quantile', ramp: 'ember' });
+    const empty = createColorScale({ values: [], mode: 'quantile', ramp: 'spectral' });
     renderLegend(empty);
     expect(screen.getByText(trStrings.legend.noData)).toBeInTheDocument();
   });
 
   it('still names the single value when every region is identical', () => {
-    const flat = createColorScale({ values: [5, 5, 5], mode: 'quantile', ramp: 'ember' });
+    const flat = createColorScale({ values: [5, 5, 5], mode: 'quantile', ramp: 'spectral' });
     const { container } = renderLegend(flat);
     const ticks = [...container.querySelectorAll('[data-role="tick"]')];
     expect(ticks.length).toBeGreaterThan(0);

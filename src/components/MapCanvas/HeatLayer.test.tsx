@@ -11,7 +11,7 @@ const FEATURES: RenderFeature[] = [
 ];
 
 const VALUES = new Map([['34', 100], ['06', 40]]);
-const SCALE = createColorScale({ values: [100, 40], mode: 'quantile', ramp: 'ember' });
+const SCALE = createColorScale({ values: [100, 40], mode: 'quantile', ramp: 'spectral' });
 
 function renderLayer(props: Partial<HeatLayerProps> = {}) {
   return render(

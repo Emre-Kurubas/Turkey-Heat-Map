@@ -67,3 +67,51 @@ describe('SelectionLayer', () => {
     expect(container.querySelector('g')?.getAttribute('aria-hidden')).toBe('true');
   });
 });
+
+describe('SelectionLayer — the province being explored', () => {
+  const PROVINCE: RenderFeature = { code: '34', name: 'İstanbul', d: 'M0,0L99,0L99,99Z' };
+
+  it('draws nothing extra when no province is in context', () => {
+    const { container } = renderLayer();
+    expect(container.querySelector('[data-role="context"]')).toBeNull();
+  });
+
+  it('draws the province boundary when one is passed', () => {
+    const { container } = renderLayer({ contextFeature: PROVINCE });
+    const group = container.querySelector('[data-role="context"]');
+    expect(group).not.toBeNull();
+    expect(group).toHaveAttribute('data-code', '34');
+  });
+
+  it('casings it, so it does not read as one more district border', () => {
+    // Zoomed in, the map is a mesh of dark district borders. A single heavier
+    // line of the same ink is just a thicker one of those; the pale stroke
+    // underneath is what separates it from the mesh.
+    const { container } = renderLayer({ contextFeature: PROVINCE });
+    const strokes = [...container.querySelectorAll('[data-role="context"] path')]
+      .map((path) => path.getAttribute('stroke'));
+    expect(strokes).toHaveLength(2);
+    expect(strokes[0]).not.toBe(strokes[1]);
+  });
+
+  it('draws the casing wider than the line it carries', () => {
+    const { container } = renderLayer({ contextFeature: PROVINCE });
+    const widths = [...container.querySelectorAll('[data-role="context"] path')]
+      .map((path) => Number(path.getAttribute('stroke-width')));
+    expect(widths[0]).toBeGreaterThan(widths[1]!);
+  });
+
+  it('keeps its weight through zoom, like every other highlight', () => {
+    const { container } = renderLayer({ contextFeature: PROVINCE });
+    for (const path of container.querySelectorAll('[data-role="context"] path')) {
+      expect(path).toHaveAttribute('vector-effect', 'non-scaling-stroke');
+    }
+  });
+
+  it('sits under the selection, so a district clicked inside it still reads', () => {
+    const { container } = renderLayer({ contextFeature: PROVINCE, selectedCode: '06' });
+    const roles = [...container.querySelectorAll('[data-role]')]
+      .map((node) => node.getAttribute('data-role'));
+    expect(roles.indexOf('context')).toBeLessThan(roles.indexOf('selected'));
+  });
+});

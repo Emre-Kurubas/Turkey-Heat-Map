@@ -4,6 +4,8 @@ import styles from './Sidebar.module.css';
 
 export interface SidebarRowProps {
   region: RankedRegion;
+  /** 1-based position in the list as displayed. */
+  position: number;
   color: string;
   hovered: boolean;
   selected: boolean;
@@ -12,9 +14,9 @@ export interface SidebarRowProps {
   height: number;
 }
 
-/** One ranked region. Name, count, share, and a bar tinted with its heat colour. */
+/** One ranked region. Position, name, count, share, and a heat-tinted bar. */
 export function SidebarRow({
-  region, color, hovered, selected, onActivate, onHover, height,
+  region, position, color, hovered, selected, onActivate, onHover, height,
 }: SidebarRowProps) {
   return (
     <button
@@ -28,6 +30,8 @@ export function SidebarRow({
       onPointerEnter={() => { onHover(region.code); }}
       onPointerLeave={() => { onHover(null); }}
     >
+      {/* Decorative: the list is an <ol>, so a screen reader already counts. */}
+      <span className={styles.rowRank} aria-hidden="true">{position}</span>
       <span className={styles.rowName}>{region.name}</span>
       <span className={styles.rowTotal}>{formatTrNumber(region.total)}</span>
       <span className={styles.rowShare}>{formatPercent(region.share)}</span>

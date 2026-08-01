@@ -6,7 +6,7 @@ export type { ColorDomain } from './domain.js';
 export { createColorDomain } from './domain.js';
 export type { ColorScale, ColorScaleName, ColorScaleOptions, RampFn } from './scales.js';
 export {
-  DEEP_BLUE_STOPS, DIFF_STOPS, RAMPS, EMBER_STOPS,
+  DEEP_BLUE_STOPS, DIFF_STOPS, RAMPS, SPECTRAL_STOPS,
   createColorScale, createDiffColorScale,
 } from './scales.js';
 export type { LegendBreak } from './legend.js';

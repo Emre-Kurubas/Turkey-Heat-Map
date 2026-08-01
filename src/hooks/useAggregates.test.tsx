@@ -28,6 +28,7 @@ const base: HeatMapState = {
   defaultFilters: { yearRange: [2020, 2021], categories: [] },
   yearBounds: [2020, 2021],
   flyToRequest: null,
+  viewResetRequest: 0,
   detail: null,
   metric: 'total',
   scaleMode: 'quantile',
@@ -43,7 +44,7 @@ function setup(state: HeatMapState = base) {
   return { store, wrapper };
 }
 
-const INPUT = { data: DATA, categories: CATEGORIES, colorScale: 'ember' } as const;
+const INPUT = { data: DATA, categories: CATEGORIES, colorScale: 'spectral' } as const;
 
 describe('useAggregates', () => {
   it('rolls up totals for the active level', () => {
@@ -104,7 +105,7 @@ describe('useAggregates', () => {
     ];
     const { wrapper } = setup();
     const { result } = renderHook(
-      () => useAggregates({ data: ilOnly, categories: CATEGORIES, colorScale: 'ember' }),
+      () => useAggregates({ data: ilOnly, categories: CATEGORIES, colorScale: 'spectral' }),
       { wrapper },
     );
 
@@ -148,7 +149,7 @@ describe('useAggregates', () => {
     ];
     const { wrapper } = setup();
     const { result } = renderHook(
-      () => useAggregates({ data: bad, categories: CATEGORIES, colorScale: 'ember' }),
+      () => useAggregates({ data: bad, categories: CATEGORIES, colorScale: 'spectral' }),
       { wrapper },
     );
     expect(result.current.index.warnings.length).toBeGreaterThan(0);
@@ -158,7 +159,7 @@ describe('useAggregates', () => {
   it('survives an empty dataset', () => {
     const { wrapper } = setup();
     const { result } = renderHook(
-      () => useAggregates({ data: [], categories: CATEGORIES, colorScale: 'ember' }),
+      () => useAggregates({ data: [], categories: CATEGORIES, colorScale: 'spectral' }),
       { wrapper },
     );
     expect(result.current.rollup.total).toBe(0);

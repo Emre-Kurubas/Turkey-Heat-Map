@@ -8,6 +8,19 @@
   pointer-events: auto;
 }
 
+/*
+ * Nested inside another panel: no surface of its own.
+ *
+ * Declared after `.panel` and repeated inside the @supports block below, since
+ * that block re-declares the same properties at the same specificity and would
+ * otherwise win.
+ */
+.flat {
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
 /* backdrop-filter is unsupported in some embedded webviews, so the solid
    background above is the baseline and the blur is layered on only where it
    actually works. Text contrast never depends on the blur rendering. */
@@ -21,5 +34,13 @@
     box-shadow:
       inset 0 1px 0 var(--hm-glass-highlight),
       var(--hm-glass-shadow);
+  }
+
+  .flat {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }

@@ -1,6 +1,34 @@
 .panel { padding: 10px 12px; display: grid; gap: 8px; width: 220px; }
+/* Inside another panel: no card padding of its own, and it takes the column. */
+.embedded { padding: 0; width: auto; align-content: start; }
 .title { margin: 0; font-size: 12px; font-weight: 600; color: var(--hm-fg); }
 .scope { font-size: 11px; color: var(--hm-fg-muted); }
+/* Drawing and key, stacked by default. */
+.body { display: grid; gap: 8px; align-content: start; }
+
+/*
+ * Key to the right of the donut. The donut is a fixed size so it takes an
+ * `auto` track; the key gets the rest and `minmax(0, 1fr)` is what lets a long
+ * category label ellipsise instead of forcing the column wider.
+ */
+.beside {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+/*
+ * `--legend-rows` is set by the component to the dataset's slice ceiling, and
+ * the floor below reserves that many rows whatever this region draws. A row is
+ * an 11px line plus the list's 3px gap.
+ */
+.keyColumn {
+  display: grid;
+  gap: 6px;
+  align-content: center;
+  min-width: 0;
+  min-height: calc(var(--legend-rows, 0) * 17px);
+}
 .chart { display: block; margin: 0 auto; }
 .slice { transition: opacity var(--hm-motion-hover) var(--hm-ease-hover); cursor: pointer; }
 .slice[data-dimmed='true'] { opacity: 0.35; }

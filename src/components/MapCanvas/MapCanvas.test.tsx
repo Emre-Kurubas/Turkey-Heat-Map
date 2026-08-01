@@ -23,6 +23,7 @@ const base: HeatMapState = {
   defaultFilters: { yearRange: [2020, 2020], categories: [] },
   yearBounds: [2020, 2020],
   flyToRequest: null,
+  viewResetRequest: 0,
   detail: null,
   metric: 'total',
   scaleMode: 'quantile',
@@ -41,7 +42,7 @@ function renderCanvas(state: HeatMapState = base, props: Partial<MapCanvasProps>
     <MapCanvas
       data={DATA}
       categories={CATEGORIES}
-      colorScale="ember"
+      colorScale="spectral"
       heatStyle="glow"
       testViewport={{ width: 800, height: 500 }}
       {...props}
@@ -115,12 +116,18 @@ describe('MapCanvas', () => {
     expect(heat.querySelectorAll('path')).toHaveLength(81);
   });
 
-  it('scales the blur down as zoom rises, so softness looks constant', () => {
+  it('holds the blur in projected space, so districts stay soft when zoomed', () => {
+    // Scaling it down with the zoom sharpened the heat into flat polygons at
+    // exactly the scale where the district detail lives. Constant here means
+    // the softness is proportional to the regions rather than to the screen —
+    // and it takes the transform out of the filter's inputs, so panning and
+    // zooming never re-run the blur.
     const { container: a } = renderCanvas();
     const { container: b } = renderCanvas({ ...base, transform: { k: 4, x: 0, y: 0 } });
     const read = (c: HTMLElement) =>
       Number(c.querySelector('feGaussianBlur')?.getAttribute('stdDeviation'));
-    expect(read(b)).toBeLessThan(read(a));
+    expect(read(b)).toBe(read(a));
+    expect(read(a)).toBeGreaterThan(0);
   });
 
   it('reports a region click to the consumer', () => {
@@ -210,6 +217,50 @@ describe('MapCanvas — fly-to requests from other panels', () => {
   });
 });
 
+describe('MapCanvas — returning to the country view', () => {
+  const zoomedIn: HeatMapState = {
+    ...base,
+    transform: { k: 6, x: -1200, y: -700 },
+    level: 'ilce',
+  };
+
+  it('travels back to the default view when a panel asks for it', () => {
+    const { store } = renderCanvas(zoomedIn);
+
+    act(() => { store.dispatch({ type: 'requestViewReset' }); });
+    // Reduced motion is stubbed on, so the journey lands in one step here; the
+    // 600ms easing itself is covered in useViewAnimation's own tests.
+    expect(store.getState().transform).toEqual({ k: 1, x: 0, y: 0 });
+  });
+
+  it('lets the level follow the scale back up to provinces', () => {
+    const { store } = renderCanvas(zoomedIn);
+
+    act(() => { store.dispatch({ type: 'requestViewReset' }); });
+    expect(store.getState().level).toBe('il');
+  });
+
+  it('answers a second request, having already served the first', () => {
+    // The regression a boolean flag would cause: drill in, close, drill in,
+    // close — and the second close does nothing because the flag never reset.
+    const { store } = renderCanvas(zoomedIn);
+
+    act(() => { store.dispatch({ type: 'requestViewReset' }); });
+    act(() => { store.dispatch({ type: 'setTransform', transform: { k: 6, x: -1200, y: -700 } }); });
+    act(() => { store.dispatch({ type: 'requestViewReset' }); });
+
+    expect(store.getState().transform).toEqual({ k: 1, x: 0, y: 0 });
+  });
+
+  it('does not travel anywhere on mount, whatever the request count started at', () => {
+    // The effect compares against what it saw last, seeded at mount. A naive
+    // truthiness check would fire on any nonzero initial value and yank a
+    // consumer's `defaultView` back to the whole country on first paint.
+    const { store } = renderCanvas({ ...zoomedIn, viewResetRequest: 7 });
+    expect(store.getState().transform).toEqual(zoomedIn.transform);
+  });
+});
+
 describe('MapCanvas — opening a region detail', () => {
   it('opens the detail panel for a clicked province', () => {
     const { container, store } = renderCanvas();
@@ -248,5 +299,44 @@ describe('MapCanvas — opening a region detail', () => {
 
     expect(store.getState().detail).toEqual({ code, level: 'ilce' });
     expect(store.getState().transform).toEqual(before);
+  });
+});
+
+describe('MapCanvas — knowing which province you are inside', () => {
+  const drilledIn: HeatMapState = {
+    ...base,
+    transform: { k: 6, x: -1200, y: -700 },
+    level: 'ilce',
+    detail: { code: '34', level: 'il' },
+  };
+
+  it('outlines the open province once districts are what is drawn', () => {
+    const { container } = renderCanvas(drilledIn);
+    expect(container.querySelector('[data-role="context"][data-code="34"]')).not.toBeNull();
+  });
+
+  it('draws no such outline at country zoom, where province borders already exist', () => {
+    const { container } = renderCanvas({ ...base, detail: { code: '34', level: 'il' } });
+    expect(container.querySelector('[data-role="context"]')).toBeNull();
+  });
+
+  it('draws none when the open panel is itself a district', () => {
+    // A district's own boundary is already one of the outlined features.
+    const { container } = renderCanvas({
+      ...drilledIn, detail: { code: '3401', level: 'ilce' },
+    });
+    expect(container.querySelector('[data-role="context"]')).toBeNull();
+  });
+
+  it('draws none when no panel is open', () => {
+    const { container } = renderCanvas({ ...drilledIn, detail: null });
+    expect(container.querySelector('[data-role="context"]')).toBeNull();
+  });
+
+  it('follows the panel rather than the selection', () => {
+    // The selection is cleared by the level change that the drill-in causes, so
+    // reading it here would lose the boundary at exactly the moment it matters.
+    const { container } = renderCanvas({ ...drilledIn, selectedCode: null });
+    expect(container.querySelector('[data-role="context"][data-code="34"]')).not.toBeNull();
   });
 });

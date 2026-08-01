@@ -1,11 +1,10 @@
 import { useCallback, useState } from 'react';
-import { Chip } from '@/components/primitives/Chip.js';
 import { GlassPanel } from '@/components/primitives/GlassPanel.js';
 import { IconButton } from '@/components/primitives/IconButton.js';
-import { RangeSlider } from '@/components/primitives/RangeSlider.js';
 import { formatTrNumber } from '@/core/format/index.js';
 import type { CrimeCategory } from '@/core/types/index.js';
 import { useHeatMapDispatch, useHeatMapState, useStrings } from '@/hooks/useHeatMapState.js';
+import { CategoryFilter } from './CategoryFilter.js';
 import styles from './FilterBar.module.css';
 
 export interface FilterBarProps {
@@ -27,16 +26,21 @@ export function FilterBar({
   const yearBounds = useHeatMapState((state) => state.yearBounds);
   const metric = useHeatMapState((state) => state.metric);
 
-  const onYearChange = useCallback((range: [number, number]) => {
-    dispatch({ type: 'setYearRange', range });
+  const [open, setOpen] = useState(false);
+
+  const onToggleCategory = useCallback((id: string) => {
+    dispatch({ type: 'toggleCategory', id });
   }, [dispatch]);
 
-  const selected = new Set(filters.categories);
-  const [open, setOpen] = useState(false);
+  const onClearCategories = useCallback(() => {
+    dispatch({ type: 'setFilters', filters: { ...filters, categories: [] } });
+  }, [dispatch, filters]);
 
   // Count what is actually narrowing the data, so a closed bar still says so.
   // Hiding active filters behind a shut panel is how someone ends up reading a
-  // filtered map as the whole picture.
+  // filtered map as the whole picture. The year range still counts even though
+  // it is set elsewhere now: the badge is about what is filtered, not about
+  // which control did it.
   const [lo, hi] = filters.yearRange;
   const [boundLo, boundHi] = yearBounds;
   const activeCount = filters.categories.length
@@ -59,6 +63,9 @@ export function FilterBar({
           onClick={() => { setOpen((v) => !v); }}
         >
           <span>{strings.filters.title}</span>
+          {/* The active year range is written across the map's top right — see
+              YearScope. Repeating it here made the same fact compete with
+              itself two panels apart. */}
           {activeCount > 0 ? (
             <span className={styles.badge}>{formatTrNumber(activeCount)}</span>
           ) : null}
@@ -78,39 +85,14 @@ export function FilterBar({
         </button>
       </div>
 
-      <div className={styles.section}>
-        <span className={styles.sectionLabel}>{strings.filters.yearRange}</span>
-        <RangeSlider
-          min={yearBounds[0]}
-          max={yearBounds[1]}
-          value={filters.yearRange}
-          onChange={onYearChange}
-          label={strings.filters.yearRange}
-          formatValue={String}
-        />
-      </div>
-
-      <div className={styles.section}>
-        <span className={styles.sectionLabel}>
-          {strings.filters.categories}
-          {/* An empty selection means every category, not none — say so, because
-              a bar of unpressed chips otherwise reads as "nothing selected". */}
-          {selected.size === 0 ? ` · ${strings.filters.allCategories}` : ''}
-        </span>
-        <div className={styles.chips}>
-          {categories.map((category) => (
-            <Chip
-              key={category.id}
-              label={category.label}
-              selected={selected.has(category.id)}
-              highlighted={category.id === highlightedCategory}
-              {...(category.color === undefined ? {} : { color: category.color })}
-              count={formatTrNumber(categoryTotals.get(category.id) ?? 0)}
-              onToggle={() => { dispatch({ type: 'toggleCategory', id: category.id }); }}
-            />
-          ))}
-        </div>
-      </div>
+      <CategoryFilter
+        categories={categories}
+        categoryTotals={categoryTotals}
+        selected={filters.categories}
+        onToggle={onToggleCategory}
+        onClear={onClearCategories}
+        highlighted={highlightedCategory}
+      />
 
       {hasPopulation ? (
         <IconButton

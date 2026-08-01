@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { MAX_ZOOM, computeFitTransform } from '@/core/geo/index.js';
-import type { BBox, Viewport } from '@/core/types/index.js';
+import type { BBox, Transform, Viewport } from '@/core/types/index.js';
 import { useHeatMapDispatch, useHeatMapState } from './useHeatMapState.js';
 import { useReducedMotion } from './useReducedMotion.js';
 
@@ -15,13 +15,25 @@ function lerp(from: number, to: number, t: number): number {
   return from + (to - from) * t;
 }
 
+export interface ViewAnimation {
+  /** Animates the viewport to fit a bounding box. */
+  flyTo: (bbox: BBox) => void;
+  /** Animates the viewport to an explicit transform — the reset path. */
+  glideTo: (target: Transform) => void;
+}
+
 /**
- * Animates the viewport to fit a bounding box.
+ * Owns every animated change of the map transform.
  *
- * Under `prefers-reduced-motion` this becomes an instant jump, per §6.7 — the
+ * One hook rather than two so a fly-to and a reset cannot run at the same time:
+ * they share the frame handle, and whichever starts second cancels the first.
+ * Two independent animations would both dispatch every frame and the transform
+ * would visibly fight itself.
+ *
+ * Under `prefers-reduced-motion` both become instant jumps, per §6.7 — the
  * destination is identical either way, only the journey differs.
  */
-export function useFlyTo(viewport: Viewport): (bbox: BBox) => void {
+export function useViewAnimation(viewport: Viewport): ViewAnimation {
   const dispatch = useHeatMapDispatch();
   const reducedMotion = useReducedMotion();
   const transform = useHeatMapState((state) => state.transform);
@@ -32,16 +44,13 @@ export function useFlyTo(viewport: Viewport): (bbox: BBox) => void {
   transformRef.current = transform;
   const frame = useRef<number | null>(null);
 
-  // A fly-to still running at unmount would dispatch into a dead store on its
-  // next frame.
+  // An animation still running at unmount would dispatch into a dead store on
+  // its next frame.
   useEffect(() => () => {
     if (frame.current !== null) cancelAnimationFrame(frame.current);
   }, []);
 
-  return useCallback((bbox: BBox) => {
-    if (viewport.width <= 0 || viewport.height <= 0) return;
-
-    const target = computeFitTransform(bbox, viewport, { maxScale: MAX_ZOOM });
+  const glideTo = useCallback((target: Transform) => {
     if (frame.current !== null) {
       cancelAnimationFrame(frame.current);
       frame.current = null;
@@ -74,5 +83,12 @@ export function useFlyTo(viewport: Viewport): (bbox: BBox) => void {
     };
 
     frame.current = requestAnimationFrame(step);
-  }, [dispatch, viewport, reducedMotion]);
+  }, [dispatch, reducedMotion]);
+
+  const flyTo = useCallback((bbox: BBox) => {
+    if (viewport.width <= 0 || viewport.height <= 0) return;
+    glideTo(computeFitTransform(bbox, viewport, { maxScale: MAX_ZOOM }));
+  }, [glideTo, viewport]);
+
+  return useMemo(() => ({ flyTo, glideTo }), [flyTo, glideTo]);
 }

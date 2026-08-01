@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Attribution } from '@/components/Attribution/index.js';
-import { CategoryPieChart } from '@/components/CategoryPieChart/index.js';
 import { FilterBar } from '@/components/FilterBar/index.js';
 import { HoverTooltip } from '@/components/HoverTooltip/index.js';
 import { Legend } from '@/components/Legend/index.js';
@@ -11,7 +10,7 @@ import {
 import { RegionDetail } from '@/components/RegionDetail/index.js';
 import { SearchBar } from '@/components/SearchBar/index.js';
 import { Sidebar } from '@/components/Sidebar/index.js';
-import { TrendChart } from '@/components/TrendChart/index.js';
+import { YearScope } from '@/components/YearScope/index.js';
 import { HeatMapProvider } from '@/context/HeatMapProvider.js';
 import { createHeatMapStore } from '@/context/HeatMapStore.js';
 import { createHoverStore } from '@/context/HoverStore.js';
@@ -95,9 +94,9 @@ interface ContentProps {
 /** Inner tree, so the error boundary can wrap everything that can throw. */
 function Content({ props, panels }: ContentProps) {
   const {
-    data, categories, population, colorScale = 'ember', heatStyle = 'glow',
+    data, categories, population, colorScale = 'spectral', heatStyle = 'glow',
   } = props;
-  const { index, rollup, scale, names } = useAggregates({
+  const { index, rollup, scale, names, byYearAll } = useAggregates({
     data, categories, colorScale, population,
   });
   const dispatch = useHeatMapDispatch();
@@ -167,26 +166,26 @@ function Content({ props, panels }: ContentProps) {
           </div>
         ) : null}
 
-        {panels.pie ? (
-          <div className="hm-area-topRight">
-            <CategoryPieChart
+        {/*
+          One rail, three sections. The panel flags still switch the donut, the
+          year series and the region list independently; what changed is that
+          they now switch sections of a shared surface rather than three cards
+          scattered around the map's edge. The rail itself mounts if any of the
+          three survives.
+        */}
+        {panels.pie || panels.trend || panels.sidebar ? (
+          <div className="hm-area-left">
+            <Sidebar
+              rows={rows}
+              scale={scale}
               categories={categories}
-              totals={categoryTotals}
+              categoryTotals={categoryTotals}
+              byYear={byYearAll}
+              total={rollup.total}
               regionName={selectedCode === null ? null : names.get(selectedCode) ?? null}
               onHoverCategory={setHoveredCategory}
+              sections={{ pie: panels.pie, trend: panels.trend, list: panels.sidebar }}
             />
-          </div>
-        ) : null}
-
-        {panels.sidebar ? (
-          <div className="hm-area-left">
-            <Sidebar rows={rows} scale={scale} />
-          </div>
-        ) : null}
-
-        {panels.trend ? (
-          <div className="hm-area-right">
-            <TrendChart byYear={rollup.byYear} />
           </div>
         ) : null}
 
@@ -197,8 +196,15 @@ function Content({ props, panels }: ContentProps) {
           </>
         )}
 
-        {/* Outside the block above: the licence requires attribution whatever
-            else is on screen. */}
+        {/* Both outside the block above, and both for the same reason: they
+            are captions on the map rather than panels over it. The licence
+            requires the attribution whatever else is on screen, and the year
+            range is what every number on screen is counted over — including
+            the ones inside an open detail panel. */}
+        <div className="hm-area-topRight">
+          <YearScope />
+        </div>
+
         <div className="hm-area-bottomCentre">
           <Attribution />
         </div>
@@ -208,7 +214,11 @@ function Content({ props, panels }: ContentProps) {
         <RegionDetail
           detail={detail}
           categories={categories}
-          onClose={() => { dispatch({ type: 'closeDetail' }); }}
+          // Dismissing the panel undoes the whole drill-in, not just the panel:
+          // the reader got here by a flight into one province, and leaving them
+          // parked at that zoom with nothing selected is a dead end. The map
+          // animates the way back — see MapCanvas's viewResetRequest effect.
+          onClose={() => { dispatch({ type: 'requestViewReset' }); }}
         />
       )}
 
@@ -268,6 +278,7 @@ export function CrimeHeatMap(props: CrimeHeatMapProps) {
     defaultFilters: reconciled.filters,
     yearBounds: reconciled.yearBounds,
     flyToRequest: null,
+    viewResetRequest: 0,
     detail: null,
     metric: reconciled.metric,
     scaleMode,

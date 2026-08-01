@@ -1,47 +1,281 @@
+/*
+ * Panel and handle in one row, so the handle rides along as the panel leaves.
+ * `pointer-events` come back on the handle itself; the row is only geometry.
+ *
+ * Both are centred in the column. The panel is only as tall as its content
+ * now, so something has to decide where in the frame it sits — and centring is
+ * what keeps the handle, which is centred on the same row, beside it.
+ */
+.rail {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  pointer-events: none;
+
+  /*
+   * How much map to spend. Nothing in here demands a particular width — the
+   * chart is fluid and the list rows flex — so this is a judgement, and 380
+   * was 40px more than the content needed once the donut stopped being drawn
+   * at a third of the panel's width.
+   *
+   * Declared here rather than on the panel because the collapse has to cancel
+   * exactly this number, and two places drifting apart would leave the handle
+   * a few pixels off the edge of the frame.
+   */
+  --rail-width: 340px;
+  /* One number for every band's breathing room, so the rules stay centred. */
+  --band-pad: 14px;
+}
+
 .sidebar {
   display: grid;
   grid-template-rows: auto 1fr;
-  height: 100%;
-  width: 268px;
+  /*
+   * As tall as what is in it, capped at the frame.
+   *
+   * It used to be `height: 100%`, which made the panel as tall as the map
+   * whatever it held — and three sections rarely fill that, so the difference
+   * came out as empty glass. Growing the last band centred the donut in that
+   * emptiness but did not remove it. Shrinking to fit does: the donut now has
+   * the same 14px under it as every other band, and the panel simply stops
+   * there.
+   *
+   * The cap keeps a long list scrollable rather than letting it run off the
+   * bottom of the map; `.body` still owns the scrolling.
+   */
+  height: auto;
+  max-height: 100%;
+  width: var(--rail-width);
+  /*
+   * Against the rail, which the panel itself sizes — so in the ordinary case
+   * this clamps nothing and only bites when the container is genuinely too
+   * narrow. It was `calc(100% - 24px)`, which subtracted 24px from a width the
+   * panel had just set: the panel came out 24px short of the rail, and the
+   * handle anchored to the rail's edge floated in the gap.
+   */
+  max-width: 100%;
   overflow: hidden;
-  transition: width var(--hm-motion-panel) var(--hm-ease-panel);
+
+  /*
+   * A more opaque fill than the floating panels get.
+   *
+   * Rebound as a custom property rather than as a `background` declaration:
+   * GlassPanel's own rule already resolves `var(--hm-glass-bg)`, and a local
+   * override wins wherever the two stylesheets land in the bundle. Declaring
+   * `background` here instead would be a same-specificity fight decided by
+   * import order.
+   *
+   * It needs the extra opacity because it is a rail carrying three dense
+   * sections: at 55% white the map's heat showed through hard enough to compete
+   * with the chart line and the list bars, two sets of colour arguing over the
+   * same pixels. It still blurs and still saturates what is behind it, so it
+   * stays a pane rather than becoming a wall.
+   */
+  --hm-glass-bg: var(--hm-glass-bg-strong);
+
+  transition:
+    margin-left var(--hm-motion-panel) var(--hm-ease-panel),
+    opacity var(--hm-motion-panel) var(--hm-ease-panel);
 }
 
-/* Collapsed to just the expand button. Only the width animates — the contents
-   unmount, and animating their opacity as well made the panel look broken
-   halfway through. */
-.isCollapsed { width: 46px; }
+/*
+ * Collapsed: the panel slides off the left edge and stops occupying its column.
+ *
+ * A negative margin rather than a transform, because a transform would leave a
+ * rail-wide hole in the grid where the panel used to be — the column is sized by
+ * this element's layout box, and only a margin change collapses it. Cancelling
+ * the width exactly, rather than overshooting it, is what puts the rail's right
+ * edge back at zero: the handle is anchored to that edge, and every pixel of
+ * overshoot would drag the handle off the frame with the panel.
+ *
+ * (A percentage would be wrong here. Percentage margins resolve against the
+ * containing block's width, not the element's own, and the containing block is
+ * a shrink-to-fit column sized by this very element.)
+ */
+.rail[data-collapsed='true'] .sidebar {
+  margin-left: calc(-1 * var(--rail-width));
+  opacity: 0;
+  pointer-events: none;
+  /*
+   * `visibility` is what takes it out of the tab order, and delaying it by the
+   * length of the slide is what lets it animate out first. Unmounting the
+   * contents instead would leave nothing to animate — the panel would blink out
+   * and slide back in from a standing start.
+   */
+  visibility: hidden;
+  transition:
+    margin-left var(--hm-motion-panel) var(--hm-ease-panel),
+    opacity var(--hm-motion-panel) var(--hm-ease-panel),
+    visibility 0s linear var(--hm-motion-panel);
+}
+
+/*
+ * The tab that stays behind. Rounded on its outer edge only, so it reads as
+ * something attached to the panel rather than as a floating button.
+ *
+ * Anchored to the rail's right edge rather than placed in the flex row, so it
+ * is not itself pushed around by the panel's negative margin. `left: 100%`
+ * resolves against a width that shrinks to zero as the panel leaves, which is
+ * what walks the handle from the panel's edge to the edge of the map — and it
+ * takes no space in the grid column, so a collapsed rail costs nothing.
+ */
+.handle {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 54px;
+  padding: 0;
+  border: 1px solid var(--hm-glass-border);
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  background: var(--hm-glass-bg-strong);
+  color: var(--hm-fg-muted);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: var(--hm-glass-shadow);
+  transition:
+    background var(--hm-motion-hover) var(--hm-ease-hover),
+    color var(--hm-motion-hover) var(--hm-ease-hover);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .handle {
+    -webkit-backdrop-filter: blur(var(--hm-glass-blur)) saturate(var(--hm-glass-saturate));
+    backdrop-filter: blur(var(--hm-glass-blur)) saturate(var(--hm-glass-saturate));
+  }
+}
+
+/*
+ * Flush with the edge of the frame once the panel is gone. The rail's own left
+ * offset is the overlay's 12px padding, and while collapsed there is nothing
+ * left for that padding to hold off — the tab is supposed to look like it is
+ * hanging off the side of the map, not floating a hair away from it.
+ */
+.rail[data-collapsed='true'] .handle {
+  margin-left: -12px;
+  border-left: 1px solid var(--hm-glass-border);
+  border-radius: 0 10px 10px 0;
+}
+
+.handle:hover { background: var(--hm-glass-bg-solid); color: var(--hm-fg); }
+.handle:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  padding: 10px 10px 8px;
+  /*
+   * The header is a band like any other, so it gets the same rule under it and
+   * the same space between its text and that rule. Declared here rather than
+   * through the divider rule below because the header is a sibling of the body,
+   * not one of its children.
+   */
+  padding: 10px 12px var(--band-pad);
+  border-bottom: 1px solid var(--hm-glass-border);
 }
 
 .title {
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--hm-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
-.actions { display: flex; gap: 2px; }
+
+/* The country's own count, set to match the region panel's exactly. */
+.total { margin: 0; }
+
+.totalValue {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--hm-fg);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /*
- * Takes whatever the grid row gives it. The old 38vh cap dated from when the
- * legend shared this column; the legend has its own row now, so the cap only
- * ever cut the list short — it stopped at Mersin on a 1000px window with
- * empty space beneath.
+ * The whole rail scrolls as one, rather than each section scrolling itself.
+ * Three independent scrollbars in one column is three places to lose your
+ * position; `min-height: 0` is what lets this shrink instead of pushing the
+ * grid taller than the viewport.
+ *
+ * Vertical only. Everything inside is fluid or wraps, so a horizontal bar here
+ * would always be reporting a rounding error rather than real content.
+ *
+ * No `gap`: the bands carry their own padding, which is what keeps each one
+ * centred between its rules.
  */
-.scroller { overflow-y: auto; padding: 0 4px 6px; min-height: 0; }
-.spacer { position: relative; width: 100%; }
-.slice { position: absolute; left: 0; right: 0; display: grid; }
+.body {
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+/*
+ * One band per section, padded equally top and bottom.
+ *
+ * The symmetry is the point: with the same space above and below every band's
+ * content, a rule between two bands sits exactly midway between the things it
+ * separates rather than hugging whichever one was given the margin. Sections
+ * used to carry a top margin only, so a chart sat hard against the line above
+ * it and floated away from the line below.
+ */
+.section { padding-block: var(--band-pad); min-width: 0; flex: none; }
+
+/*
+ * Nothing special about the last band any more.
+ *
+ * It used to grow into the leftover height and centre its content there, which
+ * was the right answer while the panel was pinned to the full height of the
+ * map. The panel shrinks to its content now, so there is no leftover — and
+ * growing a band into a space that no longer exists would just reintroduce the
+ * gap this removed.
+ */
+
+/*
+ * A rule between bands rather than a gap alone: three stacked blocks of small
+ * type read as one long block without them.
+ *
+ * On the wrapper, never on the section's own content. A chart's root here is a
+ * flat GlassPanel carrying `border: 0` at the same specificity as this rule,
+ * so declaring the border there would leave it to whichever stylesheet the
+ * bundle happens to emit last — which is exactly how the line above the donut
+ * went missing while the one above the list survived.
+ *
+ * Keyed off `* + *` so a section that is switched off takes its divider with it
+ * and the rail never ends up with a line above nothing.
+ */
+.body > * + * { border-top: 1px solid var(--hm-glass-border); }
+
+.listSection { display: grid; gap: 6px; min-width: 0; }
+
+.sectionTitle {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--hm-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.list { list-style: none; margin: 0; padding: 0; display: grid; }
 
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 18px 1fr auto auto;
   align-items: center;
   gap: 8px;
   width: 100%;
@@ -61,6 +295,13 @@
 .row[data-hovered='true'] { background: rgba(15, 23, 42, 0.05); }
 .row[aria-current='true'] { background: rgba(15, 23, 42, 0.09); }
 .row:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: -2px; }
+
+.rowRank {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--hm-fg-muted);
+  text-align: right;
+}
 
 .rowName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rowTotal { font-variant-numeric: tabular-nums; }

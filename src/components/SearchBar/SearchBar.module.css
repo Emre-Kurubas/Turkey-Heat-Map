@@ -1,4 +1,16 @@
-.wrapper { position: relative; min-width: 300px; }
+/*
+ * The overlay this sits in disables pointer events so the map stays draggable
+ * in the gaps between panels, and every panel re-enables them for itself —
+ * GlassPanel does it for the ones it wraps, and the attribution does it by
+ * hand. The search bar wraps nothing and did neither, so every click on it went
+ * straight through to the map: the field looked live, took focus from nothing,
+ * and typing had nowhere to land.
+ */
+.wrapper {
+  position: relative;
+  min-width: 300px;
+  pointer-events: auto;
+}
 
 .input {
   width: 100%;

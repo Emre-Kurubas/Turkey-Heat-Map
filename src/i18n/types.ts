@@ -16,7 +16,6 @@ export interface Strings {
     title: string;
     noData: string;
     /** Shown beneath the ramp so a quantile map is never read as absolute. */
-    scaleNote: string;
   };
   filters: {
     title: string;
@@ -25,7 +24,16 @@ export interface Strings {
     reset: string;
     perCapita: string;
     /** Shown when no category chip is selected — empty means every category. */
+    /** Shown when nothing is ticked, because empty means "every category". */
     allCategories: string;
+    /** Follows the count: "3 seçili". */
+    selectedSuffix: string;
+    searchCategories: string;
+    noCategoryMatch: string;
+    /** Follows the count of results the list did not draw. */
+    moreCategories: string;
+    removeCategory: string;
+    clearCategories: string;
     /** Accessible names for the collapse toggle. */
     open: string;
     close: string;
@@ -34,10 +42,10 @@ export interface Strings {
     close: string;
     total: string;
     categories: string;
+    /** Heading over the district leaderboard in a province's panel. */
+    districts: string;
+    noChildren: string;
     empty: string;
-    /** Shown beside the region name so the unit is never ambiguous. */
-    levelIl: string;
-    levelIlce: string;
   };
   pie: {
     title: string;
@@ -54,9 +62,8 @@ export interface Strings {
     title: string;
     collapse: string;
     expand: string;
-    sortByTotal: string;
-    sortByName: string;
     empty: string;
+    topList: string;
   };
   search: {
     label: string;

@@ -1,6 +1,23 @@
 /*
- * The left edge, full height. It takes the column the sidebar occupies and
- * every other panel stands down while it is open, so nothing competes with it.
+ * The same object as the left rail, holding different contents.
+ *
+ * It replaces the rail in the same corner the instant a region is opened, so
+ * every dimension it does not share with the rail reads as the layout jumping
+ * under the click: same width, same box, same band rhythm, and the same
+ * vertical placement.
+ *
+ * That placement is the fiddly one. The rail is a centred flex item inside a
+ * grid area inset 28px, itself inside an overlay padded 12px — so it occupies a
+ * band 40px in from the top and bottom of the frame, centred. This panel is
+ * positioned against the root rather than the overlay, so it recreates that
+ * band by hand: 40px offsets and `margin-block: auto` to centre what is left.
+ *
+ * Its height is constant across regions, and it gets there the same way the
+ * rail does: by fitting its contents. The trick is that the one band whose
+ * contents vary — the ranked list — reserves room for the most it can ever
+ * hold, so fitting to it always lands on the same number. A province with two
+ * districts and one with ten produce the same card, and nothing scrolls,
+ * because the panel is already as tall as its fullest case.
  *
  * The map keeps the rest of the frame and is not covered: this panel answers
  * "what is in this region", and that answer is worth little without the region
@@ -9,26 +26,46 @@
 .panel {
   position: absolute;
   left: 12px;
-  top: 12px;
-  bottom: 12px;
-  width: 380px;
+  top: 40px;
+  bottom: 40px;
+  height: fit-content;
+  margin-block: auto;
+  /*
+   * The one thing that overrides the fixed height, and only on a window too
+   * short to hold it: better a panel that scrolls than one hanging off the
+   * bottom of the map. On any ordinary window this never bites.
+   */
+  max-height: calc(100% - 80px);
+  width: var(--panel-width);
   max-width: calc(100% - 24px);
   z-index: 30;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: 12px;
-  padding: 14px 16px;
   border-radius: var(--hm-radius);
   background: var(--hm-glass-bg-solid);
   border: 1px solid var(--hm-glass-border);
   box-shadow: var(--hm-glass-shadow);
   pointer-events: auto;
   animation: slideIn var(--hm-motion-panel) var(--hm-ease-panel);
+
+  /* Kept in step with the rail's own two numbers. */
+  --panel-width: 340px;
+  --band-pad: 14px;
+  /*
+   * One source for the row height — district rows and category rows alike, so
+   * the two lists keep the same rhythm — and for the space the list band
+   * reserves.
+   */
+  --child-row-h: 26px;
+  --child-rows: 10;
 }
 
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
   .panel {
-    background: var(--hm-glass-bg);
+    /* As opaque as the left rail it replaces. Same reason: it carries three
+       dense sections, and at 55% white the heat behind it competed with the
+       chart line and the district rows drawn on top of it. */
+    background: var(--hm-glass-bg-strong);
     -webkit-backdrop-filter: blur(var(--hm-glass-blur)) saturate(var(--hm-glass-saturate));
     backdrop-filter: blur(var(--hm-glass-blur)) saturate(var(--hm-glass-saturate));
     box-shadow:
@@ -45,17 +82,22 @@
 
 .panel:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
 
+/*
+ * Padded and ruled exactly as the rail's header is, so the two panels have the
+ * same first inch. Only what is written in it differs.
+ */
 .header {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto auto;
   align-items: baseline;
-  gap: 6px 12px;
+  gap: 10px;
+  padding: 10px 12px var(--band-pad);
+  border-bottom: 1px solid var(--hm-glass-border);
 }
 
-.identity { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
 .name {
   margin: 0;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--hm-fg);
   overflow: hidden;
@@ -63,32 +105,21 @@
   white-space: nowrap;
 }
 
-.level {
-  padding: 1px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--hm-glass-border);
-  font-size: 11px;
-  flex: none;
-  color: var(--hm-fg-muted);
-}
 
-/* Second row of the header grid, under the name — the panel is too narrow to
-   sit the total beside it without the name truncating on most regions. */
-.total {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  margin: 0;
+.total { margin: 0; }
+
+.totalValue {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--hm-fg);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.totalLabel { font-size: 12px; color: var(--hm-fg-muted); }
-.totalValue { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .close {
-  grid-row: 1;
-  grid-column: 2;
-  width: 30px;
-  height: 30px;
+  align-self: center;
+  width: 26px;
+  height: 26px;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -105,21 +136,133 @@
 .close:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
 
 /*
- * One column now, stacked and scrollable. The three-across layout was built
- * for a panel that spanned the full width; at 380px the donut and the trend
- * chart have to sit under the table rather than beside it.
+ * One column, stacked and scrollable, in the same order as the left rail:
+ * year series, ranked list, category donut. The three-across layout was built
+ * for a panel that spanned the full width.
  */
 .body {
-  display: grid;
-  grid-template-rows: auto auto auto;
-  gap: 14px;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px;
   min-height: 0;
+  /* Vertical only. The trend chart is fluid and everything else wraps, so a
+     horizontal bar here would be reporting a rounding error. */
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.listColumn { min-width: 0; }
-.table { width: 100%; border-collapse: collapse; font-size: 13px; }
+/*
+ * One band per section, padded equally top and bottom, ruled between them —
+ * the same construction as the left rail, and for the same two reasons: the
+ * rule has to sit midway between the things it separates, and it has to be on
+ * a wrapper because a flat GlassPanel's `border: 0` would otherwise cancel it.
+ */
+.band { padding-block: var(--band-pad); min-width: 0; flex: none; }
+.body > * + * { border-top: 1px solid var(--hm-glass-border); }
+
+/*
+ * The one band whose contents vary, holding the space for its fullest case.
+ *
+ * The chart above it and the donut below it are fixed drawings; this is what
+ * has three rows for one region and ten for the next. Reserving the ten here is
+ * what makes the whole panel a constant height without a magic total anywhere:
+ * the panel fits its contents, and its contents no longer change size.
+ *
+ * The floor is the section heading and its gap plus the ten district rows a
+ * province lists — the tallest this band gets, since the district list is
+ * capped at ten and a category table never runs longer.
+ *
+ * Rows stay top-aligned in the space: a short list should look like a short
+ * list, not like a centred one.
+ */
+.listBand {
+  display: grid;
+  align-content: start;
+  min-height: calc(21px + var(--child-rows) * var(--child-row-h));
+}
+
+
+.section { display: grid; gap: 6px; min-width: 0; }
+
+.sectionTitle {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--hm-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/*
+ * A district's donut and its table, as one thing.
+ *
+ * The drawing takes an `auto` track at its own 104px; the table gets what is
+ * left and `minmax(0, 1fr)` is what lets a long category label ellipsise rather
+ * than force the column wider. Centred against each other, because neither is
+ * subordinate — one is the shape of the other.
+ */
+.pairing {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+/* The districts inside the open province. Rows are the way down a level. */
+.childList { list-style: none; margin: 0; padding: 0; display: grid; }
+
+.childRow {
+  display: grid;
+  grid-template-columns: 18px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: var(--child-row-h);
+  padding: 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--hm-fg);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--hm-motion-hover) var(--hm-ease-hover);
+}
+
+.childRow:hover { background: rgba(15, 23, 42, 0.05); }
+.childRow:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: -2px; }
+
+.childRank {
+  font-size: 11px;
+  color: var(--hm-fg-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.childName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.childValue { font-variant-numeric: tabular-nums; }
+
+.childShare {
+  font-size: 12px;
+  color: var(--hm-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+/*
+ * Fixed layout, so the columns are decided here rather than by whichever
+ * category happens to have the longest name.
+ *
+ * Beside the donut the table has about 200px. With the count pinned at 52 and
+ * the swatch at 16, that leaves roughly 120px of text for the label — enough
+ * for every category in a Turkish crime taxonomy of ordinary length. The
+ * ellipsis below is a backstop for a consumer's outlier, not the normal case.
+ */
+.table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 13px;
+}
 
 .tableCaption {
   text-align: left;
@@ -128,17 +271,37 @@
   color: var(--hm-fg-muted);
 }
 
-.row { border-bottom: 1px solid var(--hm-glass-border); }
+/*
+ * No rule under each row.
+ *
+ * The panel already draws lines, and they mean something there: they separate
+ * the three bands. Repeating that stroke eight times inside one band made the
+ * heaviest thing on the card a list of hairlines, and it put the category table
+ * out of step with the district list directly above it in a province's panel —
+ * same job, same shape, one of them ruled and the other not.
+ *
+ * The swatches and the aligned columns are what group the rows; they do not
+ * need help.
+ */
 .swatchCell { width: 16px; padding: 5px 0; }
 .swatch { display: block; width: 9px; height: 9px; border-radius: 2px; }
-.rowLabel { padding: 5px 6px; text-align: left; font-weight: 400; color: var(--hm-fg); }
-.rowValue { padding: 5px 6px; text-align: right; font-variant-numeric: tabular-nums; }
+.rowLabel {
+  padding: 5px 6px;
+  text-align: left;
+  font-weight: 400;
+  color: var(--hm-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-.rowShare {
-  padding: 5px 0 5px 6px;
+.rowValue {
+  width: 52px;
+  padding: 5px 6px;
   text-align: right;
   font-variant-numeric: tabular-nums;
-  color: var(--hm-fg-muted);
 }
+.row { height: var(--child-row-h); }
+
 
 .empty { margin: 0; padding: 12px 0; font-size: 13px; color: var(--hm-fg-muted); }

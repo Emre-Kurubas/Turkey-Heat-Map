@@ -21,6 +21,7 @@ const base: HeatMapState = {
   defaultFilters: DEFAULTS,
   yearBounds: [2015, 2024],
   flyToRequest: null,
+  viewResetRequest: 0,
   detail: null,
   metric: 'total',
   scaleMode: 'quantile',
@@ -167,5 +168,33 @@ describe('SearchBar', () => {
     // Yenişehir occurs three times; the parent is what tells them apart.
     expect(screen.getAllByRole('option').length).toBeGreaterThan(1);
     expect(screen.getAllByRole('option')[0]?.textContent).toMatch(/·/u);
+  });
+});
+
+describe('SearchBar — the dropdown follows focus', () => {
+  it('closes when the field loses focus', () => {
+    // Otherwise the list hangs over the map after the reader has moved on.
+    renderSearch();
+    const input = screen.getByRole('combobox', { name: trStrings.search.label });
+    fireEvent.change(input, { target: { value: 'İst' } });
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+
+    fireEvent.blur(input);
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('brings it back when focus returns to a field that still has a query', () => {
+    renderSearch();
+    const input = screen.getByRole('combobox', { name: trStrings.search.label });
+    fireEvent.change(input, { target: { value: 'İst' } });
+    fireEvent.blur(input);
+    fireEvent.focus(input);
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+
+  it('stays shut on focus when there is nothing typed', () => {
+    renderSearch();
+    fireEvent.focus(screen.getByRole('combobox', { name: trStrings.search.label }));
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 });

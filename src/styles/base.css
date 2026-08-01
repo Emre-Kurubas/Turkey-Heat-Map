@@ -37,9 +37,19 @@
    * height of the component rather than stopping between the top and bottom
    * bands.
    */
+  /*
+   * The right column carries two panels and nothing else: the year range at the
+   * top, the colour key at the bottom. Both charts that used to live over there
+   * are sections of the left rail now, which is why the middle row of that
+   * column is empty.
+   *
+   * The middle column's top slot is empty too. The search and filter row is
+   * positioned against the frame rather than placed in the grid — see below —
+   * so leaving a named area for it would be naming a slot nothing lands in.
+   */
   grid-template-areas:
-    "left topCentre topRight"
-    "left centre    right"
+    "left .         topRight"
+    "left centre    ."
     "left bottomCtr bottomRight";
   gap: 12px;
   padding: 12px;
@@ -54,24 +64,43 @@
  * Search and filters share the top-centre row. They are the two controls that
  * change what the map shows, so they belong next to each other rather than at
  * opposite ends of the same edge.
+ *
+ * Centred on the frame, not on the grid's middle column — which is why it is
+ * taken out of the grid entirely. As a grid item it was centred in whatever
+ * space the left rail left over, so collapsing the rail slid the search field
+ * and the filter button sideways. Nothing about those controls has anything to
+ * do with the rail, and a control that moves when you touch something else is
+ * a control you have to re-find.
  */
 .hm-area-topCentre {
-  grid-area: topCentre;
-  align-self: start;
-  justify-self: center;
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: flex-start;
   gap: 10px;
 }
+/* Holds the year-range caption, which draws no surface of its own. */
 .hm-area-topRight { grid-area: topRight; align-self: start; justify-self: end; }
 /*
  * Full height, top to bottom. The sidebar is a ranked list of every province
  * and the one panel whose usefulness scales with its height; `min-height: 0`
  * is what lets its inner scroller shrink instead of pushing the grid taller
  * than the viewport.
+ *
+ * The extra block margin is on top of the overlay's own 12px padding, so the
+ * panel floats about 40px clear of the frame at both ends rather than running
+ * edge to edge. A list that reaches the very top and bottom reads as chrome
+ * bolted to the window; inset, it reads as a card over the map — which is what
+ * every other panel here already does.
  */
-.hm-area-left { grid-area: left; align-self: stretch; min-height: 0; }
-.hm-area-right { grid-area: right; align-self: end; justify-self: end; }
+.hm-area-left {
+  grid-area: left;
+  align-self: stretch;
+  min-height: 0;
+  margin-block: 28px;
+}
 .hm-area-bottomRight {
   grid-area: bottomRight;
   align-self: end;

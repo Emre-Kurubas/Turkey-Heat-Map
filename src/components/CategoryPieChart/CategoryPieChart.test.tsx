@@ -35,6 +35,7 @@ const base: HeatMapState = {
   defaultFilters: DEFAULTS,
   yearBounds: [2015, 2024],
   flyToRequest: null,
+  viewResetRequest: 0,
   detail: null,
   metric: 'total',
   scaleMode: 'quantile',
@@ -207,5 +208,41 @@ describe('CategoryPieChart', () => {
   it('still draws its legend by default', () => {
     renderPie();
     expect(screen.getAllByRole('listitem').length).toBeGreaterThan(0);
+  });
+});
+
+describe('CategoryPieChart — a constant size, whatever the region holds', () => {
+  /**
+   * The panel around this chart is a fixed height, which it can only be if the
+   * chart is. Both of these were reasons it was not.
+   */
+  it('reserves key rows for the dataset ceiling, not for what this region shows', () => {
+    const { container } = renderPie({ totals: new Map([['a', 10]]) });
+    const key = container.querySelector('[class*="keyColumn"]') as HTMLElement;
+    // Three categories are defined, so three rows are held even though this
+    // region only fills one.
+    expect(key.style.getPropertyValue('--legend-rows')).toBe('3');
+  });
+
+  it('reserves nothing when the key is not drawn at all', () => {
+    const { container } = renderPie({ showLegend: false });
+    const key = container.querySelector('[class*="keyColumn"]') as HTMLElement;
+    expect(key.style.getPropertyValue('--legend-rows')).toBe('');
+  });
+
+  it('hides the Diğer disclosure when there is no key for it to open', () => {
+    // It expanded arcs with no labels to read them off, and its coming and
+    // going with the data changed the height of the panel around it.
+    const many: CrimeCategory[] = Array.from({ length: 12 }, (_, i) => ({
+      id: `c${i}`, label: `Tür ${i}`,
+    }));
+    const totals = new Map(many.map((c, i) => [c.id, i === 0 ? 1000 : 1]));
+
+    const withKey = renderPie({ categories: many, totals });
+    expect(withKey.container.querySelector('[class*="disclosure"]')).not.toBeNull();
+    withKey.unmount();
+
+    const withoutKey = renderPie({ categories: many, totals, showLegend: false });
+    expect(withoutKey.container.querySelector('[class*="disclosure"]')).toBeNull();
   });
 });

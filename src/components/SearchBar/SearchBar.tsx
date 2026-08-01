@@ -88,6 +88,16 @@ export function SearchBar({ categories }: SearchBarProps) {
     }
   }, [ordered, activeIndex, select]);
 
+  /*
+   * The dropdown closes when the field loses focus, and comes back when it
+   * regains it with a query still in place.
+   *
+   * `onMouseDown` on an option calls `preventDefault`, so choosing one never
+   * blurs the input and this cannot fire underneath a selection.
+   */
+  const onBlur = useCallback(() => { setOpen(false); }, []);
+  const onFocus = useCallback(() => { setOpen(true); }, []);
+
   const showDropdown = open && query.trim() !== '';
   let flatIndex = -1;
 
@@ -112,6 +122,8 @@ export function SearchBar({ categories }: SearchBarProps) {
           setOpen(true);
         }}
         onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
       />
 
       {showDropdown ? (

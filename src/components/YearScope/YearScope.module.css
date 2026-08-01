@@ -1,0 +1,45 @@
+/*
+ * A card built around one number.
+ *
+ * Sized to the widest thing in it — the range at 22px — with the track beneath
+ * at the same width. Narrower and the two handles crowd; wider and it starts
+ * competing with the search field opposite.
+ */
+.scope {
+  width: 212px;
+  padding: 10px 14px 10px;
+  display: grid;
+  gap: 2px;
+  /* The trend chart's cyan, borrowed by the slider's fill, ticks and handles.
+     Both controls are about the same years; the shared accent says so. */
+  --slider-fill: var(--hm-chart-line);
+}
+
+.caption { margin: 0; display: grid; gap: 1px; user-select: none; }
+
+/*
+ * An eyebrow rather than a label beside the value. Set small, spaced and
+ * uppercase, it stops competing with the number and starts introducing it —
+ * which is the whole reason the number is the largest thing on the card.
+ */
+.label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hm-fg-muted);
+  white-space: nowrap;
+}
+
+.value {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--hm-fg);
+  font-variant-numeric: tabular-nums;
+  /* The en dash in a year range is the one glyph that must not wrap. */
+  white-space: nowrap;
+}
+
+.control { width: 100%; }
+

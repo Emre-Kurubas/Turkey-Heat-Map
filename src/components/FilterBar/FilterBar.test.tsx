@@ -25,6 +25,7 @@ const base: HeatMapState = {
   defaultFilters: DEFAULTS,
   yearBounds: [2015, 2024],
   flyToRequest: null,
+  viewResetRequest: 0,
   detail: null,
   metric: 'total',
   scaleMode: 'quantile',
@@ -67,10 +68,10 @@ describe('FilterBar', () => {
     expect(screen.getByRole('group', { name: trStrings.filters.title })).toBeInTheDocument();
   });
 
-  it('renders a chip per category', () => {
+  it('renders a row per category', () => {
     renderBar();
-    expect(screen.getByRole('button', { name: /Hırsızlık/u })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Darp/u })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /Hırsızlık/u })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /Darp/u })).toBeInTheDocument();
   });
 
   it('shows each category total beside its chip', () => {
@@ -80,7 +81,7 @@ describe('FilterBar', () => {
 
   it('toggles a category into the filter set', () => {
     const { store } = renderBar();
-    fireEvent.click(screen.getByRole('button', { name: /Hırsızlık/u }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Hırsızlık/u }));
     expect(store.getState().filters.categories).toEqual(['hirsizlik']);
   });
 
@@ -90,17 +91,18 @@ describe('FilterBar', () => {
       filters: { yearRange: [2015, 2024], categories: ['hirsizlik'] },
     };
     const { store } = renderBar(selected);
-    fireEvent.click(screen.getByRole('button', { name: /Hırsızlık/u }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Hırsızlık/u }));
     expect(store.getState().filters.categories).toEqual([]);
   });
 
-  it('marks a selected chip pressed', () => {
+  it('ticks the categories that are filtered', () => {
     const selected: HeatMapState = {
       ...base,
       filters: { yearRange: [2015, 2024], categories: ['darp'] },
     };
     renderBar(selected);
-    expect(screen.getByRole('button', { name: /Darp/u })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('checkbox', { name: /Darp/u })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /Hırsızlık/u })).not.toBeChecked();
   });
 
   it('says "all" when nothing is selected, since empty means every category', () => {
@@ -119,15 +121,11 @@ describe('FilterBar', () => {
     expect(store.getState().filters).toEqual(base.defaultFilters);
   });
 
-  it('exposes the year range as two sliders', () => {
+  it('holds no year control, since that lives over the map now', () => {
+    // The year range decides what every number on screen counts, so it is a
+    // caption on the map rather than a drawer item. See YearScope.
     renderBar();
-    expect(screen.getAllByRole('slider')).toHaveLength(2);
-  });
-
-  it('writes a keyboard year change into the store', () => {
-    const { store } = renderBar();
-    fireEvent.keyDown(screen.getAllByRole('slider')[0]!, { key: 'ArrowRight' });
-    expect(store.getState().filters.yearRange).toEqual([2016, 2024]);
+    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
   });
 
   it('does not render the per-capita toggle without population data', () => {
@@ -155,7 +153,7 @@ describe('FilterBar', () => {
     expect(store.getState().metric).toBe('total');
   });
 
-  it('highlights the chip matching a hovered pie slice', () => {
+  it('highlights the row matching a hovered pie slice', () => {
     const { container } = renderBar(base, { highlightedCategory: 'darp' });
     const highlighted = container.querySelectorAll('[data-highlighted="true"]');
     expect(highlighted).toHaveLength(1);
@@ -168,8 +166,7 @@ describe('FilterBar — collapsed by default', () => {
     renderBarClosed();
     expect(screen.getByRole('button', { name: trStrings.filters.open }))
       .toBeInTheDocument();
-    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Hırsızlık/u })).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: /Hırsızlık/u })).not.toBeInTheDocument();
   });
 
   it('reports its state through aria-expanded', () => {
@@ -182,15 +179,15 @@ describe('FilterBar — collapsed by default', () => {
     renderBarClosed();
     fireEvent.click(screen.getByRole('button', { name: trStrings.filters.open }));
 
-    expect(screen.getAllByRole('slider')).toHaveLength(2);
-    expect(screen.getByRole('button', { name: /Hırsızlık/u })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /Hırsızlık/u })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: trStrings.filters.reset })).toBeInTheDocument();
   });
 
   it('closes again on a second press', () => {
     renderBarClosed();
     fireEvent.click(screen.getByRole('button', { name: trStrings.filters.open }));
     fireEvent.click(screen.getByRole('button', { name: trStrings.filters.close }));
-    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: /Hırsızlık/u })).not.toBeInTheDocument();
   });
 
   /**
@@ -208,8 +205,10 @@ describe('FilterBar — collapsed by default', () => {
   });
 
   it('shows no count when nothing is filtered', () => {
-    renderBarClosed();
-    expect(screen.getByRole('button', { name: trStrings.filters.open }).textContent)
-      .not.toMatch(/\d/u);
+    // Scoped to the badge, not to the whole button: the button also carries the
+    // active year range now, which is digits that are not a count.
+    const { container } = renderBarClosed();
+    expect(container.querySelector('[class*="badge"]')).toBeNull();
   });
+
 });

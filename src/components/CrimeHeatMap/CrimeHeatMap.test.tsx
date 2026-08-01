@@ -125,7 +125,10 @@ describe('CrimeHeatMap', () => {
 
 const PANEL_QUERIES: Record<string, () => HTMLElement | null> = {
   legend: () => screen.queryByRole('group', { name: trStrings.legend.title }),
-  sidebar: () => screen.queryByRole('group', { name: trStrings.sidebar.title }),
+  // The rail itself is named "Bölgeler" and survives as long as any of its
+  // three sections does, so the `sidebar` flag is pinned to the section it
+  // actually owns: the leaderboard.
+  sidebar: () => screen.queryByRole('group', { name: trStrings.sidebar.topList }),
   search: () => screen.queryByRole('combobox', { name: trStrings.search.label }),
   // The filter bar mounts collapsed, so its presence reads as the toggle
   // button rather than as a labelled group.
@@ -184,11 +187,21 @@ describe('CrimeHeatMap — fixed layout', () => {
   it('places every panel in its own grid area', () => {
     const { container } = renderMap();
     for (const area of [
-      'hm-area-topCentre', 'hm-area-topRight', 'hm-area-left',
-      'hm-area-right', 'hm-area-bottomRight', 'hm-area-bottomCentre',
+      'hm-area-topCentre', 'hm-area-left',
+      'hm-area-bottomRight', 'hm-area-bottomCentre',
     ]) {
       expect(container.querySelector(`.${area}`), area).not.toBeNull();
     }
+  });
+
+  it('has no floating chart cards left on the right edge', () => {
+    // Both charts moved into the left rail. A stray wrapper would be an empty
+    // div holding a 12px grid gap open. The top-right area survives, but it
+    // holds the year-range caption rather than a panel.
+    const { container } = renderMap();
+    expect(container.querySelector('.hm-area-right')).toBeNull();
+    expect(container.querySelector('.hm-area-topRight [data-role="year-scope"]'))
+      .not.toBeNull();
   });
 });
 
@@ -211,6 +224,16 @@ describe('CrimeHeatMap — region detail', () => {
     fireEvent.click(screen.getByRole('button', { name: trStrings.detail.close }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('drops the selection when the panel is dismissed', () => {
+    // Closing undoes the whole drill-in. Leaving the province outlined with no
+    // panel beside it says the map is still filtered to it, which it is not.
+    const { container } = renderMap();
+    fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
+    fireEvent.click(screen.getByRole('button', { name: trStrings.detail.close }));
+
+    expect(container.querySelector('[aria-current="true"]')).toBeNull();
   });
 
   it('keeps the map mounted behind the panel', () => {

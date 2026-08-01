@@ -1,23 +1,91 @@
-.panel { padding: 10px 12px; display: grid; gap: 6px; width: 260px; }
+.panel { padding: 10px 12px; display: grid; gap: 6px; width: 364px; }
+/* Inside another panel: no card padding, and it takes the column it is given. */
+.embedded { padding: 0; width: auto; align-content: start; min-width: 0; }
 .title { margin: 0; font-size: 12px; font-weight: 600; color: var(--hm-fg); }
-.chart { display: block; overflow: visible; }
-/* A hairline, not a hover wash — recessive but actually visible on a light surface. */
-.grid { stroke: rgba(15, 23, 42, 0.14); stroke-width: 1; }
-.area { fill: var(--hm-fg); opacity: 0.12; }
-.line { fill: none; stroke: var(--hm-fg); stroke-width: 2; stroke-linejoin: round; }
-.marker { fill: var(--hm-fg); }
-.marker[data-active='false'] { opacity: 0.35; }
-.guide { stroke: var(--hm-focus-ring); stroke-width: 1; }
-.hit { fill: transparent; cursor: pointer; }
+/*
+ * Fluid, not fixed.
+ *
+ * The svg carries a viewBox, so overriding its width in CSS scales the whole
+ * drawing — labels included — to whatever column it lands in. It was a fixed
+ * 340px, which is a pixel wider than a 380px rail once the border, the padding
+ * and a vertical scrollbar are taken out: the rail grew a horizontal scrollbar
+ * to reveal that one pixel, and the scrollbar made the shortfall worse.
+ */
+.chart { display: block; overflow: visible; width: 100%; height: auto; }
 
-.readout {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--hm-fg-muted);
+/* Behind the axes and recessive against them: a reference, not a subject. */
+.grid { stroke: var(--hm-chart-grid); stroke-width: 1; }
+
+/* The two axes are the frame of the drawing, so they carry real weight. */
+.axis {
+  stroke: var(--hm-chart-axis);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.arrow { fill: var(--hm-chart-axis); }
+
+.yLabel {
+  fill: var(--hm-fg-muted);
+  font-size: 10px;
+  text-anchor: end;
+  dominant-baseline: middle;
   font-variant-numeric: tabular-nums;
-  min-height: 15px;
 }
 
-.readoutValue { color: var(--hm-fg); font-weight: 600; }
+/* Rotated, so ten years fit under a 300px axis without touching. */
+.xLabel {
+  fill: var(--hm-fg-muted);
+  font-size: 10px;
+  text-anchor: end;
+  dominant-baseline: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.line {
+  fill: none;
+  stroke: var(--hm-chart-line);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/*
+ * Hollow markers, not solid dots. A filled dot on a stroke of the same colour
+ * disappears into it; the white centre is what makes each year a countable
+ * point rather than a bulge in the line.
+ */
+.marker {
+  fill: var(--hm-chart-marker-fill);
+  stroke: var(--hm-chart-line);
+  stroke-width: 2.5;
+  transition: r var(--hm-motion-hover) var(--hm-ease-hover);
+}
+/*
+ * Dimmed, never hidden. Years outside the selection are still the way to move
+ * the selection, so they have to stay both visible and obviously clickable.
+ */
+.marker[data-active='false'] { opacity: 0.45; }
+
+/* The isolated year: filled rather than hollow, so it reads as picked. */
+.marker[data-selected='true'] { fill: var(--hm-chart-line); stroke: var(--hm-fg); }
+
+.guide { stroke: var(--hm-focus-ring); stroke-width: 1; stroke-dasharray: 3 3; }
+.hit { fill: transparent; cursor: pointer; }
+
+/*
+ * The hovered value, drawn over the plot. The white stroke is painted first —
+ * `paint-order: stroke` — so it reads as a halo around the glyphs rather than
+ * as an outline drawn over them, which is what keeps it legible where it
+ * crosses a gridline or the line itself.
+ */
+.callout {
+  fill: var(--hm-fg);
+  stroke: var(--hm-glass-bg-solid);
+  stroke-width: 3;
+  paint-order: stroke;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
 .empty { margin: 0; font-size: 12px; color: var(--hm-fg-muted); }
