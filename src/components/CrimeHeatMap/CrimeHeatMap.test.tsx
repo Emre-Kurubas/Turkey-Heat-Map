@@ -135,11 +135,14 @@ const PANEL_QUERIES: Record<string, () => HTMLElement | null> = {
   filters: () => screen.queryByRole('button', { name: trStrings.filters.open }),
   pie: () => screen.queryByRole('group', { name: trStrings.pie.title }),
   trend: () => screen.queryByRole('group', { name: trStrings.trend.title }),
+  // The year card carries no accessible name of its own — the slider inside it
+  // does — so it is found by the role attribute instead.
+  yearRange: () => document.querySelector<HTMLElement>('[data-role="year-scope"]'),
 };
 
 const ALL_OFF = {
   legend: false, tooltip: false, sidebar: false,
-  search: false, filters: false, pie: false, trend: false,
+  search: false, filters: false, pie: false, trend: false, yearRange: false,
 };
 
 describe('CrimeHeatMap — panel matrix', () => {
@@ -282,5 +285,58 @@ describe('CrimeHeatMap — the detail panel owns the frame', () => {
     expect(screen.getByRole('combobox', { name: trStrings.search.label })).toBeInTheDocument();
     expect(screen.getByRole('group', { name: trStrings.sidebar.title })).toBeInTheDocument();
     expect(screen.getByRole('group', { name: trStrings.legend.title })).toBeInTheDocument();
+  });
+});
+
+describe('CrimeHeatMap — the consumer owns the data and the layout', () => {
+  /**
+   * Two promises the README makes, pinned here because both are the kind of
+   * thing that erodes quietly: a panel added later that forgets its flag, or a
+   * default that makes the demo data reachable in production.
+   */
+  it('takes the consumer data and nothing else — there is no mock fallback', () => {
+    // `data` and `categories` are required props with no defaults, so a
+    // consumer's dataset is the only dataset the component can ever render.
+    const own: CrimeRecord[] = [
+      { year: 2020, ilCode: '35', category: 'hirsizlik', count: 4242 },
+    ];
+    renderMap({ data: own });
+
+    // 4242 is theirs; nothing from the bundled mock is on screen.
+    expect(screen.getAllByRole('img', { name: /İzmir/u })[0]?.getAttribute('aria-label'))
+      .toContain('4.242');
+  });
+
+  it('renders an unknown-to-the-mock category without complaint', () => {
+    const onDataWarning = vi.fn();
+    renderMap({
+      data: [{ year: 2020, ilCode: '34', category: 'kendi-turumuz', count: 7 }],
+      categories: [{ id: 'kendi-turumuz', label: 'Kendi türümüz' }],
+      onDataWarning,
+    });
+    expect(onDataWarning).not.toHaveBeenCalled();
+  });
+
+  it('leaves nothing but the map and its attribution when every panel is off', () => {
+    // The attribution is the one thing a consumer cannot remove: the boundary
+    // data is ODbL/CC-BY-SA and crediting it is a licence condition (§5.4).
+    const { container } = renderMap({ panels: ALL_OFF });
+
+    for (const [name, query] of Object.entries(PANEL_QUERIES)) {
+      expect(query(), name).not.toBeInTheDocument();
+    }
+    expect(screen.getByRole('application', { name: trStrings.map.label })).toBeInTheDocument();
+    expect(screen.getByText(/OpenStreetMap/u)).toBeInTheDocument();
+    expect(container.querySelector('[data-role="year-scope"]')).toBeNull();
+  });
+
+  it('covers every panel it renders with a flag', () => {
+    // The guard against the real failure mode: a panel added later that no flag
+    // reaches. Every element the overlay positions must be either switchable or
+    // the attribution.
+    const { container } = renderMap({ panels: ALL_OFF });
+    const areas = [...container.querySelectorAll('[class^="hm-area-"]')]
+      .map((node) => node.className);
+    expect(areas).toEqual(['hm-area-bottomCentre']);
   });
 });

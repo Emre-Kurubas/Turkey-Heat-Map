@@ -75,6 +75,47 @@ render'da yeniden kurulur.
 `core/` katmanı React'ten ve DOM'dan tamamen bağımsızdır ve %100 dal kapsamıyla
 test edilir.
 
+## Kendi verinizle
+
+`data` ve `categories` **zorunlu** proplardır; bileşenin geri düşeceği bir
+varsayılan veri kümesi yoktur. `generateMockData` yalnızca denemek içindir ve
+onu içe aktarmayan bir projede paketleyici tarafından tamamen elenir — doğrulandı:
+yalnızca bileşeni içe aktaran bir derlemede örnek verinin hiçbir izi kalmıyor.
+
+Kategoriler de sizindir: `categories` içinde ne verirseniz odur, örnek listeyle
+eşleşmesi gerekmez.
+
+## Panelleri açıp kapatmak
+
+Her panel `panels` prop'u ile bağımsız olarak kapatılabilir ve hepsi varsayılan
+olarak açıktır:
+
+```tsx
+<CrimeHeatMap
+  data={kayitlar}
+  categories={turler}
+  panels={{ search: false, filters: false, yearRange: false }}
+/>
+```
+
+| Bayrak | Ne kapanır |
+|---|---|
+| `legend` | Sağ alttaki ölçek |
+| `tooltip` | İmleç ipucu |
+| `sidebar` | Sol paneldeki bölge listesi |
+| `pie` | Sol paneldeki halka grafik |
+| `trend` | Sol paneldeki yıl grafiği |
+| `search` | Arama kutusu |
+| `filters` | Suç türü filtresi |
+| `yearRange` | Sağ üstteki yıl aralığı kartı |
+
+Sol panel, üç bölümünden (`sidebar`, `pie`, `trend`) en az biri açıksa görünür;
+üçü birden kapalıysa hiç oluşturulmaz.
+
+Hepsi kapalıyken geriye yalnızca harita ve **atıf** kalır. Atıf kaldırılamaz:
+sınır verisi ODbL/CC-BY-SA lisanslıdır ve kaynağı belirtmek nezaket değil,
+lisans şartıdır (§5.4).
+
 ## Erişilebilirlik
 
 Harita klavyeyle tam kullanılabilir: `Tab` haritaya odaklanır, ok tuşları

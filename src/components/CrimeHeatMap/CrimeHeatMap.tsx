@@ -49,6 +49,8 @@ export interface PanelFlags {
   pie?: boolean;
   /** The year series at the head of the left rail. */
   trend?: boolean;
+  /** The year-range card in the top right, which reads and sets that range. */
+  yearRange?: boolean;
 }
 
 export interface CrimeHeatMapProps {
@@ -92,6 +94,7 @@ interface ResolvedPanels {
   filters: boolean;
   pie: boolean;
   trend: boolean;
+  yearRange: boolean;
 }
 
 interface ContentProps {
@@ -204,14 +207,21 @@ function Content({ props, panels }: ContentProps) {
           </>
         )}
 
-        {/* Both outside the block above, and both for the same reason: they
-            are captions on the map rather than panels over it. The licence
-            requires the attribution whatever else is on screen, and the year
-            range is what every number on screen is counted over — including
-            the ones inside an open detail panel. */}
-        <div className="hm-area-topRight">
-          <YearScope />
-        </div>
+        {/*
+          Both outside the block above, because both stay put while a region
+          detail panel is open: the year range is what every number on screen is
+          counted over, including the ones in that panel.
+
+          They differ in one way that matters. The year range is a control like
+          any other and the consumer can switch it off; the attribution cannot
+          be switched off by anyone, because the boundary data is ODbL/CC-BY-SA
+          and crediting it is a licence condition rather than a courtesy (§5.4).
+        */}
+        {panels.yearRange ? (
+          <div className="hm-area-topRight">
+            <YearScope />
+          </div>
+        ) : null}
 
         <div className="hm-area-bottomCentre">
           <Attribution />
@@ -303,6 +313,7 @@ export function CrimeHeatMap(props: CrimeHeatMapProps) {
     filters: panels?.filters ?? true,
     pie: panels?.pie ?? true,
     trend: panels?.trend ?? true,
+    yearRange: panels?.yearRange ?? true,
   };
 
   const onBoundaryError = useCallback((error: Error) => { onError?.(error); }, [onError]);
