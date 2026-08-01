@@ -6,3 +6,6 @@ coverage/
 
 playground/dist
 .playwright-mcp
+
+# Local tool configuration: machine paths and per-machine permissions.
+.claude/
