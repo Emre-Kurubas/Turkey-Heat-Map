@@ -31,16 +31,24 @@ import { reconcileProps } from './reconcile.js';
 import styles from './CrimeHeatMap.module.css';
 import '@/styles/index.js';
 
+/**
+ * Which panels to mount. Every flag defaults to `true`.
+ *
+ * `sidebar`, `pie` and `trend` switch the three sections of the left rail
+ * rather than three separate cards; the rail itself mounts if any of them
+ * survives.
+ */
 export interface PanelFlags {
   legend?: boolean;
   tooltip?: boolean;
-  /** Phase 3 panels. Accepted now so the prop shape is stable. */
+  /** The ranked region list in the left rail. */
   sidebar?: boolean;
   search?: boolean;
   filters?: boolean;
+  /** The category donut at the foot of the left rail. */
   pie?: boolean;
+  /** The year series at the head of the left rail. */
   trend?: boolean;
-  compare?: boolean;
 }
 
 export interface CrimeHeatMapProps {

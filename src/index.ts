@@ -1,9 +1,14 @@
 /**
  * turkiye-suc-haritasi — public API.
  *
- * Phase 2 exposes the map: `CrimeHeatMap` with its legend, tooltip and
- * attribution, on top of the pure core. The sidebar, search, filter bar and
- * charts arrive in Phase 3 and are added to this barrel then.
+ * Every name below is a promise: it cannot be renamed or removed without a
+ * major version, whether or not anyone is using it. So the barrel is deliberate
+ * rather than exhaustive — `CrimeHeatMap` and the types its props take, plus
+ * the pure `core/` utilities a consumer needs to build their own panels against
+ * the same aggregation, colour, search and formatting rules the component uses.
+ *
+ * Internal machinery stays internal even when it is generic and tested. The
+ * test for inclusion is "would a consumer reach for this", not "does it work".
  */
 
 // Types
@@ -31,7 +36,7 @@ export {
 } from './core/color/index.js';
 
 // Geo
-export type { FitOptions, ProjectionOptions } from './core/geo/index.js';
+export type { FitOptions, MapFit, ProjectionOptions } from './core/geo/index.js';
 export {
   collectBounds, computeFitTransform, createPathGenerator, createTurkeyProjection,
   cullFeatures, decodeTopology, deriveRegionMeta, featureBounds, featureCentroid,
@@ -83,7 +88,5 @@ export {
   CATEGORY_PALETTE, arcPath, areaPath, categoryColor, collapseSlices,
   createLinearScale, linePath, niceMax, snapToStep,
 } from './core/chart/index.js';
-export type { ListWindow } from './core/list/index.js';
-export { computeWindow } from './core/list/index.js';
 export type { PopulationIndex } from './core/aggregation/index.js';
 export { buildPopulationIndex, toPerCapita } from './core/aggregation/index.js';

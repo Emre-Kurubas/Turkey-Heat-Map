@@ -130,3 +130,57 @@ describe('Phase 3 public surface', () => {
     expect(typeof api.toPerCapita).toBe('function');
   });
 });
+
+describe('public API surface — the whole list, on purpose', () => {
+  /**
+   * Every name here is a promise: it cannot be renamed or removed without a
+   * major version, whether or not anyone is using it.
+   *
+   * So the list is written out rather than counted. A diff on this test is the
+   * point — adding an export should be a decision someone made, not a thing
+   * that happened because a barrel re-exported a module.
+   */
+  const EXPECTED = [
+    // Aggregation
+    'buildIndex', 'buildPopulationIndex', 'diffRollups', 'rankRegions', 'rollup',
+    'toPerCapita', 'totalsByYear',
+    // Colour
+    'CATEGORY_PALETTE', 'DEEP_BLUE_STOPS', 'DIFF_STOPS', 'RAMPS', 'SPECTRAL_STOPS',
+    'computeLegendBreaks', 'createColorDomain', 'createColorScale',
+    'createDiffColorScale', 'createRamp', 'interpolateOklab', 'oklabToRgb',
+    'parseHex', 'rgbToOklab', 'toHex',
+    // Chart geometry
+    'arcPath', 'areaPath', 'categoryColor', 'collapseSlices', 'createLinearScale',
+    'linePath', 'niceMax', 'snapToStep',
+    // Geo
+    'LEVELS', 'collectBounds', 'computeFitTransform', 'createPathGenerator',
+    'createTurkeyProjection', 'cullFeatures', 'decodeTopology', 'deriveRegionMeta',
+    'featureBounds', 'featureCentroid', 'getLevelFeatures', 'getLevelRegionMeta',
+    'isVisible', 'regionNameMap',
+    // Region metadata
+    'IL_BY_CODE', 'IL_REGIONS', 'ilCodeFromIlceCode', 'isValidIlCode',
+    // Search
+    'buildSearchIndex', 'compareTurkish', 'foldTurkish', 'scoreEntity',
+    'searchEntities', 'toTurkishLowerCase', 'toTurkishUpperCase',
+    // Formatting
+    'EM_DASH', 'MINUS', 'formatCompactTr', 'formatDelta', 'formatPercent',
+    'formatPercentDelta', 'formatTrDecimal', 'formatTrNumber', 'formatYearRange',
+    // Strings
+    'mergeStrings', 'trStrings',
+    // Mock data
+    'MOCK_CATEGORIES', 'createPrng', 'generateMockData',
+    // The component
+    'CrimeHeatMap',
+  ].sort();
+
+  it('exports exactly what it means to', () => {
+    expect(Object.keys(api).sort()).toEqual(EXPECTED);
+  });
+
+  it('does not leak list virtualisation, which is not part of this library', () => {
+    // It existed for a sidebar that windowed 973 districts. That list is ten
+    // rows now, and a geography component has no business promising a generic
+    // scroll-window helper for ever.
+    expect('computeWindow' in api).toBe(false);
+  });
+});
