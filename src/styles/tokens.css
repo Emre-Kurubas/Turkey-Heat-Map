@@ -1,0 +1,50 @@
+:root {
+  /* Glass — §6.2 */
+  --hm-glass-bg: rgba(255, 255, 255, 0.06);
+  --hm-glass-bg-solid: rgba(18, 24, 44, 0.92);
+  --hm-glass-border: rgba(255, 255, 255, 0.12);
+  --hm-glass-blur: 20px;
+  --hm-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+  --hm-radius: 16px;
+
+  /* Map surface */
+  --hm-map-bg: #0b1020;
+  --hm-border-stroke: rgba(255, 255, 255, 0.55);
+  --hm-border-width: 0.75;
+  --hm-focus-ring: #ffd166;
+  /* Distinct from any ramp colour: "no records" and "zero crimes" are
+     different claims and must not look alike. */
+  --hm-no-data: rgba(255, 255, 255, 0.06);
+
+  /* Type */
+  --hm-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --hm-fg: rgba(255, 255, 255, 0.92);
+  --hm-fg-muted: rgba(255, 255, 255, 0.62);
+
+  /* Motion — §6.7 */
+  --hm-motion-hover: 120ms;
+  --hm-motion-panel: 240ms;
+  --hm-motion-color: 400ms;
+  --hm-motion-fly: 600ms;
+  --hm-motion-level: 300ms;
+  --hm-ease-hover: ease-out;
+  --hm-ease-panel: cubic-bezier(0.16, 1, 0.3, 1);
+  --hm-ease-color: ease-in-out;
+  --hm-ease-fly: cubic-bezier(0.4, 0, 0.2, 1);
+  --hm-ease-level: ease-in-out;
+}
+
+/*
+ * Motion is a preference the OS already answers. Zeroing the durations here
+ * means no component has to branch on it in JS for CSS-driven transitions;
+ * useReducedMotion covers the JS-driven ones (fly-to).
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --hm-motion-hover: 0ms;
+    --hm-motion-panel: 0ms;
+    --hm-motion-color: 0ms;
+    --hm-motion-fly: 0ms;
+    --hm-motion-level: 0ms;
+  }
+}
