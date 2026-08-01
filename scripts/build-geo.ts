@@ -14,9 +14,13 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import process from 'node:process';
+import { quantize } from 'topojson-client';
 import { topology } from 'topojson-server';
-import { presimplify, simplify } from 'topojson-simplify';
+import {
+  filter, filterAttachedWeight, planarRingArea, presimplify, simplify,
+} from 'topojson-simplify';
 import { IL_BY_CODE, ilCodeFromIlceCode, isValidIlCode } from '../src/data/geo/region-meta.js';
+import { rewindGeometry } from './geo/planar.js';
 
 export type GeoLevelName = 'il' | 'ilce';
 
@@ -114,20 +118,53 @@ function reportOrExit(report: ValidationReport, level: GeoLevelName): void {
   process.exit(1);
 }
 
-/** Drops presimplify weights below the threshold, then writes the topology. */
+/**
+ * Simplifies, then quantizes, in that order.
+ *
+ * Order is not interchangeable. `presimplify` needs absolute coordinates to
+ * measure triangle areas, so it discards any quantization already applied —
+ * quantizing first costs the size win and keeps none of the precision.
+ * Quantizing last also delta-encodes the surviving points, which is where most
+ * of the reduction actually comes from.
+ */
 function buildTopology(
   features: GeoJSON.Feature[],
   level: GeoLevelName,
   minWeight: number,
+  quantization: number,
 ): unknown {
-  const collection: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features };
+  // Normalize winding before anything measures the geometry. See rewindGeometry:
+  // a backwards exterior ring reads as the whole globe minus the region.
+  const collection: GeoJSON.FeatureCollection = {
+    type: 'FeatureCollection',
+    features: features.map((feature) => ({
+      ...feature,
+      geometry: rewindGeometry(feature.geometry),
+    })),
+  };
 
   // @types/topojson-server types feature properties as GeoJsonProperties (which
   // admits null) while @types/topojson-simplify requires a non-null object. The
   // runtime shapes are identical; this reconciles the two declarations.
   const raw = topology({ [level]: collection }) as unknown as Parameters<typeof presimplify>[0];
+  const thinned = simplify(presimplify(raw), minWeight);
 
-  return simplify(presimplify(raw), minWeight);
+  // Simplification drives small islands and exclaves to zero area but leaves the
+  // collapsed rings in place. A zero-area ring is not merely wasted bytes: it has
+  // no meaningful winding, so d3-geo's spherical area and bounds go haywire on
+  // it. `filterAttachedWeight` drops them while keeping every ring still joined
+  // to its neighbours, so no province loses its mainland.
+  const filtered = filter(
+    thinned,
+    filterAttachedWeight(thinned, minWeight, planarRingArea),
+  ) as unknown as { arcs: [number, number, number?][][] };
+
+  // presimplify keeps each point's weight as a third ordinate — and marks ring
+  // endpoints with Infinity so they always survive. `quantize` reads only [x, y]
+  // and rejects the extra ordinate, so drop it here.
+  filtered.arcs = filtered.arcs.map((arc) => arc.map(([x, y]) => [x, y]));
+
+  return quantize(filtered as unknown as Parameters<typeof quantize>[0], quantization);
 }
 
 function parseArgs(argv: readonly string[]): Map<string, string> {
@@ -146,10 +183,16 @@ function main(): void {
   const args = parseArgs(process.argv.slice(2));
   const outDir = args.get('out') ?? 'src/data/geo';
 
-  // İl geometry is only ever seen at country zoom, so it is simplified harder.
-  const levels: [GeoLevelName, number][] = [['il', 1e-6], ['ilce', 1e-7]];
+  // Tuned against the §9 budget: these settings land il at ~30 KB and ilçe at
+  // ~75 KB gzipped, 105 KB together against a 120 KB ceiling, while keeping
+  // coastlines recognisable. Quantizing to 1e4 puts the grid at roughly 200 m
+  // across Türkiye's extent — finer than one screen pixel at maximum zoom.
+  const levels: [GeoLevelName, number, number][] = [
+    ['il', 1e-4, 1e4],
+    ['ilce', 3e-4, 1e4],
+  ];
 
-  for (const [level, minWeight] of levels) {
+  for (const [level, minWeight, quantization] of levels) {
     const input = args.get(level);
     if (input === undefined) {
       console.error(`[build-geo] --${level} <geojson> gerekli.`);
@@ -161,7 +204,10 @@ function main(): void {
     reportOrExit(validateFeatures(source.features, level), level);
 
     const outPath = resolve(outDir, `turkiye-${level}.topo.json`);
-    writeFileSync(outPath, JSON.stringify(buildTopology(source.features, level, minWeight)));
+    writeFileSync(
+      outPath,
+      JSON.stringify(buildTopology(source.features, level, minWeight, quantization)),
+    );
 
     const sizeKb = Math.round(readFileSync(outPath).byteLength / 1024);
     console.log(`[build-geo] ${level}: ${source.features.length} bölge → ${outPath} (${sizeKb} KB)`);

@@ -29,6 +29,7 @@
   "scripts": {
     "build": "vite build && tsc -p tsconfig.build.json --emitDeclarationOnly",
     "build:geo": "tsx scripts/build-geo.ts",
+    "prepare:geo": "tsx scripts/prepare-geo-source.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
