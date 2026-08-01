@@ -2,21 +2,22 @@
 
 Türkiye suç istatistikleri için etkileşimli ısı haritası React bileşeni.
 
-> **Durum:** Geliştirme aşamasında. Paket henüz npm'e yayımlanmadı; aşağıdaki
-> GitHub kurulumu şu an çalışan yoldur.
+[![npm](https://img.shields.io/npm/v/turkiye-suc-haritasi.svg)](https://www.npmjs.com/package/turkiye-suc-haritasi)
+[![license](https://img.shields.io/npm/l/turkiye-suc-haritasi.svg)](./LICENSE)
+
+> **Durum:** 0.1.0 yayımlandı. Sürüm numarası 1.0'ın altında olduğu için genel
+> API'nin hâlâ değişebileceğini varsayın.
 
 ## Kurulum
 
-Depodan doğrudan:
+```bash
+npm install turkiye-suc-haritasi
+```
+
+Depodaki son hâli doğrudan kurmak isterseniz:
 
 ```bash
 npm install github:Emre-Kurubas/Turkey-Heat-Map
-```
-
-npm'e yayımlandıktan sonra:
-
-```bash
-npm install turkiye-suc-haritasi
 ```
 
 React 18 veya 19 bir **peer dependency**'dir; projenizde zaten kurulu olması
