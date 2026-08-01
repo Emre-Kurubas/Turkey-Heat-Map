@@ -25,6 +25,20 @@ export const trStrings: Strings = {
     perCapita: 'Nüfusa göre',
     allCategories: 'Tümü',
   },
+  sidebar: {
+    title: 'Bölgeler',
+    collapse: 'Listeyi daralt',
+    expand: 'Listeyi genişlet',
+    sortByTotal: 'Sayıya göre sırala',
+    sortByName: 'Ada göre sırala',
+    empty: 'Gösterilecek bölge yok',
+  },
+  search: {
+    label: 'Ara',
+    placeholder: 'İl, ilçe, suç türü veya yıl ara…',
+    noResults: 'Sonuç bulunamadı',
+    groups: { il: 'İl', ilce: 'İlçe', category: 'Suç Türü', year: 'Yıl' },
+  },
   scaleMode: {
     linear: 'Doğrusal',
     log: 'Logaritmik',

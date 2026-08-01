@@ -11,6 +11,7 @@ const base: HeatMapState = {
   filters: DEFAULT_FILTERS,
   defaultFilters: DEFAULT_FILTERS,
   yearBounds: [2015, 2024],
+  flyToRequest: null,
   metric: 'total',
   scaleMode: 'quantile',
 };
@@ -165,5 +166,33 @@ describe('createHeatMapStore', () => {
     const store = createHeatMapStore(base);
     store.dispatch({ type: 'select', code: '01' });
     expect(store.getState().selectedCode).toBe('01');
+  });
+});
+
+describe('fly-to requests', () => {
+  it('records a requested region', () => {
+    const next = heatMapReducer(base, { type: 'requestFlyTo', code: '34' });
+    expect(next.flyToRequest).toBe('34');
+  });
+
+  it('clears the request once the map has acted on it', () => {
+    const asked = heatMapReducer(base, { type: 'requestFlyTo', code: '34' });
+    expect(heatMapReducer(asked, { type: 'clearFlyTo' }).flyToRequest).toBeNull();
+  });
+
+  it('no-ops when clearing an already-empty request', () => {
+    expect(heatMapReducer(base, { type: 'clearFlyTo' })).toBe(base);
+  });
+
+  it('re-requesting the same region still fires, so a second click flies again', () => {
+    const asked = heatMapReducer(base, { type: 'requestFlyTo', code: '34' });
+    const again = heatMapReducer(asked, { type: 'requestFlyTo', code: '34' });
+    expect(again).not.toBe(asked);
+    expect(again.flyToRequest).toBe('34');
+  });
+
+  it('drops a pending request when the level changes, since codes are level-specific', () => {
+    const asked = heatMapReducer(base, { type: 'requestFlyTo', code: '34' });
+    expect(heatMapReducer(asked, { type: 'setLevel', level: 'ilce' }).flyToRequest).toBeNull();
   });
 });

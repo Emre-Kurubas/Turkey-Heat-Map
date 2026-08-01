@@ -13,6 +13,11 @@ export interface HeatMapState {
   defaultFilters: FilterSet;
   /** The data's full year span. The slider's extent, and the range clamp. */
   yearBounds: [number, number];
+  /**
+   * A region the map has been asked to fly to, by a panel that cannot reach
+   * the map directly. The map clears it once the animation starts.
+   */
+  flyToRequest: string | null;
   metric: MetricMode;
   scaleMode: ScaleMode;
 }
@@ -28,6 +33,8 @@ export type HeatMapAction =
   | { type: 'resetFilters' }
   | { type: 'setMetric'; metric: MetricMode }
   | { type: 'setScaleMode'; mode: ScaleMode }
+  | { type: 'requestFlyTo'; code: string }
+  | { type: 'clearFlyTo' }
   | { type: 'resetView' };
 
 export const IDENTITY_TRANSFORM: Transform = { k: 1, x: 0, y: 0 };
@@ -40,9 +47,15 @@ export function heatMapReducer(state: HeatMapState, action: HeatMapAction): Heat
     case 'setLevel':
       if (action.level === state.level) return state;
       // Region codes are level-specific: "34" means İstanbul at il level and
-      // nothing at all at ilçe level. Carrying a selection across would
-      // highlight a region that does not exist.
-      return { ...state, level: action.level, selectedCode: null, focusedCode: null };
+      // nothing at all at ilçe level. Carrying a selection — or a pending
+      // fly-to — across would target a region that does not exist.
+      return {
+        ...state,
+        level: action.level,
+        selectedCode: null,
+        focusedCode: null,
+        flyToRequest: null,
+      };
 
     case 'select':
       return { ...state, selectedCode: action.code };
@@ -82,6 +95,14 @@ export function heatMapReducer(state: HeatMapState, action: HeatMapAction): Heat
 
     case 'setScaleMode':
       return { ...state, scaleMode: action.mode };
+
+    case 'requestFlyTo':
+      // Always a new object, even for the same code: clicking the same sidebar
+      // row twice should fly twice, and identity is how the map notices.
+      return { ...state, flyToRequest: action.code };
+
+    case 'clearFlyTo':
+      return state.flyToRequest === null ? state : { ...state, flyToRequest: null };
 
     case 'resetView':
       return {

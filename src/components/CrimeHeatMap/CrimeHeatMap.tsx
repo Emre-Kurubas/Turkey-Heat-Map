@@ -141,6 +141,7 @@ export function CrimeHeatMap(props: CrimeHeatMapProps) {
     // when nothing has changed.
     defaultFilters: reconciled.filters,
     yearBounds: reconciled.yearBounds,
+    flyToRequest: null,
     metric: reconciled.metric,
     scaleMode,
   }));

@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HeatMapProvider } from '@/context/HeatMapProvider.js';
 import { createHeatMapStore, type HeatMapState } from '@/context/HeatMapStore.js';
 import { createHoverStore } from '@/context/HoverStore.js';
@@ -22,6 +22,7 @@ const base: HeatMapState = {
   filters: { yearRange: [2020, 2020], categories: [] },
   defaultFilters: { yearRange: [2020, 2020], categories: [] },
   yearBounds: [2020, 2020],
+  flyToRequest: null,
   metric: 'total',
   scaleMode: 'quantile',
 };
@@ -48,6 +49,14 @@ function renderCanvas(state: HeatMapState = base, props: Partial<MapCanvasProps>
   );
   return { ...utils, store };
 }
+
+// Reduced motion makes a fly-to land in one step rather than needing frames.
+beforeEach(() => {
+  vi.stubGlobal('matchMedia', () => ({
+    matches: true, addEventListener: () => {}, removeEventListener: () => {},
+  }));
+});
+afterEach(() => { vi.unstubAllGlobals(); });
 
 describe('MapCanvas', () => {
   it('renders an accessible svg', () => {
@@ -172,5 +181,30 @@ describe('MapCanvas', () => {
     renderCanvas({ ...base, level: 'ilce', transform: { k: 3, x: 0, y: 0 } });
     expect(screen.getByRole('img', { name: /Adalar/u }).getAttribute('aria-label'))
       .toContain('100');
+  });
+});
+
+describe('MapCanvas — fly-to requests from other panels', () => {
+  it('flies to a region requested through the store', () => {
+    const { store } = renderCanvas();
+    const before = store.getState().transform;
+
+    act(() => { store.dispatch({ type: 'requestFlyTo', code: '34' }); });
+    expect(store.getState().transform).not.toEqual(before);
+  });
+
+  it('clears the request so the same region can be requested again', () => {
+    const { store } = renderCanvas();
+    act(() => { store.dispatch({ type: 'requestFlyTo', code: '34' }); });
+    expect(store.getState().flyToRequest).toBeNull();
+  });
+
+  it('ignores a request for a region it has no geometry for', () => {
+    const { store } = renderCanvas();
+    const before = store.getState().transform;
+
+    act(() => { store.dispatch({ type: 'requestFlyTo', code: 'yok' }); });
+    expect(store.getState().transform).toEqual(before);
+    expect(store.getState().flyToRequest).toBeNull();
   });
 });

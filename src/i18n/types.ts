@@ -27,6 +27,21 @@ export interface Strings {
     /** Shown when no category chip is selected — empty means every category. */
     allCategories: string;
   };
+  sidebar: {
+    title: string;
+    collapse: string;
+    expand: string;
+    sortByTotal: string;
+    sortByName: string;
+    empty: string;
+  };
+  search: {
+    label: string;
+    placeholder: string;
+    noResults: string;
+    /** Dropdown group headings, keyed by SearchEntityType. */
+    groups: { il: string; ilce: string; category: string; year: string };
+  };
   scaleMode: {
     linear: string;
     log: string;

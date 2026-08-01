@@ -16,6 +16,7 @@ const base: HeatMapState = {
   filters: { yearRange: [2015, 2024], categories: [] },
   defaultFilters: { yearRange: [2015, 2024], categories: [] },
   yearBounds: [2015, 2024],
+  flyToRequest: null,
   metric: 'total',
   scaleMode: 'quantile',
 };
@@ -65,8 +66,8 @@ describe('HeatMapProvider', () => {
       { wrapper },
     );
 
-    act(() => { result.current.setHover({ type: 'enter', target: { code: '34', x: 5, y: 6 } }); });
-    expect(result.current.hover).toEqual({ code: '34', x: 5, y: 6 });
+    act(() => { result.current.setHover({ type: 'enter', target: { code: '34', x: 5, y: 6, source: 'map' } }); });
+    expect(result.current.hover).toEqual({ code: '34', x: 5, y: 6, source: 'map' });
     expect(store.getState().selectedCode).toBeNull();
   });
 
@@ -76,7 +77,7 @@ describe('HeatMapProvider', () => {
     renderHook(() => { renders(); return useHeatMapState((s) => s.level); }, { wrapper });
     const before = renders.mock.calls.length;
 
-    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 1, y: 2 } }); });
+    act(() => { hoverStore.dispatch({ type: 'enter', target: { code: '34', x: 1, y: 2, source: 'map' } }); });
     expect(renders.mock.calls.length).toBe(before);
   });
 

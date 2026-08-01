@@ -24,6 +24,7 @@ const base: HeatMapState = {
   filters: DEFAULTS,
   defaultFilters: DEFAULTS,
   yearBounds: [2015, 2024],
+  flyToRequest: null,
   metric: 'total',
   scaleMode: 'quantile',
 };

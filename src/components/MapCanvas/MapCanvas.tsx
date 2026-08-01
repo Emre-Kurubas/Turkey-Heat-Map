@@ -1,9 +1,10 @@
-import { useCallback, useId, useMemo } from 'react';
+import { useCallback, useEffect, useId, useMemo } from 'react';
 import type { RollupResult } from '@/core/aggregation/index.js';
 import type { ColorScaleName, RampFn } from '@/core/color/index.js';
 import { formatTrNumber } from '@/core/format/index.js';
 import type { CrimeCategory, CrimeRecord, Viewport } from '@/core/types/index.js';
 import { useAggregates } from '@/hooks/useAggregates.js';
+import { useFlyTo } from '@/hooks/useFlyTo.js';
 import { useHeatMapDispatch, useHeatMapState, useStrings } from '@/hooks/useHeatMapState.js';
 import { useHoverTarget } from '@/hooks/useHoverTarget.js';
 import { useMapGeometry } from '@/hooks/useMapGeometry.js';
@@ -88,6 +89,21 @@ export function MapCanvas({
   const onFocusRegion = useCallback((code: string) => {
     dispatch({ type: 'focus', code });
   }, [dispatch]);
+
+  // Panels ask for a fly-to through the store rather than reaching into the
+  // map, which is what lets the sidebar and search bar move it without
+  // importing it. The request is cleared immediately so the same region can be
+  // requested again.
+  const flyTo = useFlyTo(viewport);
+  const flyToRequest = useHeatMapState((state) => state.flyToRequest);
+
+  useEffect(() => {
+    if (flyToRequest === null) return;
+
+    const bbox = geometry.bounds.get(flyToRequest);
+    if (bbox !== undefined) flyTo(bbox);
+    dispatch({ type: 'clearFlyTo' });
+  }, [flyToRequest, geometry.bounds, flyTo, dispatch]);
 
   return (
     <div ref={containerRef} className={styles.container}>

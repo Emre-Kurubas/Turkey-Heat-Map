@@ -2,9 +2,15 @@ import type { Store } from './HeatMapStore.js';
 
 export interface HoverTarget {
   code: string;
-  /** Client coordinates, for tooltip placement. */
+  /** Client coordinates, for tooltip placement. Zero for a list hover. */
   x: number;
   y: number;
+  /**
+   * Where the hover came from. A list hover highlights the region on the map
+   * but must not open a tooltip — there is no pointer over the map to anchor
+   * it to, and one would appear in the corner attached to nothing.
+   */
+  source: 'map' | 'list';
 }
 
 export type HoverAction =

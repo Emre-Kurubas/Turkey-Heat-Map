@@ -22,6 +22,7 @@ const base: HeatMapState = {
   filters: { yearRange: [2015, 2024], categories: [] },
   defaultFilters: { yearRange: [2015, 2024], categories: [] },
   yearBounds: [2015, 2024],
+  flyToRequest: null,
   metric: 'total',
   scaleMode: 'quantile',
 };
@@ -74,7 +75,7 @@ describe('HitLayer', () => {
     const { container, hoverStore } = renderLayer();
     const path = container.querySelector('path[data-code="34"]')!;
     fireEvent.pointerEnter(path, { clientX: 12, clientY: 34 });
-    expect(hoverStore.getState()).toEqual({ code: '34', x: 12, y: 34 });
+    expect(hoverStore.getState()).toEqual({ code: '34', x: 12, y: 34, source: 'map' });
   });
 
   it('clears the hover target on pointer leave', () => {
