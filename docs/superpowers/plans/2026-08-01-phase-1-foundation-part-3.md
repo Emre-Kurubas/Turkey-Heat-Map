@@ -34,7 +34,7 @@ function createPathGenerator(projection: GeoProjection): GeoPath;
 
 **Equal-area is a correctness requirement, not an aesthetic preference.** A choropleth encodes magnitude by color across area. Under Mercator, northeastern provinces would render visibly larger than equally-sized southern ones, systematically overstating how much of the country a color covers. `geoConicEqualArea` with parallels bracketing Turkey's latitude span preserves area ratios exactly.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/geo/projection.test.ts`:
 
@@ -155,12 +155,12 @@ describe('createTurkeyProjection', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/geo`
 Expected: FAIL — cannot resolve `./projection.js`.
 
-- [ ] **Step 3: Implement `src/core/geo/projection.ts`**
+- [x] **Step 3: Implement `src/core/geo/projection.ts`**
 
 ```ts
 import { type GeoPath, type GeoProjection, geoConicEqualArea, geoPath } from 'd3-geo';
@@ -220,12 +220,12 @@ export function createPathGenerator(projection: GeoProjection): GeoPath {
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/geo`
 Expected: PASS. If the area-ratio test fails, the projection is not equal-area — check that `geoConicEqualArea` was used rather than `geoConicConformal`, whose name is one letter away and whose behavior is exactly what this test exists to reject.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/geo/projection.ts src/core/geo/projection.test.ts
@@ -249,7 +249,7 @@ git commit -m "feat(core): add Turkey-tuned equal-area projection"
 
 İlçe metadata is derived from the boundary file rather than hand-written. 973 hand-typed entries would drift from the geometry the moment either changed; deriving them makes the two impossible to disagree.
 
-- [ ] **Step 1: Create the test fixture**
+- [x] **Step 1: Create the test fixture**
 
 Create `src/core/geo/__fixtures__/sample.topo.json`. Three tiny square regions, two in İstanbul and one in Ankara, with the same `id`/`properties.name` convention the real build script emits:
 
@@ -279,7 +279,7 @@ Create `src/core/geo/__fixtures__/sample.topo.json`. Three tiny square regions, 
 }
 ```
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 Create `src/core/geo/topology.test.ts`:
 
@@ -418,12 +418,12 @@ describe('regionNameMap', () => {
 });
 ```
 
-- [ ] **Step 3: Run the tests to verify they fail**
+- [x] **Step 3: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/geo/topology.test.ts`
 Expected: FAIL — cannot resolve `./topology.js`.
 
-- [ ] **Step 4: Implement `src/core/geo/topology.ts`**
+- [x] **Step 4: Implement `src/core/geo/topology.ts`**
 
 ```ts
 import { feature } from 'topojson-client';
@@ -506,12 +506,12 @@ export function regionNameMap(metas: readonly RegionMeta[]): Map<string, string>
 }
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/geo`
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/core/geo/topology.ts src/core/geo/topology.test.ts src/core/geo/__fixtures__
@@ -544,7 +544,7 @@ interface FitOptions {
 
 Transform convention, fixed here and used everywhere after: **`screen = point * k + [x, y]`.** This matches the SVG `transform="translate(x,y) scale(k)"` attribute exactly, so the value can be handed straight to the DOM in Phase 2 with no conversion.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/geo/bounds.test.ts`:
 
@@ -680,12 +680,12 @@ describe('computeFitTransform', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/geo/bounds.test.ts`
 Expected: FAIL — cannot resolve `./bounds.js`.
 
-- [ ] **Step 3: Implement `src/core/geo/bounds.ts`**
+- [x] **Step 3: Implement `src/core/geo/bounds.ts`**
 
 ```ts
 import type { GeoPath } from 'd3-geo';
@@ -787,12 +787,12 @@ export function computeFitTransform(
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/geo`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/geo/bounds.ts src/core/geo/bounds.test.ts
@@ -816,7 +816,7 @@ At ilçe level the map holds 973 polygons. Rendering all of them at high zoom, w
   - `cullFeatures(bounds: ReadonlyMap<string, BBox>, transform, viewport, margin?): Set<string>`
   - the `src/core/geo` barrel
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/geo/viewport.test.ts`:
 
@@ -926,12 +926,12 @@ describe('cullFeatures', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/geo/viewport.test.ts`
 Expected: FAIL — cannot resolve `./viewport.js`.
 
-- [ ] **Step 3: Implement `src/core/geo/viewport.ts`**
+- [x] **Step 3: Implement `src/core/geo/viewport.ts`**
 
 ```ts
 import type { BBox, Transform, Viewport } from '@/core/types/index.js';
@@ -995,7 +995,7 @@ export function cullFeatures(
 }
 ```
 
-- [ ] **Step 4: Create the barrel `src/core/geo/index.ts`**
+- [x] **Step 4: Create the barrel `src/core/geo/index.ts`**
 
 ```ts
 export type { ProjectionOptions } from './projection.js';
@@ -1006,12 +1006,12 @@ export { collectBounds, computeFitTransform, featureBounds, featureCentroid } fr
 export { cullFeatures, isVisible } from './viewport.js';
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/geo`
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/core/geo
@@ -1056,7 +1056,7 @@ function buildSearchIndex(input: SearchIndexInput): SearchEntity[];
 
 Folding happens once at index time, not per keystroke. With ~1,070 entities and a keystroke budget measured in milliseconds, re-folding on every input event would be the dominant cost.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/search/entities.test.ts`:
 
@@ -1144,12 +1144,12 @@ describe('buildSearchIndex', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/search/entities.test.ts`
 Expected: FAIL — cannot resolve `./entities.js`.
 
-- [ ] **Step 3: Implement `src/core/search/entities.ts`**
+- [x] **Step 3: Implement `src/core/search/entities.ts`**
 
 ```ts
 import type { CrimeCategory, RegionMeta } from '@/core/types/index.js';
@@ -1223,12 +1223,12 @@ export function buildSearchIndex(input: SearchIndexInput): SearchEntity[] {
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/search/entities.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/search/entities.ts src/core/search/entities.test.ts
@@ -1256,7 +1256,7 @@ interface SearchResult { readonly entity: SearchEntity; readonly score: number; 
 
 Scoring tiers, highest first: exact match, whole-label prefix, word-boundary prefix, substring, bounded fuzzy. Ties break by entity type priority (il > ilçe > category > year), then Turkish alphabetical order, so results never reshuffle between renders.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/search/match.test.ts`:
 
@@ -1424,12 +1424,12 @@ describe('searchEntities — ranking', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/search/match.test.ts`
 Expected: FAIL — cannot resolve `./match.js`.
 
-- [ ] **Step 3: Implement `src/core/search/match.ts`**
+- [x] **Step 3: Implement `src/core/search/match.ts`**
 
 ```ts
 import { compareTurkish } from './collate.js';
@@ -1553,7 +1553,7 @@ export function searchEntities(
 }
 ```
 
-- [ ] **Step 4: Create the barrel `src/core/search/index.ts`**
+- [x] **Step 4: Create the barrel `src/core/search/index.ts`**
 
 ```ts
 export { foldTurkish, toTurkishLowerCase, toTurkishUpperCase } from './normalize.js';
@@ -1564,14 +1564,14 @@ export type { SearchResult } from './match.js';
 export { scoreEntity, searchEntities } from './match.js';
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/search`
 Expected: PASS.
 
 If the "prefix above substring" ranking test fails, the tightness bonus is crossing a tier boundary — confirm the bonus is capped at 50 while the tier gap is 200.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/core/search
@@ -1606,7 +1606,7 @@ interface ValidationReport {
 
 The script **fails the build on any unmatched region code, in either direction.** A boundary file missing a province renders a hole in the map; a boundary file with a code the data layer does not recognize renders a region that can never be colored. Both are silent in production and obvious at build time, so they get caught here.
 
-- [ ] **Step 1: Add the devDependencies and script**
+- [x] **Step 1: Add the devDependencies and script**
 
 ```bash
 npm install --save-dev topojson-server@^3.0.1 topojson-simplify@^3.0.3 tsx@^4.19.2
@@ -1620,7 +1620,7 @@ Then add to `package.json` `scripts`:
 
 These are `devDependencies`: the script runs on a maintainer's machine, and its output — the committed TopoJSON — is what ships. The Global Constraint limiting runtime dependencies to `d3-geo` and `topojson-client` is unaffected.
 
-- [ ] **Step 2: Write the failing validation tests**
+- [x] **Step 2: Write the failing validation tests**
 
 Create `scripts/build-geo.test.ts`:
 
@@ -1738,12 +1738,12 @@ describe('validateFeatures — empty input', () => {
 
 Note this test adds `provincesWithoutDistricts: string[]` to `ValidationReport`. Include it in the interface.
 
-- [ ] **Step 3: Run the tests to verify they fail**
+- [x] **Step 3: Run the tests to verify they fail**
 
 Run: `npx vitest run scripts`
 Expected: FAIL — cannot resolve `./build-geo.js`. If Vitest does not pick the file up, add `'scripts/**/*.test.ts'` to `test.include` in `vitest.config.ts`.
 
-- [ ] **Step 4: Implement `scripts/build-geo.ts`**
+- [x] **Step 4: Implement `scripts/build-geo.ts`**
 
 ```ts
 /**
@@ -1911,7 +1911,7 @@ function main(): void {
 if (process.argv[1]?.endsWith('build-geo.ts') === true) main();
 ```
 
-- [ ] **Step 5: Write `scripts/README.md`**
+- [x] **Step 5: Write `scripts/README.md`**
 
 ```markdown
 # Sınır verisi oluşturma
@@ -1944,12 +1944,12 @@ Sitede lisanslı HGM/TÜİK sınır verisi varsa o tercih edilmelidir; betik kay
 bağımsızdır. Bu durumda ODbL atıf zorunluluğu ortadan kalkar.
 ```
 
-- [ ] **Step 6: Run the tests to verify they pass**
+- [x] **Step 6: Run the tests to verify they pass**
 
 Run: `npx vitest run scripts`
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add scripts package.json package-lock.json vitest.config.ts
@@ -1969,7 +1969,7 @@ git commit -m "feat(scripts): add geo build script with strict region code valid
 - Consumes: every module from Tasks 2–21
 - Produces: the package's public API surface
 
-- [ ] **Step 1: Write the failing barrel test**
+- [x] **Step 1: Write the failing barrel test**
 
 Create `src/index.test.ts`:
 
@@ -2039,12 +2039,12 @@ describe('public API surface', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/index.test.ts`
 Expected: FAIL — the barrel exports nothing.
 
-- [ ] **Step 3: Implement `src/index.ts`**
+- [x] **Step 3: Implement `src/index.ts`**
 
 ```ts
 /**
@@ -2109,12 +2109,12 @@ export type { MockDataOptions, MockDataset } from './data/mock/index.js';
 export { MOCK_CATEGORIES, createPrng, generateMockData } from './data/mock/index.js';
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `npx vitest run src/index.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Write `README.md`**
+- [x] **Step 5: Write `README.md`**
 
 The full prop table and usage examples belong to Phase 5, when the component exists. For now the README documents what Phase 1 actually ships, so it is never inaccurate:
 
@@ -2166,11 +2166,11 @@ tanımlamaz; yalnızca geliştirme, test ve dokümantasyon içindir.
 MIT. Sınır verisi OpenStreetMap türevidir ve ODbL kapsamında atıf gerektirir.
 ```
 
-- [ ] **Step 6: Add the MIT `LICENSE` file**
+- [x] **Step 6: Add the MIT `LICENSE` file**
 
 Standard MIT text, copyright the project owner, year 2026.
 
-- [ ] **Step 7: Run the full verification**
+- [x] **Step 7: Run the full verification**
 
 Run: `npm run verify`
 
@@ -2181,7 +2181,7 @@ Expected, and every line must actually be confirmed before Phase 1 is called don
 - all tests pass
 - `src/core` at **100% branch coverage**
 
-- [ ] **Step 8: Verify the built package**
+- [x] **Step 8: Verify the built package**
 
 Run: `npm run build && npm pack --dry-run`
 
@@ -2190,12 +2190,12 @@ Confirm:
 - `npm pack --dry-run` lists `dist/`, `README.md`, and `LICENSE` — and nothing from `src/`, `tests/`, or `scripts/`
 - no `react` import appears in the bundle: `grep -c "from \"react\"" dist/index.mjs` returns 0
 
-- [ ] **Step 9: Confirm the core-purity constraint holds mechanically**
+- [x] **Step 9: Confirm the core-purity constraint holds mechanically**
 
 Run: `npx eslint src/core --max-warnings 0`
 Expected: clean. This is the check that proves the architecture's central rule was not quietly bypassed while making a test pass.
 
-- [ ] **Step 10: Commit and tag**
+- [x] **Step 10: Commit and tag**
 
 ```bash
 git add src/index.ts src/index.test.ts README.md LICENSE
@@ -2209,14 +2209,14 @@ git tag phase-1-complete
 
 Every one of these must be **verified by running the command**, not assumed:
 
-- [ ] `npm run verify` passes end to end
-- [ ] `src/core` is at 100% branch coverage
-- [ ] `npx eslint src/core` is clean — no React import, no DOM global has crept in
-- [ ] `npm run build` produces ESM, CJS, and type declarations
-- [ ] `npm pack --dry-run` ships `dist/` only
-- [ ] The end-to-end test in `src/index.test.ts` passes: mock data → index → rollup → rank → color → legend, with no React in the path
-- [ ] Aggregation performance guards pass at realistic scale (>50,000 records)
-- [ ] No `Math.random()` anywhere in `src/` — `npx eslint .` enforces this
+- [x] `npm run verify` passes end to end
+- [x] `src/core` is at 100% branch coverage
+- [x] `npx eslint src/core` is clean — no React import, no DOM global has crept in
+- [x] `npm run build` produces ESM, CJS, and type declarations
+- [x] `npm pack --dry-run` ships `dist/` only
+- [x] The end-to-end test in `src/index.test.ts` passes: mock data → index → rollup → rank → color → legend, with no React in the path
+- [x] Aggregation performance guards pass at realistic scale (>50,000 records)
+- [x] No `Math.random()` anywhere in `src/` — `npx eslint .` enforces this
 
 ## What Phase 2 needs from Phase 1
 

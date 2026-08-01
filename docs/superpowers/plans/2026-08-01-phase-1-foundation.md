@@ -76,7 +76,7 @@ These apply to every task. Copied verbatim from the spec.
 - Consumes: nothing
 - Produces: a working `npm test`, `npm run build`, `npm run lint`, `npm run typecheck`. Every later task depends on these commands existing.
 
-- [ ] **Step 1: Create `package.json`**
+- [x] **Step 1: Create `package.json`**
 
 ```json
 {
@@ -129,7 +129,7 @@ These apply to every task. Copied verbatim from the spec.
 }
 ```
 
-- [ ] **Step 2: Create `tsconfig.json`**
+- [x] **Step 2: Create `tsconfig.json`**
 
 ```json
 {
@@ -157,7 +157,7 @@ These apply to every task. Copied verbatim from the spec.
 
 `noUncheckedIndexedAccess` matters here: this codebase indexes into arrays and maps constantly, and it forces every access to be null-checked. Leave it on even when it is annoying.
 
-- [ ] **Step 3: Create `tsconfig.build.json`**
+- [x] **Step 3: Create `tsconfig.build.json`**
 
 ```json
 {
@@ -174,7 +174,7 @@ These apply to every task. Copied verbatim from the spec.
 }
 ```
 
-- [ ] **Step 4: Create `vite.config.ts`**
+- [x] **Step 4: Create `vite.config.ts`**
 
 ```ts
 import { resolve } from 'node:path';
@@ -199,7 +199,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 5: Create `vitest.config.ts`**
+- [x] **Step 5: Create `vitest.config.ts`**
 
 ```ts
 import { resolve } from 'node:path';
@@ -224,7 +224,7 @@ export default defineConfig({
 
 The `environment: 'node'` is deliberate. Phase 1 is pure logic; if a test needs a DOM, something has been put in the wrong layer. Phase 3 adds a second Vitest project with `jsdom` for components.
 
-- [ ] **Step 6: Create `eslint.config.js` with the `core/`-purity rule**
+- [x] **Step 6: Create `eslint.config.js` with the `core/`-purity rule**
 
 ```js
 import js from '@eslint/js';
@@ -273,7 +273,7 @@ export default tseslint.config(
 );
 ```
 
-- [ ] **Step 7: Create `.gitignore`**
+- [x] **Step 7: Create `.gitignore`**
 
 ```
 node_modules/
@@ -283,14 +283,14 @@ coverage/
 .DS_Store
 ```
 
-- [ ] **Step 8: Create the placeholder barrel `src/index.ts`**
+- [x] **Step 8: Create the placeholder barrel `src/index.ts`**
 
 ```ts
 // Public API surface. Populated as modules land; see Task 23.
 export {};
 ```
 
-- [ ] **Step 9: Write a smoke test that proves the harness runs**
+- [x] **Step 9: Write a smoke test that proves the harness runs**
 
 Create `src/core/smoke.test.ts`:
 
@@ -304,7 +304,7 @@ describe('test harness', () => {
 });
 ```
 
-- [ ] **Step 10: Install and verify every script works**
+- [x] **Step 10: Install and verify every script works**
 
 ```bash
 npm install
@@ -318,7 +318,7 @@ Expected: `typecheck` passes silently. `lint` passes. `test` reports 1 passing t
 
 If `build` fails because the entry exports nothing, that is expected only if Rollup errors on an empty chunk — in that case leave the `export {}` and confirm `dist/index.mjs` exists regardless.
 
-- [ ] **Step 11: Delete the smoke test and commit**
+- [x] **Step 11: Delete the smoke test and commit**
 
 The smoke test has done its job; keeping it dilutes the suite. Real tests arrive in Task 2.
 
@@ -342,7 +342,7 @@ git commit -m "chore: scaffold TypeScript library with Vite, Vitest, and core/-p
 
 Types alone cannot be unit-tested at runtime, so this task's test is a **compile-time** test using `expectTypeOf`. That is a real test: it fails the build if a later task changes a shape incompatibly.
 
-- [ ] **Step 1: Create `src/core/types/data.ts`**
+- [x] **Step 1: Create `src/core/types/data.ts`**
 
 ```ts
 /** A single pre-aggregated crime count. This is the library's input unit. */
@@ -412,7 +412,7 @@ export interface NormalizedRecord {
 }
 ```
 
-- [ ] **Step 2: Create `src/core/types/filters.ts`**
+- [x] **Step 2: Create `src/core/types/filters.ts`**
 
 ```ts
 export type GeoLevel = 'il' | 'ilce';
@@ -429,7 +429,7 @@ export type MetricMode = 'total' | 'perCapita';
 
 The "empty means all" convention is load-bearing and appears in three modules. It is chosen because it makes the default filter state trivially constructible and makes "reset" a single assignment.
 
-- [ ] **Step 3: Create `src/core/types/view.ts`**
+- [x] **Step 3: Create `src/core/types/view.ts`**
 
 ```ts
 export type ScaleMode = 'linear' | 'log' | 'quantile';
@@ -450,7 +450,7 @@ export interface Viewport {
 }
 ```
 
-- [ ] **Step 4: Create the barrel `src/core/types/index.ts`**
+- [x] **Step 4: Create the barrel `src/core/types/index.ts`**
 
 ```ts
 export type {
@@ -463,7 +463,7 @@ export type { ScaleMode, Transform, BBox, Viewport } from './view.js';
 
 Note the `.js` extensions in relative imports. `moduleResolution: bundler` tolerates their absence, but including them keeps the source valid under Node ESM resolution too, which matters when `scripts/` is run directly with `tsx` or `node --experimental-strip-types`.
 
-- [ ] **Step 5: Write the compile-time type test**
+- [x] **Step 5: Write the compile-time type test**
 
 Create `src/core/types/types.test.ts`:
 
@@ -487,12 +487,12 @@ describe('core type vocabulary', () => {
 });
 ```
 
-- [ ] **Step 6: Run typecheck and tests**
+- [x] **Step 6: Run typecheck and tests**
 
 Run: `npm run typecheck && npx vitest run src/core/types`
 Expected: typecheck passes; 3 tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/core/types
@@ -516,7 +516,7 @@ This is the highest-risk pure function in the library and the one most likely to
   - `toTurkishLowerCase(input: string): string` — display-correct lowercase
   - `toTurkishUpperCase(input: string): string` — display-correct uppercase
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/search/normalize.test.ts`:
 
@@ -603,12 +603,12 @@ describe('toTurkishUpperCase', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/search/normalize.test.ts`
 Expected: FAIL — cannot resolve `./normalize.js`.
 
-- [ ] **Step 3: Implement `src/core/search/normalize.ts`**
+- [x] **Step 3: Implement `src/core/search/normalize.ts`**
 
 ```ts
 /**
@@ -666,17 +666,17 @@ export function toTurkishUpperCase(input: string): string {
 
 Why the pre-replace in `toTurkishLowerCase` rather than `toLocaleLowerCase('tr')`: the locale-aware form depends on the host's ICU data, which is absent in small-icu Node builds and inconsistent in older browsers. The explicit replacement is deterministic everywhere, which the Global Constraints require.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/search/normalize.test.ts`
 Expected: PASS, all tests green.
 
-- [ ] **Step 5: Verify coverage is complete for this file**
+- [x] **Step 5: Verify coverage is complete for this file**
 
 Run: `npx vitest run --coverage src/core/search/normalize.test.ts`
 Expected: `normalize.ts` at 100% branches. If the `mapped ?? ch.toLowerCase()` fallback shows an uncovered branch, add a case with a non-Turkish letter such as `foldTurkish('Wien')`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/core/search/normalize.ts src/core/search/normalize.test.ts
@@ -701,7 +701,7 @@ git commit -m "feat(core): add Turkish-aware text folding and case conversion"
   - `formatDelta(delta: number): string` — `-45` → `"−45"` (U+2212 minus)
   - `formatPercentDelta(ratio: number | null): string` — `null` → `"—"`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/format/format.test.ts`:
 
@@ -830,12 +830,12 @@ describe('formatPercentDelta', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/format`
 Expected: FAIL — cannot resolve `./index.js`.
 
-- [ ] **Step 3: Implement `src/core/format/number.ts`**
+- [x] **Step 3: Implement `src/core/format/number.ts`**
 
 ```ts
 /**
@@ -902,7 +902,7 @@ export function formatCompactTr(value: number): string {
 }
 ```
 
-- [ ] **Step 4: Implement `src/core/format/percent.ts`**
+- [x] **Step 4: Implement `src/core/format/percent.ts`**
 
 ```ts
 import { EM_DASH, formatTrDecimal } from './number.js';
@@ -918,7 +918,7 @@ export function formatPercent(ratio: number, digits = 1): string {
 }
 ```
 
-- [ ] **Step 5: Implement `src/core/format/delta.ts`**
+- [x] **Step 5: Implement `src/core/format/delta.ts`**
 
 ```ts
 import { EM_DASH, MINUS, formatTrDecimal, formatTrNumber } from './number.js';
@@ -946,7 +946,7 @@ export function formatPercentDelta(ratio: number | null): string {
 }
 ```
 
-- [ ] **Step 6: Create the barrel `src/core/format/index.ts`**
+- [x] **Step 6: Create the barrel `src/core/format/index.ts`**
 
 ```ts
 export { EM_DASH, MINUS, formatCompactTr, formatTrDecimal, formatTrNumber } from './number.js';
@@ -954,14 +954,14 @@ export { formatPercent } from './percent.js';
 export { formatDelta, formatPercentDelta } from './delta.js';
 ```
 
-- [ ] **Step 7: Run the tests to verify they pass**
+- [x] **Step 7: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/format`
 Expected: PASS, all tests green.
 
 Note `formatTrDecimal(2.7, 0)` returning `"3"`: `toFixed(0)` produces no `.`, so `fracPart` is `undefined` and the separator is correctly omitted. That branch is covered by the "omits the separator when digits is 0" test.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/core/format
@@ -986,7 +986,7 @@ git commit -m "feat(core): add deterministic tr-TR number, percent and delta for
 
 İlçe metadata is **not** hand-written — 973 entries would be unmaintainable and would duplicate the boundary data. It is derived from the TopoJSON in Task 17.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/data/geo/region-meta.test.ts`:
 
@@ -1065,12 +1065,12 @@ describe('ilCodeFromIlceCode', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/data/geo`
 Expected: FAIL — cannot resolve `./region-meta.js`.
 
-- [ ] **Step 3: Implement `src/data/geo/region-meta.ts`**
+- [x] **Step 3: Implement `src/data/geo/region-meta.ts`**
 
 The province list is fixed reference data. Transcribe it exactly — the diacritics are load-bearing, because a name stored as `Sanliurfa` folds to a different search key than `Şanlıurfa` and would break Task 20's search.
 
@@ -1126,12 +1126,12 @@ export function ilCodeFromIlceCode(ilceCode: string): string | null {
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/data/geo`
 Expected: PASS. If the count assertion fails, a province is missing or duplicated — compare against the code range test output, which names the gap.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/data/geo/region-meta.ts src/data/geo/region-meta.test.ts
@@ -1159,7 +1159,7 @@ git commit -m "feat(data): add il region metadata with plaka codes"
 
 Interpolating in sRGB produces muddy grey-brown bands between blue and red. OKLab is perceptually uniform, so the midpoint of a ramp looks like the midpoint.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/color/interpolate.test.ts`:
 
@@ -1297,12 +1297,12 @@ describe('createRamp', () => {
 
 Note: `createRamp([])` throwing is the one place in `core/` that throws. It is not a data error — it is a programming error in the consumer's `colorScale` prop, caught at development time, and the spec's "invalid data never throws" rule is about the `data` prop.
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/color`
 Expected: FAIL — cannot resolve `./interpolate.js`.
 
-- [ ] **Step 3: Implement `src/core/color/interpolate.ts`**
+- [x] **Step 3: Implement `src/core/color/interpolate.ts`**
 
 ```ts
 /**
@@ -1457,12 +1457,12 @@ export function createRamp(stops: readonly string[]): (t: number) => string {
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/color`
 Expected: PASS. If the round-trip test drifts by more than 1, a matrix coefficient has been transcribed wrong — compare against Ottosson's published values digit by digit.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/color/interpolate.ts src/core/color/interpolate.test.ts
@@ -1495,7 +1495,7 @@ interface ColorDomain {
 
 The default is `quantile` because Turkish crime counts are extremely right-skewed — İstanbul dwarfs everything, and a linear domain would render 78 provinces in indistinguishable blue.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/color/domain.test.ts`:
 
@@ -1640,12 +1640,12 @@ describe('createColorDomain — degenerate inputs', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/color/domain.test.ts`
 Expected: FAIL — cannot resolve `./domain.js`.
 
-- [ ] **Step 3: Implement `src/core/color/domain.ts`**
+- [x] **Step 3: Implement `src/core/color/domain.ts`**
 
 ```ts
 import type { ScaleMode } from '@/core/types/index.js';
@@ -1769,12 +1769,12 @@ export function createColorDomain(
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/color/domain.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/color/domain.ts src/core/color/domain.test.ts
@@ -1813,7 +1813,7 @@ interface ColorScale {
 }
 ```
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/color/scales.test.ts`:
 
@@ -1937,12 +1937,12 @@ describe('createDiffColorScale', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/color/scales.test.ts`
 Expected: FAIL — cannot resolve `./scales.js`.
 
-- [ ] **Step 3: Implement `src/core/color/scales.ts`**
+- [x] **Step 3: Implement `src/core/color/scales.ts`**
 
 ```ts
 import type { ScaleMode } from '@/core/types/index.js';
@@ -2035,12 +2035,12 @@ export function createDiffColorScale(maxAbsDelta: number): ColorScale {
 
 Note the degenerate case: `createDiffColorScale(0)` builds a domain over `[0, 0, 0]`, which `createColorDomain` recognizes as having no spread and maps every value to `t = 0.5` — the neutral center. That is exactly right, and it is why the test asserting `flat(10) === flat(0)` passes.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/color`
 Expected: PASS, all color tests green.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/color/scales.ts src/core/color/scales.test.ts
@@ -2073,7 +2073,7 @@ interface LegendBreak {
 
 The legend must state which scale mode is active, because a quantile map answers "how does this rank" while a linear map answers "how many", and conflating them is a real analytical error. The mode label itself lives in `i18n/tr.ts` (Phase 3); this task supplies the numeric buckets.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/color/legend.test.ts`:
 
@@ -2166,12 +2166,12 @@ describe('computeLegendBreaks', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/color/legend.test.ts`
 Expected: FAIL — cannot resolve `./legend.js`.
 
-- [ ] **Step 3: Implement `src/core/color/legend.ts`**
+- [x] **Step 3: Implement `src/core/color/legend.ts`**
 
 ```ts
 import { formatTrNumber } from '@/core/format/index.js';
@@ -2262,7 +2262,7 @@ function invertT(
 }
 ```
 
-- [ ] **Step 4: Create the barrel `src/core/color/index.ts`**
+- [x] **Step 4: Create the barrel `src/core/color/index.ts`**
 
 ```ts
 export type { Oklab, RGB } from './interpolate.js';
@@ -2280,19 +2280,19 @@ export type { LegendBreak } from './legend.js';
 export { computeLegendBreaks } from './legend.js';
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/color`
 Expected: PASS.
 
 If the "no gaps" test fails on a quantile domain, the bisection is converging to a value whose `toT` sits just off the target; confirm `invertT` rounds only at the end, never inside the loop.
 
-- [ ] **Step 6: Run the whole suite and check coverage so far**
+- [x] **Step 6: Run the whole suite and check coverage so far**
 
 Run: `npm run test:coverage`
 Expected: PASS with 100% branch coverage across `src/core`. Coverage gaps at this point are almost always an untested guard clause — add the case rather than lowering the threshold.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/core/color

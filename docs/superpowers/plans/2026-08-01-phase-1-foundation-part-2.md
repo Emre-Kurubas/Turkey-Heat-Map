@@ -39,7 +39,7 @@ interface BuildIndexOptions {
 function buildIndex(options: BuildIndexOptions): CrimeIndex;
 ```
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/aggregation/buildIndex.test.ts`:
 
@@ -257,12 +257,12 @@ describe('buildIndex — empty inputs', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/aggregation`
 Expected: FAIL — cannot resolve `./buildIndex.js`.
 
-- [ ] **Step 3: Implement `src/core/aggregation/buildIndex.ts`**
+- [x] **Step 3: Implement `src/core/aggregation/buildIndex.ts`**
 
 ```ts
 import { ilCodeFromIlceCode, isValidIlCode } from '@/data/geo/region-meta.js';
@@ -416,12 +416,12 @@ export function buildIndex(options: BuildIndexOptions): CrimeIndex {
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/aggregation`
 Expected: PASS, all tests green.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/aggregation/buildIndex.ts src/core/aggregation/buildIndex.test.ts
@@ -461,7 +461,7 @@ function rollup(index: CrimeIndex, level: GeoLevel, filters: FilterSet): RollupR
 
 Remember the convention from Task 2: **an empty `filters.categories` means "all categories", not "none".**
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/aggregation/rollup.test.ts`:
 
@@ -601,12 +601,12 @@ describe('rollup — filtering', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/aggregation/rollup.test.ts`
 Expected: FAIL — cannot resolve `./rollup.js`.
 
-- [ ] **Step 3: Implement `src/core/aggregation/rollup.ts`**
+- [x] **Step 3: Implement `src/core/aggregation/rollup.ts`**
 
 ```ts
 import type { FilterSet, GeoLevel } from '@/core/types/index.js';
@@ -693,12 +693,12 @@ export function rollup(
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/aggregation`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/aggregation/rollup.ts src/core/aggregation/rollup.test.ts
@@ -737,7 +737,7 @@ interface RankedRegion {
 
 Turkish alphabetical order is not ASCII order: `ç` follows `c`, `ı` precedes `i`, `ş` follows `s`. Sorting province names with the default comparator puts `Çorum` after `Zonguldak`, which looks broken to any Turkish reader.
 
-- [ ] **Step 1: Write the failing collation tests**
+- [x] **Step 1: Write the failing collation tests**
 
 Create `src/core/search/collate.test.ts`:
 
@@ -794,12 +794,12 @@ describe('compareTurkish', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/search/collate.test.ts`
 Expected: FAIL — cannot resolve `./collate.js`.
 
-- [ ] **Step 3: Implement `src/core/search/collate.ts`**
+- [x] **Step 3: Implement `src/core/search/collate.ts`**
 
 ```ts
 import { toTurkishLowerCase } from './normalize.js';
@@ -842,12 +842,12 @@ export function compareTurkish(a: string, b: string): number {
 }
 ```
 
-- [ ] **Step 4: Run the collation tests to verify they pass**
+- [x] **Step 4: Run the collation tests to verify they pass**
 
 Run: `npx vitest run src/core/search/collate.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Write the failing ranking tests**
+- [x] **Step 5: Write the failing ranking tests**
 
 Create `src/core/aggregation/rank.test.ts`:
 
@@ -955,12 +955,12 @@ describe('rankRegions', () => {
 });
 ```
 
-- [ ] **Step 6: Run the tests to verify they fail**
+- [x] **Step 6: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/aggregation/rank.test.ts`
 Expected: FAIL — cannot resolve `./rank.js`.
 
-- [ ] **Step 7: Implement `src/core/aggregation/rank.ts`**
+- [x] **Step 7: Implement `src/core/aggregation/rank.ts`**
 
 ```ts
 import { compareTurkish } from '@/core/search/collate.js';
@@ -1024,12 +1024,12 @@ export function rankRegions(result: RollupResult, options: RankOptions): RankedR
 
 The `switch` has no `default` branch on purpose: `RankSort` is a closed union, so TypeScript proves the switch exhaustive and a `default` would be unreachable code that coverage could never satisfy.
 
-- [ ] **Step 8: Run the tests to verify they pass**
+- [x] **Step 8: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/aggregation src/core/search`
 Expected: PASS.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/core/search/collate.ts src/core/search/collate.test.ts src/core/aggregation/rank.ts src/core/aggregation/rank.test.ts
@@ -1069,7 +1069,7 @@ function diffRollups(a: RollupResult, b: RollupResult): DiffResult;
 
 `pctDelta` is `null` rather than `Infinity` when the baseline is zero. That distinction must survive to the UI, where Task 4's `formatPercentDelta(null)` renders an em dash instead of an absurd percentage.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/core/aggregation/diff.test.ts`:
 
@@ -1174,12 +1174,12 @@ describe('diffRollups', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/core/aggregation/diff.test.ts`
 Expected: FAIL — cannot resolve `./diff.js`.
 
-- [ ] **Step 3: Implement `src/core/aggregation/diff.ts`**
+- [x] **Step 3: Implement `src/core/aggregation/diff.ts`**
 
 ```ts
 import type { RollupResult } from './rollup.js';
@@ -1237,7 +1237,7 @@ export function diffRollups(a: RollupResult, b: RollupResult): DiffResult {
 }
 ```
 
-- [ ] **Step 4: Create the barrel `src/core/aggregation/index.ts`**
+- [x] **Step 4: Create the barrel `src/core/aggregation/index.ts`**
 
 ```ts
 export type { BuildIndexOptions, CrimeIndex } from './buildIndex.js';
@@ -1250,12 +1250,12 @@ export type { DiffResult, RegionDiff } from './diff.js';
 export { diffRollups } from './diff.js';
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `npx vitest run src/core/aggregation`
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/core/aggregation
@@ -1296,7 +1296,7 @@ interface MockDataset {
 
 This is demo data, and the API docs must say so plainly. It exists to drive the playground, the tests, and the README — not to describe reality.
 
-- [ ] **Step 1: Write the failing PRNG tests**
+- [x] **Step 1: Write the failing PRNG tests**
 
 Create `src/data/mock/prng.test.ts`:
 
@@ -1346,12 +1346,12 @@ describe('createPrng', () => {
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `npx vitest run src/data/mock`
 Expected: FAIL — cannot resolve `./prng.js`.
 
-- [ ] **Step 3: Implement `src/data/mock/prng.ts`**
+- [x] **Step 3: Implement `src/data/mock/prng.ts`**
 
 ```ts
 /**
@@ -1377,7 +1377,7 @@ export function createPrng(seed: number): () => number {
 }
 ```
 
-- [ ] **Step 4: Implement `src/data/mock/categories.ts`**
+- [x] **Step 4: Implement `src/data/mock/categories.ts`**
 
 ```ts
 import type { CrimeCategory } from '@/core/types/index.js';
@@ -1398,7 +1398,7 @@ export const MOCK_CATEGORIES: readonly CrimeCategory[] = [
 ];
 ```
 
-- [ ] **Step 5: Write the failing generator tests**
+- [x] **Step 5: Write the failing generator tests**
 
 Create `src/data/mock/generate.test.ts`:
 
@@ -1508,12 +1508,12 @@ describe('generateMockData', () => {
 });
 ```
 
-- [ ] **Step 6: Run the tests to verify they fail**
+- [x] **Step 6: Run the tests to verify they fail**
 
 Run: `npx vitest run src/data/mock/generate.test.ts`
 Expected: FAIL — cannot resolve `./generate.js`.
 
-- [ ] **Step 7: Implement `src/data/mock/generate.ts`**
+- [x] **Step 7: Implement `src/data/mock/generate.ts`**
 
 ```ts
 import type { CrimeCategory, CrimeRecord, RegionPopulation } from '@/core/types/index.js';
@@ -1638,7 +1638,7 @@ export function generateMockData(options: MockDataOptions = {}): MockDataset {
 }
 ```
 
-- [ ] **Step 8: Create the barrel `src/data/mock/index.ts`**
+- [x] **Step 8: Create the barrel `src/data/mock/index.ts`**
 
 ```ts
 export { createPrng } from './prng.js';
@@ -1647,14 +1647,14 @@ export type { MockDataOptions, MockDataset } from './generate.js';
 export { generateMockData } from './generate.js';
 ```
 
-- [ ] **Step 9: Run the tests to verify they pass**
+- [x] **Step 9: Run the tests to verify they pass**
 
 Run: `npx vitest run src/data/mock`
 Expected: PASS.
 
 If the right-skew test fails, `IL_WEIGHTS['34']` is being diluted by the random factors — widen the gap between İstanbul's weight and `DEFAULT_WEIGHT` rather than loosening the assertion. The skew is the point.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add src/data/mock
@@ -1674,7 +1674,7 @@ A realistic-scale test that fails loudly if aggregation regresses. The spec's bu
 - Consumes: `generateMockData` (Task 14), `buildIndex` / `rollup` / `rankRegions` / `diffRollups` (Tasks 10–13)
 - Produces: nothing. This is a guard, not a module.
 
-- [ ] **Step 1: Write the performance test**
+- [x] **Step 1: Write the performance test**
 
 Create `src/core/aggregation/performance.test.ts`:
 
@@ -1756,14 +1756,14 @@ describe('aggregation performance at realistic scale', () => {
 });
 ```
 
-- [ ] **Step 2: Run the performance test**
+- [x] **Step 2: Run the performance test**
 
 Run: `npx vitest run src/core/aggregation/performance.test.ts`
 Expected: PASS.
 
 If a timing assertion fails, do not raise the threshold. Profile first: the usual causes are rebuilding the index inside the measured block, or an accidental array scan inside the per-record loop.
 
-- [ ] **Step 3: Exclude the performance test from coverage thresholds**
+- [x] **Step 3: Exclude the performance test from coverage thresholds**
 
 Performance tests exercise no new branches and would skew the coverage report. In `vitest.config.ts`, extend the coverage `exclude` list:
 
@@ -1775,12 +1775,12 @@ exclude: [
 ],
 ```
 
-- [ ] **Step 4: Run the full suite with coverage**
+- [x] **Step 4: Run the full suite with coverage**
 
 Run: `npm run verify`
 Expected: typecheck passes, lint passes, all tests pass, `src/core` at 100% branch coverage.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/aggregation/performance.test.ts vitest.config.ts
