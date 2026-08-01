@@ -1,0 +1,22 @@
+.panel { padding: 10px 12px; display: grid; gap: 6px; width: 260px; }
+.title { margin: 0; font-size: 12px; font-weight: 600; color: var(--hm-fg); }
+.chart { display: block; overflow: visible; }
+.grid { stroke: rgba(255, 255, 255, 0.08); stroke-width: 1; }
+.area { fill: var(--hm-fg); opacity: 0.12; }
+.line { fill: none; stroke: var(--hm-fg); stroke-width: 2; stroke-linejoin: round; }
+.marker { fill: var(--hm-fg); }
+.marker[data-active='false'] { opacity: 0.35; }
+.guide { stroke: var(--hm-focus-ring); stroke-width: 1; }
+.hit { fill: transparent; cursor: pointer; }
+
+.readout {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--hm-fg-muted);
+  font-variant-numeric: tabular-nums;
+  min-height: 15px;
+}
+
+.readoutValue { color: var(--hm-fg); font-weight: 600; }
+.empty { margin: 0; font-size: 12px; color: var(--hm-fg-muted); }

@@ -25,6 +25,15 @@ export const trStrings: Strings = {
     perCapita: 'Nüfusa göre',
     allCategories: 'Tümü',
   },
+  pie: {
+    title: 'Suç türü dağılımı',
+    national: 'Türkiye geneli',
+    other: 'Diğer',
+    expand: 'tümünü göster',
+    collapse: 'Diğer kategorileri gizle',
+    empty: 'Veri yok',
+  },
+  trend: { title: 'Yıllara göre', empty: 'Veri yok', year: 'Yıl' },
   sidebar: {
     title: 'Bölgeler',
     collapse: 'Listeyi daralt',

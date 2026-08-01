@@ -27,6 +27,17 @@ export interface Strings {
     /** Shown when no category chip is selected — empty means every category. */
     allCategories: string;
   };
+  pie: {
+    title: string;
+    /** Shown when no region is selected. */
+    national: string;
+    other: string;
+    /** Accessible names for the Diğer disclosure (§7.7). */
+    expand: string;
+    collapse: string;
+    empty: string;
+  };
+  trend: { title: string; empty: string; year: string };
   sidebar: {
     title: string;
     collapse: string;
