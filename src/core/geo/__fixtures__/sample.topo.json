@@ -1,0 +1,35 @@
+{
+  "type": "Topology",
+  "objects": {
+    "regions": {
+      "type": "GeometryCollection",
+      "geometries": [
+        {
+          "type": "Polygon",
+          "id": "3401",
+          "properties": { "name": "Kadıköy" },
+          "arcs": [[0]]
+        },
+        {
+          "type": "Polygon",
+          "id": "3402",
+          "properties": { "name": "Şişli" },
+          "arcs": [[1]]
+        },
+        {
+          "type": "Polygon",
+          "id": "0601",
+          "properties": { "name": "Çankaya" },
+          "arcs": [[2]]
+        }
+      ]
+    },
+    "empty": { "type": "GeometryCollection", "geometries": [] }
+  },
+  "arcs": [
+    [[0, 0], [100, 0], [0, 100], [-100, 0], [0, -100]],
+    [[200, 0], [100, 0], [0, 100], [-100, 0], [0, -100]],
+    [[0, 200], [100, 0], [0, 100], [-100, 0], [0, -100]]
+  ],
+  "transform": { "scale": [0.001, 0.001], "translate": [28.0, 39.0] }
+}
