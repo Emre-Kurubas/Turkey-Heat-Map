@@ -9,3 +9,8 @@ playground/dist
 
 # Local tool configuration: machine paths and per-machine permissions.
 .claude/
+
+# Design spec and the reference images the UI was built against. Kept out of
+# the repository by choice; note that ~29 comments in src/ cite the spec's
+# section numbers, so those citations resolve locally and not on GitHub.
+docs/
