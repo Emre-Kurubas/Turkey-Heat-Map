@@ -14,6 +14,8 @@ export const THEME_TOKEN_NAMES = [
   '--hm-glass-bg-solid',
   '--hm-glass-border',
   '--hm-glass-blur',
+  '--hm-glass-saturate',
+  '--hm-glass-highlight',
   '--hm-glass-shadow',
   '--hm-radius',
   '--hm-map-bg',

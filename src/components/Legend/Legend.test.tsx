@@ -25,7 +25,7 @@ const base: HeatMapState = {
 const SCALE = createColorScale({
   values: [10, 40, 90, 250, 900],
   mode: 'quantile',
-  ramp: 'spectral',
+  ramp: 'ember',
 });
 
 function renderLegend(scale = SCALE, state: HeatMapState = base) {
@@ -62,19 +62,19 @@ describe('Legend', () => {
   });
 
   it('names the linear mode when that is active', () => {
-    const linear = createColorScale({ values: [1, 2, 3], mode: 'linear', ramp: 'spectral' });
+    const linear = createColorScale({ values: [1, 2, 3], mode: 'linear', ramp: 'ember' });
     renderLegend(linear, { ...base, scaleMode: 'linear' });
     expect(screen.getByText(new RegExp(trStrings.scaleMode.linear, 'u'))).toBeInTheDocument();
   });
 
   it('says "no data" for an empty domain rather than rendering an empty ramp', () => {
-    const empty = createColorScale({ values: [], mode: 'quantile', ramp: 'spectral' });
+    const empty = createColorScale({ values: [], mode: 'quantile', ramp: 'ember' });
     renderLegend(empty);
     expect(screen.getByText(trStrings.legend.noData)).toBeInTheDocument();
   });
 
   it('collapses to a single swatch when every value is identical', () => {
-    const flat = createColorScale({ values: [5, 5, 5], mode: 'quantile', ramp: 'spectral' });
+    const flat = createColorScale({ values: [5, 5, 5], mode: 'quantile', ramp: 'ember' });
     const { container } = renderLegend(flat);
     expect(container.querySelectorAll('[data-role="swatch"]')).toHaveLength(1);
   });

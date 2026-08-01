@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { GlassPanel } from '@/components/primitives/GlassPanel.js';
 import { computeLegendBreaks, type ColorScale } from '@/core/color/index.js';
 import { useHeatMapState, useStrings } from '@/hooks/useHeatMapState.js';
 import styles from './Legend.module.css';
@@ -34,7 +33,7 @@ export function Legend({ scale, breakCount = DEFAULT_BREAKS }: LegendProps) {
   const hasData = scale.domain.min !== scale.domain.max || scale.domain.max !== 0;
 
   return (
-    <GlassPanel label={strings.legend.title} className={styles.legend}>
+    <div role="group" aria-label={strings.legend.title} className={styles.legend}>
       <h2 className={styles.title}>{strings.legend.title}</h2>
 
       {hasData ? (
@@ -58,6 +57,6 @@ export function Legend({ scale, breakCount = DEFAULT_BREAKS }: LegendProps) {
       <p className={styles.note}>
         {strings.scaleMode[scaleMode]} · {strings.legend.scaleNote}
       </p>
-    </GlassPanel>
+    </div>
   );
 }

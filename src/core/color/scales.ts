@@ -3,50 +3,56 @@ import { type ColorDomain, createColorDomain } from './domain.js';
 import { createRamp } from './interpolate.js';
 
 export type RampFn = (t: number) => string;
-export type ColorScaleName = 'spectral' | 'blueRed';
+export type ColorScaleName = 'ember' | 'deepBlue';
 
 /**
- * Default heat ramp: cool for low crime counts, warm for high.
- * Matches the reference design. Note that rainbow ramps are not fully
- * colorblind-safe, which is why the UI always shows numbers alongside color.
- */
-/**
- * The default map ramp, for a light canvas.
+ * The default map ramp: one hue, light to dark.
  *
- * Each stop is solved to a target luminance rather than picked by eye, so the
- * ramp darkens monotonically from 0.782 to 0.061 while keeping the spectral
- * hue journey. That matters more here than on a dark canvas: with a pale
- * background, magnitude has to read by lightness as well as hue, and the
- * previous ramp — dark blue, light yellow, dark red — had its lightest stops
- * in the middle, so mid-range values washed out at 1.36 contrast.
+ * This replaced a spectral rainbow — blue, cyan, green, olive, orange, red —
+ * and the reason is worth keeping. A rainbow has no intrinsic order: nothing
+ * about green says it is more than cyan, so the reader has to consult the
+ * legend for every single region. Worse on a pale canvas, the hues that fall
+ * between the ends land on olive and teal, and the map reads as mud rather
+ * than as a gradient. A single hue darkening toward the top has the order
+ * built into it and needs the legend only for the numbers.
  *
- * The lowest stop deliberately sits close to the surface. On a choropleth,
- * "near zero" is supposed to recede.
+ * Each stop is solved rather than picked: even steps of OKLab lightness from
+ * 0.90 down to 0.40, each at the largest chroma still in gamut at that
+ * lightness, scaled by a curve that keeps the pale end from going chalky.
+ * The result darkens monotonically (relative luminance 0.726 → 0.059, a 12.3×
+ * span) with every adjacent pair separated by at least 1.33 contrast.
+ *
+ * The lowest stop is a warm tint rather than the surface itself: it clears
+ * `--hm-map-bg` by 1.20 and the no-data fill by 1.09, so "few records" still
+ * reads as a measured value and not as a hole in the map.
  */
-export const SPECTRAL_STOPS: readonly string[] = [
-  '#dbe6f4', // solmuş mavi  — en düşük
-  '#acd0ea',
-  '#5ac0cf',
-  '#39ab72',
-  '#9c7a16',
-  '#a14e12',
-  '#871d13', // koyu kırmızı — en yüksek
+export const EMBER_STOPS: readonly string[] = [
+  '#e8dbd5', // soluk kum   — en düşük
+  '#e3b8a5',
+  '#e88f64',
+  '#d96b30',
+  '#bc5311',
+  '#9a3f00',
+  '#762f00', // koyu kor    — en yüksek
 ];
 
 /**
- * Colorblind-friendlier alternative: no green, relies on the blue↔red axis.
- * Re-stepped for the light canvas — the original's pale middle and light arms
- * were built against a dark background, where they read as bright rather than
- * as absent.
+ * The colourblind-safe alternative: a single blue, same construction.
+ *
+ * Its predecessor ran blue through a pale middle to red, which is a *diverging*
+ * ramp — it announces a meaningful midpoint. Crime counts have no such
+ * midpoint, so that shape invented one. This one has no red/green axis at all,
+ * which is what makes it safe under deuteranopia and protanopia, and no false
+ * centre.
  */
-export const BLUE_RED_STOPS: readonly string[] = [
-  '#c6dbef',
-  '#83aed4',
-  '#4a80b4',
-  '#dcdcdc',
-  '#d98f77',
-  '#bf5b40',
-  '#93231a',
+export const DEEP_BLUE_STOPS: readonly string[] = [
+  '#d9dee7',
+  '#b1c1d9',
+  '#85a4d3',
+  '#5486d1',
+  '#366ab5',
+  '#25508d',
+  '#183765',
 ];
 
 /** Diverging ramp for compare mode: blue = decrease, neutral = unchanged, red = increase. */
@@ -61,8 +67,8 @@ export const DIFF_STOPS: readonly string[] = [
 ];
 
 export const RAMPS: Readonly<Record<ColorScaleName, RampFn>> = {
-  spectral: createRamp(SPECTRAL_STOPS),
-  blueRed: createRamp(BLUE_RED_STOPS),
+  ember: createRamp(EMBER_STOPS),
+  deepBlue: createRamp(DEEP_BLUE_STOPS),
 };
 
 const DIFF_RAMP: RampFn = createRamp(DIFF_STOPS);

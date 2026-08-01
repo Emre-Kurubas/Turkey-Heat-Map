@@ -84,7 +84,7 @@ interface ContentProps {
 /** Inner tree, so the error boundary can wrap everything that can throw. */
 function Content({ props, panels }: ContentProps) {
   const {
-    data, categories, population, colorScale = 'spectral', heatStyle = 'glow',
+    data, categories, population, colorScale = 'ember', heatStyle = 'glow',
   } = props;
   const { index, rollup, scale, names } = useAggregates({
     data, categories, colorScale, population,
@@ -125,18 +125,20 @@ function Content({ props, panels }: ContentProps) {
       />
 
       <div className="hm-overlay">
-        {panels.search ? (
-          <div className="hm-area-topLeft"><SearchBar categories={categories} /></div>
-        ) : null}
-
-        {panels.filters ? (
+        {/* Search and filters share one row: both change what the map shows.
+            The wrapper mounts whenever either does, and the flex row collapses
+            to whichever survives. */}
+        {panels.search || panels.filters ? (
           <div className="hm-area-topCentre">
-            <FilterBar
-              categories={categories}
-              categoryTotals={categoryTotals}
-              hasPopulation={population !== undefined && population.length > 0}
-              highlightedCategory={hoveredCategory}
-            />
+            {panels.search ? <SearchBar categories={categories} /> : null}
+            {panels.filters ? (
+              <FilterBar
+                categories={categories}
+                categoryTotals={categoryTotals}
+                hasPopulation={population !== undefined && population.length > 0}
+                highlightedCategory={hoveredCategory}
+              />
+            ) : null}
           </div>
         ) : null}
 

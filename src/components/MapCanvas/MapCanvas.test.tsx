@@ -41,7 +41,7 @@ function renderCanvas(state: HeatMapState = base, props: Partial<MapCanvasProps>
     <MapCanvas
       data={DATA}
       categories={CATEGORIES}
-      colorScale="spectral"
+      colorScale="ember"
       heatStyle="glow"
       testViewport={{ width: 800, height: 500 }}
       {...props}

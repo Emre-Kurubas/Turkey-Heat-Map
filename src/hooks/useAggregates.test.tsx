@@ -43,7 +43,7 @@ function setup(state: HeatMapState = base) {
   return { store, wrapper };
 }
 
-const INPUT = { data: DATA, categories: CATEGORIES, colorScale: 'spectral' } as const;
+const INPUT = { data: DATA, categories: CATEGORIES, colorScale: 'ember' } as const;
 
 describe('useAggregates', () => {
   it('rolls up totals for the active level', () => {
@@ -104,7 +104,7 @@ describe('useAggregates', () => {
     ];
     const { wrapper } = setup();
     const { result } = renderHook(
-      () => useAggregates({ data: ilOnly, categories: CATEGORIES, colorScale: 'spectral' }),
+      () => useAggregates({ data: ilOnly, categories: CATEGORIES, colorScale: 'ember' }),
       { wrapper },
     );
 
@@ -148,7 +148,7 @@ describe('useAggregates', () => {
     ];
     const { wrapper } = setup();
     const { result } = renderHook(
-      () => useAggregates({ data: bad, categories: CATEGORIES, colorScale: 'spectral' }),
+      () => useAggregates({ data: bad, categories: CATEGORIES, colorScale: 'ember' }),
       { wrapper },
     );
     expect(result.current.index.warnings.length).toBeGreaterThan(0);
@@ -158,7 +158,7 @@ describe('useAggregates', () => {
   it('survives an empty dataset', () => {
     const { wrapper } = setup();
     const { result } = renderHook(
-      () => useAggregates({ data: [], categories: CATEGORIES, colorScale: 'spectral' }),
+      () => useAggregates({ data: [], categories: CATEGORIES, colorScale: 'ember' }),
       { wrapper },
     );
     expect(result.current.rollup.total).toBe(0);

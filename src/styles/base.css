@@ -45,10 +45,27 @@
  * Stacking the two charts in a single row overflowed an 800px viewport and
  * pushed the legend off the bottom of the screen.
  */
-.hm-area-topLeft { grid-area: topLeft; align-self: start; }
-.hm-area-topCentre { grid-area: topCentre; align-self: start; justify-self: center; }
+/*
+ * Search and filters share the top-centre row. They are the two controls that
+ * change what the map shows, so they belong next to each other rather than at
+ * opposite ends of the same edge.
+ */
+.hm-area-topCentre {
+  grid-area: topCentre;
+  align-self: start;
+  justify-self: center;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
 .hm-area-topRight { grid-area: topRight; align-self: start; justify-self: end; }
-.hm-area-left { grid-area: left; align-self: start; min-height: 0; }
+/*
+ * Stretches. The sidebar is a ranked list of 81 provinces and the only panel
+ * whose usefulness scales with its height, so it takes the whole middle row;
+ * `min-height: 0` is what lets its inner scroller shrink instead of pushing
+ * the grid taller than the viewport.
+ */
+.hm-area-left { grid-area: left; align-self: stretch; min-height: 0; }
 .hm-area-right { grid-area: right; align-self: end; justify-self: end; }
 .hm-area-bottomLeft {
   grid-area: bottomLeft;

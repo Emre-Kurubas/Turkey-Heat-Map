@@ -42,15 +42,21 @@ export function FilterBar({
   const activeCount = filters.categories.length
     + (lo !== boundLo || hi !== boundHi ? 1 : 0);
 
-  if (!open) {
-    return (
+  /*
+   * The toggle stays mounted while the panel is open, and the panel hangs off
+   * it absolutely. Swapping one for the other made the control 300px wide the
+   * instant it opened, which shoved the search field sideways — they share a
+   * centred row now, so a width change on either one moves the other.
+   */
+  return (
+    <div className={styles.anchor}>
       <GlassPanel className={styles.collapsed}>
         <button
           type="button"
           className={styles.toggle}
-          aria-expanded={false}
-          aria-label={strings.filters.open}
-          onClick={() => { setOpen(true); }}
+          aria-expanded={open}
+          aria-label={open ? strings.filters.close : strings.filters.open}
+          onClick={() => { setOpen((v) => !v); }}
         >
           <span>{strings.filters.title}</span>
           {activeCount > 0 ? (
@@ -58,10 +64,8 @@ export function FilterBar({
           ) : null}
         </button>
       </GlassPanel>
-    );
-  }
 
-  return (
+      {open ? (
     <GlassPanel label={strings.filters.title} className={styles.bar}>
       <div className={styles.header}>
         <h2 className={styles.title}>{strings.filters.title}</h2>
@@ -71,15 +75,6 @@ export function FilterBar({
           onClick={() => { dispatch({ type: 'resetFilters' }); }}
         >
           {strings.filters.reset}
-        </button>
-        <button
-          type="button"
-          className={styles.reset}
-          aria-expanded
-          aria-label={strings.filters.close}
-          onClick={() => { setOpen(false); }}
-        >
-          ×
         </button>
       </div>
 
@@ -133,5 +128,7 @@ export function FilterBar({
         </IconButton>
       ) : null}
     </GlassPanel>
+      ) : null}
+    </div>
   );
 }

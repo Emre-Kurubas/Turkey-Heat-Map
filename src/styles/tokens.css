@@ -1,14 +1,28 @@
 :root {
   /*
-   * Glass on a light surface. The translucent fill is now a white wash over
-   * the map rather than a dark one, and the border darkens: a white hairline
-   * is invisible against a pale panel.
+   * Glass on a light surface.
+   *
+   * The first light pass set the fill to 72% white, and the panels went flat:
+   * a near-opaque white wash over a near-white map has nothing left to show
+   * through, so the blur had no visible work to do. Light glass has to be
+   * thinner than dark glass to read as glass at all.
+   *
+   * The saturation boost is what carries it. At 55% opacity the map's colour
+   * underneath is washed out; pushing saturation back up makes the tint of
+   * whatever sits behind the panel visible through it, which is the actual
+   * cue that the surface is translucent. The inner highlight fakes the lit
+   * top edge of a physical pane, and the border darkens because a white
+   * hairline is invisible against a pale panel.
    */
-  --hm-glass-bg: rgba(255, 255, 255, 0.72);
+  --hm-glass-bg: rgba(255, 255, 255, 0.55);
   --hm-glass-bg-solid: #f7f8fa;
-  --hm-glass-border: rgba(15, 23, 42, 0.12);
-  --hm-glass-blur: 20px;
-  --hm-glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+  --hm-glass-border: rgba(15, 23, 42, 0.14);
+  --hm-glass-highlight: rgba(255, 255, 255, 0.75);
+  --hm-glass-blur: 18px;
+  --hm-glass-saturate: 180%;
+  --hm-glass-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 8px 28px rgba(15, 23, 42, 0.14);
   --hm-radius: 16px;
 
   /* Map surface */
