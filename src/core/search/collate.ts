@@ -20,7 +20,9 @@ const UNKNOWN_BASE = ALPHABET.length;
 function rankOf(char: string): number {
   const known = RANK.get(char);
   if (known !== undefined) return known;
-  return UNKNOWN_BASE + (char.codePointAt(0) ?? 0);
+  // Callers only pass characters read from within a string's bounds, so a code
+  // point is always present — even for a lone surrogate half.
+  return UNKNOWN_BASE + char.codePointAt(0)!;
 }
 
 /** Comparator for `Array.prototype.sort`. Case-insensitive. */
