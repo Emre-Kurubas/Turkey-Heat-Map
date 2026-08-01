@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useMemo } from 'react';
 import type { RollupResult } from '@/core/aggregation/index.js';
 import type { ColorScaleName, RampFn } from '@/core/color/index.js';
 import { formatTrNumber } from '@/core/format/index.js';
+import type { MapFit } from '@/core/geo/index.js';
 import type { CrimeCategory, CrimeRecord, Viewport } from '@/core/types/index.js';
 import { useAggregates } from '@/hooks/useAggregates.js';
 import { useFlyTo } from '@/hooks/useFlyTo.js';
@@ -39,12 +40,13 @@ export interface MapCanvasProps {
   colorScale: ColorScaleName | RampFn;
   heatStyle: HeatStyle;
   onRegionClick?: (region: RegionClickPayload) => void;
+  fit?: MapFit | undefined;
   /** Test-only size override; jsdom reports every element as 0x0. */
   testViewport?: Viewport;
 }
 
 export function MapCanvas({
-  data, categories, colorScale, heatStyle, onRegionClick, testViewport,
+  data, categories, colorScale, heatStyle, onRegionClick, fit, testViewport,
 }: MapCanvasProps) {
   const [containerRef, measured] = useResizeObserver<HTMLDivElement>();
   const viewport = testViewport ?? measured;
@@ -57,7 +59,7 @@ export function MapCanvas({
   const { rollup, heatRollup, scale, heatLevel, names } = useAggregates({
     data, categories, colorScale,
   });
-  const geometry = useMapGeometry(viewport, level, heatLevel, transform);
+  const geometry = useMapGeometry(viewport, level, heatLevel, transform, fit);
 
   const selectedCode = useHeatMapState((state) => state.selectedCode);
   const focusedCode = useHeatMapState((state) => state.focusedCode);

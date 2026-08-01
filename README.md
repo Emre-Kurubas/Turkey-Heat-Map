@@ -109,10 +109,19 @@ Tek bir bozuk satır yüzünden sayfayı çökerten bir kütüphane kabul edilem
   yalnızca veri, filtre veya düzey değiştiğinde yeniden çalışır — imleç
   hareketinde asla. Haritanın anlık hissetmesiyle ağır hissetmesi arasındaki fark
   budur.
-- **Açık tema, tek tema.** Harita rampası açık zemin için yeniden türetildi:
-  her durak bir hedef parlaklığa çözüldü, böylece büyüklük yalnızca renk
-  tonuyla değil açıklıkla da okunuyor. Önceki rampa ortada açık renkliydi ve
-  açık zeminde orta değerler 1,36 kontrastla kayboluyordu.
+- **Açık tema, tek tema.**
+- **Harita rampası tek renktir, gökkuşağı değil.** Gökkuşağı rampasının
+  kendiliğinden bir sıralaması yoktur — yeşilin camgöbeğinden "daha çok"
+  olduğunu söyleyen hiçbir şey yoktur — bu yüzden her bölge için lejanda bakmak
+  gerekir. Açık zeminde ise ara tonlar zeytin ve turkuaza düşüyor ve harita bir
+  geçiş gibi değil, çamur gibi okunuyordu. `ember` ve `deepBlue` rampalarının
+  her durağı OKLab açıklığında eşit adımlarla çözüldü; parlaklık 0,726'dan
+  0,059'a tekdüze iniyor ve komşu her çift en az 1,33 kontrastla ayrılıyor.
+- **`fit` ile kap doldurma.** Türkiye'nin sınır kutusu yaklaşık 2,3:1, tarayıcı
+  penceresi ise nadiren 1,8:1'i geçer. `contain` (varsayılan) ülkenin tamamını
+  gösterir ve artan ekseni boş bırakır; `fill` kabı kaplar ve doğu ile batı
+  uçlarını kırpar. Dikey alan ancak yatay kırpmayla satın alınabildiği için
+  bu bir tercih meselesidir.
 - **İle tıklandığında hem yakınlaşır hem detay açılır.** Detay hedefi kendi
   düzeyini taşır; aksi hâlde yakınlaşmanın tetiklediği düzey değişimi, aynı
   tıklamanın az önce açtığı paneli kapatırdı.

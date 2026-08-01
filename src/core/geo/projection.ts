@@ -1,11 +1,25 @@
 import { type GeoPath, type GeoProjection, geoConicEqualArea, geoPath } from 'd3-geo';
 import type { Viewport } from '@/core/types/index.js';
 
+/**
+ * How the default view relates the country to the viewport.
+ *
+ * `contain` shows the whole country and letterboxes whichever axis is left
+ * over. `fill` covers the viewport and crops the overflow instead.
+ *
+ * There is no third option: Türkiye's bounding box is roughly 2.3:1 and a
+ * browser window is rarely wider than 1.8:1, so vertical space can only be
+ * bought with horizontal cropping, one pixel for one pixel.
+ */
+export type MapFit = 'contain' | 'fill';
+
 export interface ProjectionOptions {
   viewport: Viewport;
   fitTo: GeoJSON.FeatureCollection;
   /** Inset in pixels on every side. Default 8. */
   padding?: number;
+  /** Default `contain` — the whole country visible on first paint. */
+  fit?: MapFit;
 }
 
 const DEFAULT_PADDING = 8;
@@ -27,7 +41,7 @@ const CENTRAL_MERIDIAN = 35;
  * not a styling preference.
  */
 export function createTurkeyProjection(options: ProjectionOptions): GeoProjection {
-  const { viewport, fitTo, padding = DEFAULT_PADDING } = options;
+  const { viewport, fitTo, padding = DEFAULT_PADDING, fit = 'contain' } = options;
 
   const projection = geoConicEqualArea()
     .parallels(STANDARD_PARALLELS)
@@ -43,10 +57,40 @@ export function createTurkeyProjection(options: ProjectionOptions): GeoProjectio
     return projection;
   }
 
-  return projection.fitExtent(
+  projection.fitExtent(
     [[padding, padding], [viewport.width - padding, viewport.height - padding]],
     fitTo,
   );
+
+  if (fit === 'contain') return projection;
+
+  /*
+   * `fitExtent` is a contain fit: it takes the *smaller* of the two axis ratios
+   * so nothing spills out. Covering means taking the larger one instead, which
+   * d3-geo has no built-in for, so rescale about the country's centre.
+   *
+   * Scaling by k about the current translate maps a screen point p to
+   * `T' + k·(p − T)`. Solving that for "the country's centre lands on the
+   * viewport's centre" gives the translate below. Doing it this way rather
+   * than by a second fitExtent keeps the standard parallels untouched — the
+   * projection stays equal-area, which the choropleth depends on.
+   */
+  const [[x0, y0], [x1, y1]] = geoPath(projection).bounds(fitTo);
+  const width = x1 - x0;
+  const height = y1 - y0;
+  // Degenerate bounds would divide by zero. Nothing sensible to cover, so the
+  // contain fit stands.
+  if (width <= 0 || height <= 0) return projection;
+
+  const k = Math.max(usableWidth / width, usableHeight / height);
+  const [tx, ty] = projection.translate();
+
+  return projection
+    .scale(projection.scale() * k)
+    .translate([
+      viewport.width / 2 + k * (tx - (x0 + x1) / 2),
+      viewport.height / 2 + k * (ty - (y0 + y1) / 2),
+    ]);
 }
 
 /** Path generator bound to a projection. Reuse one per render, not one per feature. */

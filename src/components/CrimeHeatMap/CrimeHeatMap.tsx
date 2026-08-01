@@ -17,6 +17,7 @@ import { createHeatMapStore } from '@/context/HeatMapStore.js';
 import { createHoverStore } from '@/context/HoverStore.js';
 import { buildIndex, rankRegions } from '@/core/aggregation/index.js';
 import type { ColorScaleName, RampFn } from '@/core/color/index.js';
+import type { MapFit } from '@/core/geo/index.js';
 import type {
   CrimeCategory, CrimeRecord, GeoLevel, MetricMode, RegionPopulation,
   ScaleMode, Viewport,
@@ -53,6 +54,16 @@ export interface CrimeHeatMapProps {
   colorScale?: ColorScaleName | RampFn;
   scaleMode?: ScaleMode;
   heatStyle?: HeatStyle;
+  /**
+   * How the default view sits in the container. `contain` (default) keeps the
+   * whole country visible and letterboxes the leftover axis; `fill` covers the
+   * container and crops the east and west edges until the reader zooms out.
+   *
+   * Türkiye's bounding box is about 2.3:1 and a browser window rarely exceeds
+   * 1.8:1, so this is a straight trade — vertical space is bought with
+   * horizontal cropping, pixel for pixel.
+   */
+  fit?: MapFit;
   metric?: MetricMode;
   strings?: PartialStrings;
   theme?: Record<string, string>;
@@ -120,6 +131,7 @@ function Content({ props, panels }: ContentProps) {
         categories={categories}
         colorScale={colorScale}
         heatStyle={heatStyle}
+        {...(props.fit === undefined ? {} : { fit: props.fit })}
         {...(props.onRegionClick === undefined ? {} : { onRegionClick: props.onRegionClick })}
         {...(props.testViewport === undefined ? {} : { testViewport: props.testViewport })}
       />
