@@ -61,3 +61,33 @@ describe('light theme', () => {
     expect(css).toContain('prefers-reduced-motion');
   });
 });
+
+describe('base stylesheet', () => {
+  const base = readFileSync(
+    fileURLToPath(new URL('./base.css', import.meta.url)),
+    'utf8',
+  );
+
+  /**
+   * Regression guard. This class is only ever applied to content that is meant
+   * to be invisible, so losing it has no failing assertion anywhere else — it
+   * just dumps the trend chart's data table onto the page.
+   */
+  it('declares the visually-hidden helper', () => {
+    expect(base).toContain('.hm-visually-hidden');
+    expect(base).toMatch(/\.hm-visually-hidden\s*\{[^}]*clip-path/u);
+  });
+
+  it('declares every grid area the layout positions panels into', () => {
+    for (const area of [
+      'hm-area-topLeft', 'hm-area-topCentre', 'hm-area-topRight',
+      'hm-area-left', 'hm-area-right', 'hm-area-bottomLeft',
+    ]) {
+      expect(base, area).toContain(`.${area}`);
+    }
+  });
+
+  it('declares no size breakpoints, since panel positions are fixed', () => {
+    expect(base).not.toContain('@media');
+  });
+});
