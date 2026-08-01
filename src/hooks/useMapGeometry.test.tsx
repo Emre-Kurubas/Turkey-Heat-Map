@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { GeoLevel, Transform } from '@/core/types/index.js';
+import { loadLevelFeatures } from '@/data/geo/index.js';
 import { useMapGeometry } from './useMapGeometry.js';
 
 const VIEWPORT = { width: 1000, height: 600 };
@@ -10,6 +11,14 @@ const IDENTITY: Transform = { k: 1, x: 0, y: 0 };
 function countryZoom(transform: Transform = IDENTITY) {
   return renderHook(() => useMapGeometry(VIEWPORT, 'il', 'ilce', transform));
 }
+
+
+/*
+ * District geometry ships as its own chunk, so nothing below can see districts
+ * until it has been asked for. These tests are about what the map does *with*
+ * districts; the loading itself is covered where it lives, in topology.test.ts.
+ */
+beforeAll(async () => { await loadLevelFeatures('ilce'); });
 
 describe('useMapGeometry', () => {
   it('is not ready before the container has been measured', () => {

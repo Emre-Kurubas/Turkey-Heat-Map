@@ -3,5 +3,6 @@ export {
 } from './region-meta.js';
 export {
   ATTRIBUTION_REQUIRED, LEVEL_HYSTERESIS, LEVEL_THRESHOLD, LEVELS,
-  getLevelFeatures, getLevelRegionMeta,
+  getLevelRegionMeta, isLevelLoaded, loadLevelFeatures, peekLevelFeatures,
+  subscribeLevels,
 } from './topology.js';

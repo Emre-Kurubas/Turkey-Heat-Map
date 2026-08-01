@@ -30,6 +30,7 @@
     "build": "vite build && tsc -p tsconfig.build.json --emitDeclarationOnly",
     "build:geo": "tsx scripts/build-geo.ts",
     "prepare:geo": "tsx scripts/prepare-geo-source.ts",
+    "build:names": "tsx scripts/build-region-names.ts",
     "playground": "vite --config vite.playground.config.ts",
     "test": "vitest run",
     "test:watch": "vitest",

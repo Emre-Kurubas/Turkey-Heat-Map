@@ -103,10 +103,16 @@ describe('Phase 2 public surface', () => {
     expect(typeof api.mergeStrings).toBe('function');
   });
 
-  it('exports the bundled geography', async () => {
+  it('exports the bundled geography, provinces synchronously', async () => {
     const api = await import('./index.js');
-    expect(api.getLevelFeatures('il').features).toHaveLength(81);
-    expect(api.getLevelFeatures('ilce').features).toHaveLength(973);
+    expect(api.peekLevelFeatures('il')?.features).toHaveLength(81);
+    expect((await api.loadLevelFeatures('ilce')).features).toHaveLength(973);
+  });
+
+  it('names every district without anyone loading the district geometry', async () => {
+    // The 262 KB of arcs are a separate chunk; the names are not.
+    const api = await import('./index.js');
+    expect(api.getLevelRegionMeta('ilce').size).toBe(973);
   });
 });
 
@@ -155,8 +161,8 @@ describe('public API surface — the whole list, on purpose', () => {
     // Geo
     'LEVELS', 'collectBounds', 'computeFitTransform', 'createPathGenerator',
     'createTurkeyProjection', 'cullFeatures', 'decodeTopology', 'deriveRegionMeta',
-    'featureBounds', 'featureCentroid', 'getLevelFeatures', 'getLevelRegionMeta',
-    'isVisible', 'regionNameMap',
+    'featureBounds', 'featureCentroid', 'getLevelRegionMeta', 'isVisible',
+    'loadLevelFeatures', 'peekLevelFeatures', 'regionNameMap',
     // Region metadata
     'IL_BY_CODE', 'IL_REGIONS', 'ilCodeFromIlceCode', 'isValidIlCode',
     // Search

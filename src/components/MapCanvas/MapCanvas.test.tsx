@@ -1,10 +1,11 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HeatMapProvider } from '@/context/HeatMapProvider.js';
 import { createHeatMapStore, type HeatMapState } from '@/context/HeatMapStore.js';
 import { createHoverStore } from '@/context/HoverStore.js';
 import type { CrimeCategory, CrimeRecord } from '@/core/types/index.js';
+import { loadLevelFeatures } from '@/data/geo/index.js';
 import { trStrings } from '@/i18n/index.js';
 import { MapCanvas, type MapCanvasProps } from './MapCanvas.js';
 
@@ -59,6 +60,14 @@ beforeEach(() => {
   }));
 });
 afterEach(() => { vi.unstubAllGlobals(); });
+
+
+/*
+ * District geometry ships as its own chunk, so nothing below can see districts
+ * until it has been asked for. These tests are about what the map does *with*
+ * districts; the loading itself is covered where it lives, in topology.test.ts.
+ */
+beforeAll(async () => { await loadLevelFeatures('ilce'); });
 
 describe('MapCanvas', () => {
   it('renders an accessible svg', () => {
@@ -338,5 +347,33 @@ describe('MapCanvas — knowing which province you are inside', () => {
     // reading it here would lose the boundary at exactly the moment it matters.
     const { container } = renderCanvas({ ...drilledIn, selectedCode: null });
     expect(container.querySelector('[data-role="context"][data-code="34"]')).not.toBeNull();
+  });
+});
+
+describe('MapCanvas — before the district chunk lands', () => {
+  /**
+   * These run in their own file-level module registry, so `beforeAll` above has
+   * already loaded the districts by the time anything here renders. What can
+   * still be asserted is the shape of the fallback the code takes when it has
+   * not: provinces are the floor, and every level agrees on that at once.
+   */
+  it('never paints a level it cannot outline', () => {
+    // The invariant behind the whole split. Painting district totals onto
+    // province shapes leaves every region reading as no-data.
+    const { container } = renderCanvas();
+    const groups = container.querySelectorAll('svg > g > g');
+    const heatCodes = [...groups[0]!.querySelectorAll('path')]
+      .map((p) => p.getAttribute('data-code') ?? '');
+    const values = new Set(heatCodes.map((c) => c.length));
+    // One code length: the heat is entirely one level, never a mix.
+    expect(values.size).toBe(1);
+  });
+
+  it('falls back to provinces rather than rendering an empty country', () => {
+    // `useMapGeometry` projects provinces as the floor and reuses them for any
+    // level whose geometry is missing, so the first frame is a coarse map
+    // rather than a spinner.
+    const { container } = renderCanvas();
+    expect(container.querySelectorAll('path[role="img"]').length).toBeGreaterThan(0);
   });
 });

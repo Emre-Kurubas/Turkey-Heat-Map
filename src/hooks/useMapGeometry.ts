@@ -4,7 +4,8 @@ import {
 } from '@/core/geo/index.js';
 import type { MapFit } from '@/core/geo/index.js';
 import type { BBox, GeoLevel, Transform, Viewport } from '@/core/types/index.js';
-import { getLevelFeatures, getLevelRegionMeta } from '@/data/geo/index.js';
+import { getLevelRegionMeta, peekLevelFeatures } from '@/data/geo/index.js';
+import { useLoadedLevel } from './useLoadedLevel.js';
 
 export interface RenderFeature {
   code: string;
@@ -80,20 +81,39 @@ export function useMapGeometry(
   transform: Transform,
   fit: MapFit = 'contain',
 ): MapGeometry {
+  /*
+   * District geometry is a separate chunk, so what this hook can draw changes
+   * after mount. `peekLevelFeatures` starts returning districts the moment the
+   * import resolves, but nothing about that is observable to React on its own —
+   * this is the subscription that makes it so, and the same one the aggregation
+   * and zoom levels read, so all three agree about what can be drawn.
+   */
+  const districtsDrawable = useLoadedLevel('ilce');
+
   const projected = useMemo(() => {
     if (viewport.width <= 0 || viewport.height <= 0) return null;
+    /*
+     * Read, not ignored. `peekLevelFeatures` below reads module state that the
+     * dependency array cannot see, and this is the value that says it changed —
+     * naming it here is what makes the memo correct and what stops the
+     * exhaustive-deps rule reporting it as surplus.
+     */
+    void districtsDrawable;
 
     // Fit to provinces: 81 features rather than 973 to scan, and the two levels
     // share a bounding box, so the resulting projection is the same either way.
+    // Provinces are also the one level guaranteed to be loaded.
     const projection = createTurkeyProjection({
       viewport,
-      fitTo: getLevelFeatures('il'),
+      fitTo: peekLevelFeatures('il') ?? { type: 'FeatureCollection', features: [] },
       fit,
     });
     const path = createPathGenerator(projection);
 
-    const project = (level: GeoLevel): ProjectedLevel => {
-      const collection = getLevelFeatures(level);
+    const project = (level: GeoLevel): ProjectedLevel | null => {
+      const collection = peekLevelFeatures(level);
+      // Not here yet. The caller falls back to a level that is.
+      if (collection === null) return null;
       const meta = getLevelRegionMeta(level);
       const features: RenderFeature[] = [];
 
@@ -112,15 +132,18 @@ export function useMapGeometry(
       return { features, bounds: collectBounds(path, collection) };
     };
 
-    const heat = project(heatLevel);
+    /*
+     * Provinces are the floor. A level whose chunk has not landed falls back to
+     * them rather than rendering nothing: the map paints a province-resolution
+     * map immediately and sharpens when the districts arrive, which is a better
+     * first frame than a spinner over an empty country.
+     */
+    const provinces = project('il')!;
+    const heat = project(heatLevel) ?? provinces;
     // Identical levels are projected once, not twice.
-    const outline = outlineLevel === heatLevel ? heat : project(outlineLevel);
-    // Likewise: at country zoom the provinces *are* one of the two above.
-    const provinces = outlineLevel === 'il'
-      ? outline
-      : (heatLevel === 'il' ? heat : project('il'));
+    const outline = outlineLevel === heatLevel ? heat : (project(outlineLevel) ?? provinces);
     return { heat, outline, provinces };
-  }, [viewport, outlineLevel, heatLevel, fit]);
+  }, [viewport, outlineLevel, heatLevel, fit, districtsDrawable]);
 
   const visibleHeat = useMemo(() => (
     projected === null ? EMPTY_SET : cullFeatures(projected.heat.bounds, transform, viewport)

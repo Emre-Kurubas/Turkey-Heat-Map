@@ -1,9 +1,10 @@
 import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { HeatMapProvider } from '@/context/HeatMapProvider.js';
 import { createHeatMapStore, type HeatMapState } from '@/context/HeatMapStore.js';
 import { createHoverStore } from '@/context/HoverStore.js';
+import { loadLevelFeatures } from '@/data/geo/index.js';
 import { trStrings } from '@/i18n/index.js';
 import { useMapZoom } from './useMapZoom.js';
 
@@ -50,6 +51,14 @@ function pointer(overrides: Record<string, unknown>) {
     ...overrides,
   } as never;
 }
+
+
+/*
+ * District geometry ships as its own chunk, so nothing below can see districts
+ * until it has been asked for. These tests are about what the map does *with*
+ * districts; the loading itself is covered where it lives, in topology.test.ts.
+ */
+beforeAll(async () => { await loadLevelFeatures('ilce'); });
 
 describe('useMapZoom', () => {
   it('starts at identity', () => {

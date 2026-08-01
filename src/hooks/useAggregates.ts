@@ -11,6 +11,7 @@ import type {
 } from '@/core/types/index.js';
 import { getLevelRegionMeta } from '@/data/geo/index.js';
 import { useHeatMapState } from './useHeatMapState.js';
+import { useLoadedLevel } from './useLoadedLevel.js';
 
 export interface AggregatesInput {
   data: readonly CrimeRecord[];
@@ -80,7 +81,18 @@ export function useAggregates(input: AggregatesInput): AggregateResult {
     return buildIndex({ data, categories, knownIlceCodes });
   }, [data, categories]);
 
-  const heatLevel: GeoLevel = index.hasIlceData ? 'ilce' : 'il';
+  /*
+   * District resolution needs two things: district codes in the data, and
+   * district geometry to paint them onto.
+   *
+   * The second is a separate chunk, so for the first moments after mount the
+   * answer is no even when the data has them. Claiming 'ilce' before the
+   * geometry lands would key every total by district while the map still held
+   * province shapes, and the whole country would read as no-data until the
+   * chunk arrived.
+   */
+  const districtsDrawable = useLoadedLevel('ilce');
+  const heatLevel: GeoLevel = index.hasIlceData && districtsDrawable ? 'ilce' : 'il';
 
   const names = useMemo(() => namesFor(level), [level]);
 

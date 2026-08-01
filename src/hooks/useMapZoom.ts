@@ -4,6 +4,7 @@ import { deriveLevel, panBy, zoomAt } from '@/core/geo/index.js';
 import type { GeoLevel, Transform, Viewport } from '@/core/types/index.js';
 import { LEVEL_HYSTERESIS, LEVEL_THRESHOLD } from '@/data/geo/index.js';
 import { useHeatMapDispatch, useHeatMapState } from './useHeatMapState.js';
+import { useLoadedLevel } from './useLoadedLevel.js';
 
 /** One wheel notch. Multiplicative so zooming feels even at every scale. */
 const WHEEL_STEP = 1.2;
@@ -73,12 +74,24 @@ export function useMapZoom(viewport: Viewport): MapZoom {
   const transformRef = useRef(transform);
   transformRef.current = transform;
 
-  // Level follows scale, and is written back so every panel reads one source of
-  // truth. Hysteresis lives in deriveLevel, so this is safe to run every change.
+  /*
+   * Level follows scale, and is written back so every panel reads one source of
+   * truth. Hysteresis lives in deriveLevel, so this is safe to run every change.
+   *
+   * The promotion to districts also waits on their geometry. Zooming past the
+   * threshold before the chunk lands would outline province shapes while every
+   * total was keyed by district — the reader would cross 2.5 and watch the map
+   * empty itself. In practice the chunk beats any human scroll; this is the
+   * guard for the case where it does not.
+   */
+  const districtsDrawable = useLoadedLevel('ilce');
+
   useEffect(() => {
     const next = deriveLevel(transform.k, level, LEVEL_THRESHOLD, LEVEL_HYSTERESIS);
-    if (next !== level) dispatch({ type: 'setLevel', level: next });
-  }, [transform.k, level, dispatch]);
+    if (next === level) return;
+    if (next === 'ilce' && !districtsDrawable) return;
+    dispatch({ type: 'setLevel', level: next });
+  }, [transform.k, level, dispatch, districtsDrawable]);
 
   const applyZoom = useCallback((factor: number, point: readonly [number, number]) => {
     dispatch({

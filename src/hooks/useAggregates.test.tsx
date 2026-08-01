@@ -1,10 +1,11 @@
 import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { CrimeCategory, CrimeRecord, RegionPopulation } from '@/core/types/index.js';
 import { HeatMapProvider } from '@/context/HeatMapProvider.js';
 import { createHeatMapStore, type HeatMapState } from '@/context/HeatMapStore.js';
 import { createHoverStore } from '@/context/HoverStore.js';
+import { loadLevelFeatures } from '@/data/geo/index.js';
 import { trStrings } from '@/i18n/index.js';
 import { useAggregates } from './useAggregates.js';
 
@@ -45,6 +46,15 @@ function setup(state: HeatMapState = base) {
 }
 
 const INPUT = { data: DATA, categories: CATEGORIES, colorScale: 'spectral' } as const;
+
+
+/*
+ * District geometry ships as its own chunk, so nothing below can see districts
+ * until it has been asked for. These tests are about what the map does *with*
+ * districts; the loading itself is covered where it lives, in topology.test.ts
+ * and in the progressive-render cases at the bottom of this file.
+ */
+beforeAll(async () => { await loadLevelFeatures('ilce'); });
 
 describe('useAggregates', () => {
   it('rolls up totals for the active level', () => {

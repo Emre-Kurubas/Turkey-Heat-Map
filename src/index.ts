@@ -76,9 +76,17 @@ export type { HeatStyle, RegionClickPayload } from './components/MapCanvas/index
 export type { PartialStrings, Strings } from './i18n/index.js';
 export { mergeStrings, trStrings } from './i18n/index.js';
 
-// Bundled geography
+/*
+ * Bundled geography.
+ *
+ * `peekLevelFeatures` is synchronous and returns null for a level whose chunk
+ * has not arrived; `loadLevelFeatures` fetches it. District geometry is 262 KB
+ * and is split out of the main bundle, so a consumer reaching for it directly
+ * has to say which of the two they mean — there is no synchronous accessor left
+ * that can quietly pull a quarter of a megabyte into their entry point.
+ */
 export {
-  LEVELS, getLevelFeatures, getLevelRegionMeta,
+  LEVELS, getLevelRegionMeta, loadLevelFeatures, peekLevelFeatures,
 } from './data/geo/index.js';
 
 // Chart geometry and the validated categorical palette, for consumers building

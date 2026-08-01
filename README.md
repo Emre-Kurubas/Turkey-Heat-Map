@@ -109,6 +109,18 @@ Tek bir bozuk satır yüzünden sayfayı çökerten bir kütüphane kabul edilem
   yalnızca veri, filtre veya düzey değiştiğinde yeniden çalışır — imleç
   hareketinde asla. Haritanın anlık hissetmesiyle ağır hissetmesi arasındaki fark
   budur.
+- **İlçe geometrisi ayrı bir parça olarak, istendiğinde yüklenir.** 973 ilçenin
+  kodu ve adı bileşen ilk bağlandığı anda gerekir — kayıtları doğrulamak, arama
+  dizinini kurmak, ipucunu etiketlemek için — ama arkalarındaki 262 KB'lık yay
+  verisi yalnızca harita ilçe sınırlarını gerçekten çizdiğinde gerekir. İkisi
+  birlikte paketlenince ilk il boyanmadan önce hepsinin ayrıştırılması
+  gerekiyordu. Artık adlar sabit olarak (17 KB), geometri ise dinamik `import`
+  ile geliyor: ilk yük 148 KB gzip'ten 78 KB'a indi. Harita illeri hemen boyar
+  ve parça geldiğinde ilçe çözünürlüğüne keskinleşir.
+  Üç yer bu cevabı aynı anda bilmek zorunda — toplama düzeyi, yakınlaştırma
+  düzeyi ve izdüşürülen geometri — çünkü biri "ilçe" derken diğeri "il" derse
+  harita ilçe toplamlarını il şekillerine boyar ve tüm ülke "veri yok" olarak
+  okunur. `useLoadedLevel` bu yüzden modül durumuna abone olur.
 - **Bulanıklık yansıtma uzayında sabittir, ekran uzayında değil.** Önce
   yakınlaştırmaya bölünüyordu, yani ekranda hep aynı piksel sayısı kadar
   yumuşaktı; sonuç olarak yakınlaştıkça ısı keskinleşiyor ve ilçeler sert kenarlı
