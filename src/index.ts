@@ -1,2 +1,62 @@
-// Public API surface. Populated as modules land; see Task 23.
-export {};
+/**
+ * turkiye-suc-haritasi — public API.
+ *
+ * Phase 1 exposes the pure core only. React components arrive in Phase 2 and are
+ * added to this barrel then.
+ */
+
+// Types
+export type {
+  BBox, CrimeCategory, CrimeRecord, DataWarning, DataWarningCode, FilterSet,
+  GeoLevel, MetricMode, NormalizedRecord, RegionMeta, RegionPopulation,
+  ScaleMode, Transform, Viewport,
+} from './core/types/index.js';
+
+// Aggregation
+export type {
+  BuildIndexOptions, CrimeIndex, DiffResult, RankedRegion, RankOptions, RankSort,
+  RegionAggregate, RegionDiff, RollupResult,
+} from './core/aggregation/index.js';
+export { buildIndex, diffRollups, rankRegions, rollup } from './core/aggregation/index.js';
+
+// Color
+export type {
+  ColorDomain, ColorScale, ColorScaleName, ColorScaleOptions, LegendBreak, Oklab, RampFn, RGB,
+} from './core/color/index.js';
+export {
+  BLUE_RED_STOPS, DIFF_STOPS, RAMPS, SPECTRAL_STOPS, computeLegendBreaks,
+  createColorDomain, createColorScale, createDiffColorScale, createRamp,
+  interpolateOklab, oklabToRgb, parseHex, rgbToOklab, toHex,
+} from './core/color/index.js';
+
+// Geo
+export type { FitOptions, ProjectionOptions } from './core/geo/index.js';
+export {
+  collectBounds, computeFitTransform, createPathGenerator, createTurkeyProjection,
+  cullFeatures, decodeTopology, deriveRegionMeta, featureBounds, featureCentroid,
+  isVisible, regionNameMap,
+} from './core/geo/index.js';
+
+// Search
+export type {
+  SearchEntity, SearchEntityType, SearchIndexInput, SearchResult,
+} from './core/search/index.js';
+export {
+  buildSearchIndex, compareTurkish, foldTurkish, scoreEntity, searchEntities,
+  toTurkishLowerCase, toTurkishUpperCase,
+} from './core/search/index.js';
+
+// Formatting
+export {
+  EM_DASH, MINUS, formatCompactTr, formatDelta, formatPercent, formatPercentDelta,
+  formatTrDecimal, formatTrNumber,
+} from './core/format/index.js';
+
+// Region metadata
+export {
+  IL_BY_CODE, IL_REGIONS, ilCodeFromIlceCode, isValidIlCode,
+} from './data/geo/region-meta.js';
+
+// Mock data — demo only, describes nothing real
+export type { MockDataOptions, MockDataset } from './data/mock/index.js';
+export { MOCK_CATEGORIES, createPrng, generateMockData } from './data/mock/index.js';
