@@ -17,6 +17,8 @@ export default defineConfig({
         'src/core/**/*.test.ts',
         'src/core/**/__fixtures__/**',
         'src/core/**/performance.test.ts',
+        // Type-only modules compile to nothing; they report 0/0 and only add noise.
+        'src/core/types/**',
       ],
       thresholds: { branches: 100, functions: 100, lines: 100, statements: 100 },
       reporter: ['text', 'html'],
