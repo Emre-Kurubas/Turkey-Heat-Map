@@ -5,6 +5,18 @@ import type {
 
 export interface CrimeIndex {
   readonly records: readonly NormalizedRecord[];
+  /**
+   * The same records, grouped by year.
+   *
+   * The year range is the most-dragged control on the page, and every drag
+   * re-rolls the data. Grouped, a range that covers three years of ten touches
+   * three buckets and never looks at the other seven — so the cost of a filter
+   * tick follows the size of the selection rather than the size of the dataset.
+   *
+   * The buckets hold the same object references as `records`, so this costs one
+   * array per year and nothing else.
+   */
+  readonly byYear: ReadonlyMap<number, readonly NormalizedRecord[]>;
   readonly years: readonly number[];
   readonly categories: readonly string[];
   readonly ilCodes: readonly string[];
@@ -126,11 +138,17 @@ export function buildIndex(options: BuildIndexOptions): CrimeIndex {
 
   const records = [...merged.values()];
 
-  const years = new Set<number>();
+  const byYear = new Map<number, NormalizedRecord[]>();
   const ilCodes = new Set<string>();
   const ilceCodes = new Set<string>();
   for (const rec of records) {
-    years.add(rec.year);
+    let bucket = byYear.get(rec.year);
+    if (bucket === undefined) {
+      bucket = [];
+      byYear.set(rec.year, bucket);
+    }
+    bucket.push(rec);
+
     ilCodes.add(rec.ilCode);
     if (rec.ilceCode !== null) ilceCodes.add(rec.ilceCode);
   }
@@ -141,7 +159,8 @@ export function buildIndex(options: BuildIndexOptions): CrimeIndex {
 
   return {
     records,
-    years: [...years].sort((a, b) => a - b),
+    byYear,
+    years: [...byYear.keys()].sort((a, b) => a - b),
     categories: categoryIds,
     ilCodes: [...ilCodes].sort(),
     ilceCodes: [...ilceCodes].sort(),

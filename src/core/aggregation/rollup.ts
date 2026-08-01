@@ -53,26 +53,37 @@ export function rollup(
   const byYear = new Map<number, number>();
   let total = 0;
 
-  for (const rec of index.records) {
-    if (rec.year < startYear || rec.year > endYear) continue;
-    if (categoryFilter !== null && !categoryFilter.has(rec.category)) continue;
+  /*
+   * Whole years are skipped, not filtered row by row.
+   *
+   * `index.byYear` groups the records once at build time, so a range covering
+   * three years of ten never touches the other seven — the work follows the
+   * size of the selection rather than the size of the dataset. The per-record
+   * year comparison disappears with it.
+   */
+  for (const [year, bucket] of index.byYear) {
+    if (year < startYear || year > endYear) continue;
 
-    const code = level === 'il' ? rec.ilCode : rec.ilceCode;
-    if (code === null) continue; // ilçe level, il-only record
+    for (const rec of bucket) {
+      if (categoryFilter !== null && !categoryFilter.has(rec.category)) continue;
 
-    let aggregate = regions.get(code);
-    if (aggregate === undefined) {
-      aggregate = { code, total: 0, byCategory: new Map(), byYear: new Map() };
-      regions.set(code, aggregate);
+      const code = level === 'il' ? rec.ilCode : rec.ilceCode;
+      if (code === null) continue; // ilçe level, il-only record
+
+      let aggregate = regions.get(code);
+      if (aggregate === undefined) {
+        aggregate = { code, total: 0, byCategory: new Map(), byYear: new Map() };
+        regions.set(code, aggregate);
+      }
+
+      aggregate.total += rec.count;
+      bump(aggregate.byCategory, rec.category, rec.count);
+      bump(aggregate.byYear, year, rec.count);
+
+      bump(byCategory, rec.category, rec.count);
+      bump(byYear, year, rec.count);
+      total += rec.count;
     }
-
-    aggregate.total += rec.count;
-    bump(aggregate.byCategory, rec.category, rec.count);
-    bump(aggregate.byYear, rec.year, rec.count);
-
-    bump(byCategory, rec.category, rec.count);
-    bump(byYear, rec.year, rec.count);
-    total += rec.count;
   }
 
   const values: number[] = [];

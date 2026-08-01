@@ -108,6 +108,31 @@ Kayıtlar önceden toplanmış sayılardır; tekil olay kayıtları değildir.
 **Geçersiz kayıtlar hata fırlatmaz** — atılır ve Türkçe uyarı olarak bildirilir.
 Tek bir bozuk satır yüzünden sayfayı çökerten bir kütüphane kabul edilemez.
 
+## Ölçek sınırları
+
+Ölçülen sayılar, tahmin değil. 973 ilçe ve 10 yıl sabittir; ölçeklenen eksen suç
+türü sayısıdır ve ikisiyle birden çarpılır.
+
+| Kayıt | Kurulum (`buildIndex`, bir kez) | Filtre değişimi (3 geçiş) |
+|---|---|---|
+| 78 bin (8 tür) | ~55 ms | ~30 ms |
+| 623 bin (64 tür) | ~420 ms | ~90 ms |
+| 2,4 milyon (250 tür) | ~2,0 s | ~390 ms |
+
+Maliyet doğrusaldır — kareye çıkan bir davranış yok — ama sabit çarpanlar 1
+milyon kaydın üzerinde ana iş parçacığını gözle görülür biçimde kilitler.
+Pratik tavsiye:
+
+- **1 milyon kaydın altında** bileşen kendi başına yeterlidir.
+- **Üstünde** veriyi sunucuda toplayıp bileşene önceden toplanmış hâlde verin
+  (`CrimeRecord` zaten toplanmış sayılardır; daha kaba bir kırılımla vermek
+  tamamen geçerlidir), ya da yalnızca ilgilenilen yılları gönderin.
+
+Yıl aralığı daraltmak ölçüde **orantılı olarak** ucuzlar: kayıtlar kurulum
+sırasında yıla göre gruplandığı için 10 yıldan 1'ini seçmek diğer 9 yılın
+kayıtlarına hiç dokunmaz (2,4 milyon kayıtta 179 ms → 20 ms). Sayfadaki en sık
+sürüklenen denetim yıl kaydırıcısı olduğu için optimizasyon oraya yapıldı.
+
 ## Tasarım kararları
 
 - **Eşit alanlı projeksiyon.** Koroplet harita büyüklüğü alan üzerinden renkle

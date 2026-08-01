@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { generateMockData } from '@/data/mock/index.js';
+import { getLevelRegionMeta } from '@/data/geo/index.js';
 import { IL_BY_CODE } from '@/data/geo/region-meta.js';
-import type { FilterSet } from '@/core/types/index.js';
+import type { CrimeCategory, CrimeRecord, FilterSet } from '@/core/types/index.js';
 import { buildIndex, diffRollups, rankRegions, rollup } from './index.js';
 
 /**
@@ -71,5 +72,97 @@ describe('aggregation performance at realistic scale', () => {
     const smallTime = Math.max(time(small), 1);
     const largeTime = time(large);
     expect(largeTime / smallTime).toBeLessThan(12);
+  });
+});
+
+/**
+ * The axis that actually scales: the crime taxonomy.
+ *
+ * 973 districts and ten years are fixed by the geography and by what anyone
+ * publishes. The number of offence types is not — a real taxonomy runs to
+ * thousands — and it multiplies straight through both. These sizes were
+ * measured rather than guessed; the numbers behind the thresholds are in the
+ * README under "Ölçek sınırları".
+ */
+describe('aggregation performance as the taxonomy grows', () => {
+  const YEARS = [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
+  const DISTRICTS = [...getLevelRegionMeta('ilce').keys()];
+
+  function dataset(categoryCount: number): {
+    records: CrimeRecord[]; categories: CrimeCategory[];
+  } {
+    const categories = Array.from({ length: categoryCount }, (_, i) => ({
+      id: `c${i}`, label: `Tür ${i}`,
+    }));
+    const records: CrimeRecord[] = [];
+    for (const ilceCode of DISTRICTS) {
+      for (const category of categories) {
+        for (const year of YEARS) {
+          records.push({
+            year, ilCode: ilceCode.slice(0, 2), ilceCode, category: category.id, count: 3,
+          });
+        }
+      }
+    }
+    return { records, categories };
+  }
+
+  // 64 categories over every district and year: ~623k records, an order of
+  // magnitude past the shipped mock and a plausible real taxonomy.
+  const big = dataset(64);
+
+  it('builds a 600k-record index in under 3 s', () => {
+    expect(big.records.length).toBeGreaterThan(600_000);
+    const started = performance.now();
+    buildIndex({ data: big.records, categories: big.categories });
+    // Once, at mount. Loose because it is dominated by allocation, which is the
+    // first thing a slow CI runner is bad at.
+    expect(performance.now() - started).toBeLessThan(3_000);
+  });
+
+  it('rolls up 600k records in under 400 ms', () => {
+    const index = buildIndex({ data: big.records, categories: big.categories });
+    const started = performance.now();
+    rollup(index, 'ilce', { yearRange: [2015, 2024], categories: [] });
+    expect(performance.now() - started).toBeLessThan(400);
+  });
+
+  /**
+   * The behaviour year bucketing exists for, and the one worth guarding.
+   *
+   * The year range is the most-dragged control on the page. Before the records
+   * were grouped by year, every drag re-scanned the whole dataset and narrowing
+   * the range cost exactly as much as widening it. Grouped, the work follows
+   * the size of the selection — so this is a claim about the shape of the cost,
+   * not about a machine.
+   */
+  it('makes a narrowed year range proportionally cheaper', () => {
+    const index = buildIndex({ data: big.records, categories: big.categories });
+
+    const measure = (range: [number, number]): number => {
+      const started = performance.now();
+      rollup(index, 'ilce', { yearRange: range, categories: [] });
+      return performance.now() - started;
+    };
+
+    // Warm the paths so the first JIT pass is not attributed to one of them.
+    measure([2015, 2024]);
+    measure([2020, 2020]);
+
+    const all = Math.max(measure([2015, 2024]), 1);
+    const one = measure([2020, 2020]);
+
+    // A tenth of the years should cost well under half of the whole range.
+    // Deliberately not "a tenth": the fixed cost of building the result maps
+    // does not shrink with the selection.
+    expect(one).toBeLessThan(all * 0.5);
+  });
+
+  it('groups every record into its year, losing none', () => {
+    // The bucketing is only sound if the buckets and the flat list agree.
+    const index = buildIndex({ data: big.records, categories: big.categories });
+    const bucketed = [...index.byYear.values()].reduce((n, bucket) => n + bucket.length, 0);
+    expect(bucketed).toBe(index.records.length);
+    expect([...index.byYear.keys()].sort((a, b) => a - b)).toEqual(index.years);
   });
 });
