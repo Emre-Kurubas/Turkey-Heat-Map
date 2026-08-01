@@ -33,7 +33,7 @@ The entire user-facing interface is in Turkish.
 - Category distribution pie chart
 - 10-year trend line chart
 - Comparison mode (filter set A vs filter set B, rendered as a diff)
-- Per-panel enable/disable by the consumer; collapse/expand by the end user
+- Per-panel enable/disable by the **integrating developer**, via props
 - Full keyboard accessibility and screen-reader support
 - Seeded mock dataset for development, tests, and documentation
 
@@ -473,7 +473,12 @@ is always visible in context. Clicking a year sets the filter to that year.
 
 Both use the same tr-TR number formatting and color scale as the map.
 
-### 7.8 Panel control
+### 7.8 Panel control — a developer integration API
+
+This is a **build-time API for the developer integrating the component**, not a
+runtime feature for the website's visitors. A developer who downloads the package
+decides in code which panels their page needs; end users are never shown controls
+to add or remove panels.
 
 ```ts
 panels?: {
@@ -483,12 +488,24 @@ panels?: {
 }
 ```
 
-Every panel defaults to `true`. `false` means the panel never mounts — no hidden
-DOM, no wasted computation. Panels that are enabled are additionally collapsible
-by the end user, with state persisted to `localStorage` under a namespaced key
-(disableable via `persistUiState={false}`).
+Every panel defaults to `true`. `false` means the panel **never mounts** — no
+hidden DOM, no wasted computation, no dead CSS. This is a real constraint on the
+implementation: each panel must be independently mountable, must not be imported
+by any other panel, and must not be a precondition for any other panel's state.
+No panel may read another panel's DOM or assume it exists.
+
+The layout reflows to fill the space a disabled panel would have occupied, so
+`panels={{ sidebar: false, pie: false }}` produces a clean map-plus-trend layout
+rather than a full layout with holes in it. Every combination in the enable/
+disable matrix is covered by component tests (§11.2).
 
 The map always renders; it is the component's reason to exist.
+
+**Runtime UI state** is limited to what the original brief asks for: the sidebar
+collapses to a 48 px icon rail and expands again (§7.3), and the compare bar
+shows or hides with the `Karşılaştır` toggle (§7.6). Both are ordinary in-panel
+interactions held in component state. Nothing is persisted to `localStorage` —
+the component owns no storage and leaves no trace in the host page.
 
 ---
 
@@ -517,7 +534,6 @@ import 'turkiye-suc-haritasi/style.css';
   className="" style={{}}
 
   debug={false}
-  persistUiState
 
   onRegionClick={(region) => {}}
   onRegionHover={(region | null) => {}}
