@@ -93,6 +93,13 @@ Tek bir bozuk satır yüzünden sayfayı çökerten bir kütüphane kabul edilem
   `1,234,567` üretir.
 - **`toLowerCase()` yerine `foldTurkish`.** Yerleşik dönüşüm noktalı/noktasız
   İ/I çiftinde hatalıdır ve aramayı sessizce bozar.
+- **Isı her zaman ilçe sayılarından gelir.** Yakınlaştırma yalnızca hangi
+  sınırların çizildiğini değiştirir: ülke görünümünde il sınırları, yakınlaşınca
+  ilçe sınırları. Renk çözünürlüğü hiç değişmez, bu yüzden gösterge de her iki
+  düzeyde aynı aralıkları gösterir — yakınlaştırırken ölçeğin altınızda kaymadığı
+  anlamına gelir. İpucu, gördüğünüz sınırın birimini bildirir: ülke görünümünde il
+  toplamı, yakınlaşınca ilçe toplamı.
+  Veride ilçe kodu yoksa ısı il düzeyine düşer.
 - **Kaydırma ve yakınlaştırma tek bir `transform` üzerinde.** Bulanıklık filtresi
   yalnızca veri, filtre veya düzey değiştiğinde yeniden çalışır — imleç
   hareketinde asla. Haritanın anlık hissetmesiyle ağır hissetmesi arasındaki fark

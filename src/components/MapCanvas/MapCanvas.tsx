@@ -1,4 +1,5 @@
 import { useCallback, useId, useMemo } from 'react';
+import type { RollupResult } from '@/core/aggregation/index.js';
 import type { ColorScaleName, RampFn } from '@/core/color/index.js';
 import { formatTrNumber } from '@/core/format/index.js';
 import type { CrimeCategory, CrimeRecord, Viewport } from '@/core/types/index.js';
@@ -17,6 +18,13 @@ import styles from './MapCanvas.module.css';
 
 /** Blur radius at k=1, in projected pixels. */
 const BASE_BLUR = 12;
+
+/** Region code → total, the shape both the fills and the labels read. */
+function totalsOf(result: RollupResult): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const [code, aggregate] of result.byRegion) out.set(code, aggregate.total);
+  return out;
+}
 
 export interface RegionClickPayload {
   code: string;
@@ -45,24 +53,26 @@ export function MapCanvas({
   const idPrefix = useId().replace(/:/gu, '');
 
   const { transform, level, handlers, svgRef } = useMapZoom(viewport);
-  const geometry = useMapGeometry(viewport, level, transform);
-  const { rollup, scale, names } = useAggregates({ data, categories, colorScale });
+  const { rollup, heatRollup, scale, heatLevel, names } = useAggregates({
+    data, categories, colorScale,
+  });
+  const geometry = useMapGeometry(viewport, level, heatLevel, transform);
 
   const selectedCode = useHeatMapState((state) => state.selectedCode);
   const focusedCode = useHeatMapState((state) => state.focusedCode);
   const hover = useHoverTarget();
 
-  const values = useMemo(() => {
-    const out = new Map<string, number>();
-    for (const [code, aggregate] of rollup.byRegion) out.set(code, aggregate.total);
-    return out;
-  }, [rollup]);
+  /** Values for the outlined level — what the tooltip and aria labels report. */
+  const values = useMemo(() => totalsOf(rollup), [rollup]);
+  /** Values for the painted level — always district resolution. */
+  const heatValues = useMemo(() => totalsOf(heatRollup), [heatRollup]);
 
-  // The union of every region is the clip for the heat bleed. Concatenating the
-  // path data is enough — SVG treats it as one shape under the default fill rule.
-  const outlinePath = useMemo(
-    () => geometry.features.map((feature) => feature.d).join(' '),
-    [geometry.features],
+  // The union of every province is the clip for the heat bleed. Provinces are
+  // used regardless of the outlined level: they tile the same country with far
+  // fewer path segments than the districts do.
+  const clipPath = useMemo(
+    () => geometry.outline.map((feature) => feature.d).join(' '),
+    [geometry.outline],
   );
 
   const onSelect = useCallback((code: string | null) => {
@@ -98,22 +108,24 @@ export function MapCanvas({
             // Perceived softness must stay constant across zoom, so the radius
             // shrinks as the group scales up (§6.3).
             blurStdDeviation={BASE_BLUR / transform.k}
-            outlinePath={outlinePath}
+            outlinePath={clipPath}
           />
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
+            {/* Painted at district resolution whatever the zoom, so the heat
+                keeps its detail while the borders above it coarsen. */}
             <HeatLayer
-              features={geometry.features}
-              values={values}
+              features={geometry.heat}
+              values={heatValues}
               scale={scale}
               idPrefix={idPrefix}
               heatStyle={heatStyle}
-              visible={geometry.visible}
+              visible={geometry.visibleHeat}
             />
-            <BorderLayer features={geometry.features} visible={geometry.visible} />
+            <BorderLayer features={geometry.outline} visible={geometry.visibleOutline} />
             <HitLayer
-              features={geometry.features}
+              features={geometry.outline}
               values={values}
-              visible={geometry.visible}
+              visible={geometry.visibleOutline}
               selectedCode={selectedCode}
               focusedCode={focusedCode}
               onSelect={onSelect}
@@ -121,7 +133,7 @@ export function MapCanvas({
               formatValue={formatTrNumber}
             />
             <SelectionLayer
-              features={geometry.features}
+              features={geometry.outline}
               selectedCode={selectedCode}
               hoveredCode={hover?.code ?? null}
               focusedCode={focusedCode}

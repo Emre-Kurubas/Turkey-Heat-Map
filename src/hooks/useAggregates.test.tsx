@@ -62,12 +62,51 @@ describe('useAggregates', () => {
     expect(result.current.rollup.byRegion.get('3401')?.total).toBe(110);
   });
 
-  it('builds a colour scale over the rollup values', () => {
+  it('builds the colour scale over district values even at province zoom', () => {
     const { wrapper } = setup();
     const { result } = renderHook(() => useAggregates(INPUT), { wrapper });
+
+    // Provinces total 110 and 40; the districts carrying them total the same
+    // here, so the domain matches — but it comes from heatRollup, not rollup.
+    expect(result.current.heatLevel).toBe('ilce');
+    expect(result.current.heatRollup.byRegion.get('3401')?.total).toBe(110);
     expect(result.current.scale.domain.min).toBe(40);
     expect(result.current.scale.domain.max).toBe(110);
     expect(result.current.scale(110)).toMatch(/^#[0-9a-f]{6}$/u);
+  });
+
+  it('keeps the heat at district level while the outline level is provinces', () => {
+    const { wrapper } = setup();
+    const { result } = renderHook(() => useAggregates(INPUT), { wrapper });
+
+    expect([...result.current.rollup.byRegion.keys()]).toContain('34');
+    expect([...result.current.heatRollup.byRegion.keys()]).toContain('3401');
+  });
+
+  it('reuses one rollup when the outline and heat levels agree', () => {
+    const { wrapper } = setup({ ...base, level: 'ilce' });
+    const { result } = renderHook(() => useAggregates(INPUT), { wrapper });
+    expect(result.current.heatRollup).toBe(result.current.rollup);
+  });
+
+  /**
+   * An ilçe rollup of il-only records is empty, which would paint the entire
+   * map as no-data. The heat has to drop to provinces for such a dataset.
+   */
+  it('falls back to province heat when the data carries no district codes', () => {
+    const ilOnly: CrimeRecord[] = [
+      { year: 2020, ilCode: '34', category: 'hirsizlik', count: 100 },
+      { year: 2020, ilCode: '06', category: 'hirsizlik', count: 40 },
+    ];
+    const { wrapper } = setup();
+    const { result } = renderHook(
+      () => useAggregates({ data: ilOnly, categories: CATEGORIES, colorScale: 'spectral' }),
+      { wrapper },
+    );
+
+    expect(result.current.heatLevel).toBe('il');
+    expect(result.current.heatRollup.total).toBe(140);
+    expect(result.current.scale.domain.max).toBe(100);
   });
 
   it('resolves region names from the bundled geography', () => {

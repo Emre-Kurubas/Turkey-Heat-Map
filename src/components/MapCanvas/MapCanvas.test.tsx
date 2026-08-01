@@ -10,8 +10,8 @@ import { MapCanvas, type MapCanvasProps } from './MapCanvas.js';
 
 const CATEGORIES: CrimeCategory[] = [{ id: 'hirsizlik', label: 'Hırsızlık' }];
 const DATA: CrimeRecord[] = [
-  { year: 2020, ilCode: '34', category: 'hirsizlik', count: 100 },
-  { year: 2020, ilCode: '06', category: 'hirsizlik', count: 40 },
+  { year: 2020, ilCode: '34', ilceCode: '3401', category: 'hirsizlik', count: 100 },
+  { year: 2020, ilCode: '06', ilceCode: '0601', category: 'hirsizlik', count: 40 },
 ];
 
 const base: HeatMapState = {
@@ -65,9 +65,42 @@ describe('MapCanvas', () => {
       .toBe('translate(-100,-50) scale(3)');
   });
 
-  it('renders 81 hit targets at il level', () => {
+  it('outlines 81 provinces at country zoom', () => {
     const { container } = renderCanvas();
     expect(container.querySelectorAll('path[role="img"]')).toHaveLength(81);
+  });
+
+  /**
+   * The heat keeps district resolution at every zoom, so at country zoom the
+   * painted layer is finer than the outlined one.
+   */
+  it('paints districts under province outlines at country zoom', () => {
+    const { container } = renderCanvas();
+    const groups = container.querySelectorAll('svg > g > g');
+    const heat = groups[0]!;
+    const borders = groups[1]!;
+
+    expect(heat.querySelectorAll('path')).toHaveLength(973);
+    expect(borders.querySelectorAll('path')).toHaveLength(81);
+
+    // Painted codes are districts; outlined codes are provinces.
+    expect(heat.querySelector('path')?.getAttribute('data-code')).toMatch(/^\d{4}$/u);
+    expect(borders.querySelector('path')?.getAttribute('data-code')).toMatch(/^\d{2}$/u);
+  });
+
+  it('reports province totals from the outline level, not district totals', () => {
+    renderCanvas();
+    expect(screen.getByRole('img', { name: /İstanbul/u }).getAttribute('aria-label'))
+      .toContain('100');
+  });
+
+  it('drops the heat to provinces when the data carries no district codes', () => {
+    const ilOnly: CrimeRecord[] = [
+      { year: 2020, ilCode: '34', category: 'hirsizlik', count: 100 },
+    ];
+    const { container } = renderCanvas(base, { data: ilOnly });
+    const heat = container.querySelectorAll('svg > g > g')[0]!;
+    expect(heat.querySelectorAll('path')).toHaveLength(81);
   });
 
   it('scales the blur down as zoom rises, so softness looks constant', () => {
@@ -118,7 +151,7 @@ describe('MapCanvas', () => {
     expect(container.querySelectorAll('path[role="img"]')).toHaveLength(81);
   });
 
-  it('renders districts, culled to the viewport, once zoomed past the threshold', () => {
+  it('outlines districts, culled to the viewport, once zoomed past the threshold', () => {
     const { container, store } = renderCanvas({
       ...base, level: 'ilce', transform: { k: 3, x: 0, y: 0 },
     });
@@ -131,5 +164,11 @@ describe('MapCanvas', () => {
     // mean the cull set is not reaching the layers.
     expect(codes.length).toBeLessThan(973);
     for (const code of codes) expect(code).toMatch(/^\d{4}$/u);
+  });
+
+  it('reports district totals once districts are the outlined level', () => {
+    renderCanvas({ ...base, level: 'ilce', transform: { k: 3, x: 0, y: 0 } });
+    expect(screen.getByRole('img', { name: /Adalar/u }).getAttribute('aria-label'))
+      .toContain('100');
   });
 });
