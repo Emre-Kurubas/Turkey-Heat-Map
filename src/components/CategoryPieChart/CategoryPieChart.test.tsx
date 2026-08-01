@@ -35,6 +35,7 @@ const base: HeatMapState = {
   defaultFilters: DEFAULTS,
   yearBounds: [2015, 2024],
   flyToRequest: null,
+  detail: null,
   metric: 'total',
   scaleMode: 'quantile',
 };
@@ -195,5 +196,16 @@ describe('CategoryPieChart', () => {
   it('hides the svg from assistive technology, since the list carries the data', () => {
     const { container } = renderPie();
     expect(container.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('hides its legend when asked, for use beside a category table', () => {
+    const { container } = renderPie({ showLegend: false });
+    expect(container.querySelectorAll('path[data-slice]')).toHaveLength(3);
+    expect(screen.queryAllByRole('listitem')).toHaveLength(0);
+  });
+
+  it('still draws its legend by default', () => {
+    renderPie();
+    expect(screen.getAllByRole('listitem').length).toBeGreaterThan(0);
   });
 });

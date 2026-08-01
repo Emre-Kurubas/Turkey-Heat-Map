@@ -32,10 +32,19 @@ export interface CategoryPieChartProps {
   /** Selected region, or null for the national picture. */
   regionName: string | null;
   onHoverCategory: (id: string | null) => void;
+  /**
+   * Defaults to true. Set false only where the same values are already listed
+   * beside the chart — the detail panel puts a category table next to it, and
+   * printing both is the same eight rows twice.
+   *
+   * The numbers must still be visible *somewhere*: three palette hues sit below
+   * 3:1 on this surface, and their labels are what makes that legal.
+   */
+  showLegend?: boolean | undefined;
 }
 
 export function CategoryPieChart({
-  categories, totals, regionName, onHoverCategory,
+  categories, totals, regionName, onHoverCategory, showLegend = true,
 }: CategoryPieChartProps) {
   const strings = useStrings();
   const [hovered, setHovered] = useState<string | null>(null);
@@ -126,6 +135,7 @@ export function CategoryPieChart({
             ))}
           </svg>
 
+          {showLegend ? (
           <ul className={styles.legend}>
             {slices.map((slice) => (
               <li key={slice.id} className={styles.item}>
@@ -144,6 +154,7 @@ export function CategoryPieChart({
               </li>
             ))}
           </ul>
+          ) : null}
 
           {/* "Diğer" hides real categories, so it has to be openable (§7.7). */}
           {hasOther || expanded ? (

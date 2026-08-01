@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HeatMapProvider } from '@/context/HeatMapProvider.js';
@@ -23,6 +23,7 @@ const base: HeatMapState = {
   defaultFilters: { yearRange: [2020, 2020], categories: [] },
   yearBounds: [2020, 2020],
   flyToRequest: null,
+  detail: null,
   metric: 'total',
   scaleMode: 'quantile',
 };
@@ -206,5 +207,46 @@ describe('MapCanvas — fly-to requests from other panels', () => {
     act(() => { store.dispatch({ type: 'requestFlyTo', code: 'yok' }); });
     expect(store.getState().transform).toEqual(before);
     expect(store.getState().flyToRequest).toBeNull();
+  });
+});
+
+describe('MapCanvas — opening a region detail', () => {
+  it('opens the detail panel for a clicked province', () => {
+    const { container, store } = renderCanvas();
+    fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
+
+    expect(store.getState().detail).toEqual({ code: '34', level: 'il' });
+  });
+
+  it('also flies toward a clicked province, which crosses the district threshold', () => {
+    const { container, store } = renderCanvas();
+    const before = store.getState().transform;
+
+    fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
+
+    expect(store.getState().transform).not.toEqual(before);
+    expect(store.getState().transform.k).toBeGreaterThan(2.65);
+  });
+
+  it('keeps the province panel open through the level change the zoom causes', () => {
+    const { container, store } = renderCanvas();
+    fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
+
+    act(() => { store.dispatch({ type: 'setLevel', level: 'ilce' }); });
+    expect(store.getState().detail).toEqual({ code: '34', level: 'il' });
+  });
+
+  it('opens a district panel without flying, since it is already in view', () => {
+    const { container, store } = renderCanvas({
+      ...base, level: 'ilce', transform: { k: 3, x: 0, y: 0 },
+    });
+    const district = container.querySelector('path[role="img"]') as SVGPathElement;
+    const code = district.getAttribute('data-code')!;
+    const before = store.getState().transform;
+
+    fireEvent.click(district);
+
+    expect(store.getState().detail).toEqual({ code, level: 'ilce' });
+    expect(store.getState().transform).toEqual(before);
   });
 });

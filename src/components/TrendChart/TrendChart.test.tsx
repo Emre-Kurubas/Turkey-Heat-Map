@@ -20,6 +20,7 @@ const base: HeatMapState = {
   defaultFilters: { yearRange: [2018, 2022], categories: [] },
   yearBounds: [2018, 2022],
   flyToRequest: null,
+  detail: null,
   metric: 'total',
   scaleMode: 'quantile',
 };

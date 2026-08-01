@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { CrimeCategory, CrimeRecord } from '@/core/types/index.js';
 import { trStrings } from '@/i18n/index.js';
@@ -189,5 +189,34 @@ describe('CrimeHeatMap — fixed layout', () => {
     ]) {
       expect(container.querySelector(`.${area}`), area).not.toBeNull();
     }
+  });
+});
+
+describe('CrimeHeatMap — region detail', () => {
+  it('shows no detail panel until a region is clicked', () => {
+    renderMap();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('opens the panel for a clicked region', () => {
+    const { container } = renderMap();
+    fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
+
+    expect(screen.getByRole('dialog', { name: /İstanbul/u })).toBeInTheDocument();
+  });
+
+  it('closes the panel again', () => {
+    const { container } = renderMap();
+    fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
+    fireEvent.click(screen.getByRole('button', { name: trStrings.detail.close }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('keeps the map mounted behind the panel', () => {
+    const { container } = renderMap();
+    fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
+
+    expect(screen.getByRole('application', { name: trStrings.map.label })).toBeInTheDocument();
   });
 });

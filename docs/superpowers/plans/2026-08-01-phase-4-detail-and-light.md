@@ -124,7 +124,7 @@ src/
 - Produces: the same token names, with light values, plus `--hm-ink-inverse`
   for text that sits on a dark heat fill.
 
-- [ ] **Step 1: Extend the token test**
+- [x] **Step 1: Extend the token test**
 
 Add to `src/styles/tokens.test.ts`:
 
@@ -155,12 +155,12 @@ describe('light theme', () => {
 });
 ```
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `npx vitest run src/styles/tokens.test.ts`
 Expected: FAIL — the map background is still `#0b1020`.
 
-- [ ] **Step 3: Rewrite the tokens**
+- [x] **Step 3: Rewrite the tokens**
 
 Replace the `:root` block in `src/styles/tokens.css`. Keep every token name —
 only the values change, so no component needs touching:
@@ -226,13 +226,13 @@ only the values change, so no component needs touching:
 }
 ```
 
-- [ ] **Step 4: Register the new token**
+- [x] **Step 4: Register the new token**
 
 Add `'--hm-ink-inverse',` to `THEME_TOKEN_NAMES` in `src/styles/index.ts`,
 after `'--hm-fg-muted'`. The token test holds the list and the stylesheet to
 each other in both directions, so it fails until you do.
 
-- [ ] **Step 5: Fix the hard-coded dark washes**
+- [x] **Step 5: Fix the hard-coded dark washes**
 
 Several components hard-code `rgba(255, 255, 255, …)` for hover and pressed
 states, which is invisible on a light surface. Replace each with a dark wash:
@@ -259,7 +259,7 @@ Two exceptions that are **not** hover washes and need their own values:
 - `Attribution.module.css` background `rgba(0, 0, 0, 0.3)` →
   `rgba(255, 255, 255, 0.75)`, so the credit stays legible over the map.
 
-- [ ] **Step 6: Run the tests and commit**
+- [x] **Step 6: Run the tests and commit**
 
 ```bash
 npx vitest run src/styles
@@ -286,7 +286,7 @@ git commit -m "feat(styles): convert the design tokens to a light theme"
 - Produces: `SPECTRAL_STOPS` and `BLUE_RED_STOPS` with light-surface values.
   Signatures unchanged — every caller keeps working.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `src/core/color/scales.test.ts`:
 
@@ -357,13 +357,13 @@ describe('BLUE_RED_STOPS on a light canvas', () => {
 });
 ```
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `npx vitest run src/core/color/scales.test.ts`
 Expected: FAIL — the current ramp's luminance is not monotonic (it rises from
 `#2b4bd8` to `#e8d13a`).
 
-- [ ] **Step 3: Replace the stops**
+- [x] **Step 3: Replace the stops**
 
 In `src/core/color/scales.ts`:
 
@@ -407,7 +407,7 @@ export const BLUE_RED_STOPS: readonly string[] = [
 ];
 ```
 
-- [ ] **Step 4: Run the test and check coverage**
+- [x] **Step 4: Run the test and check coverage**
 
 ```bash
 npx vitest run src/core/color
@@ -419,7 +419,7 @@ Expected: PASS, and `scales.ts` still at 100% — only data changed.
 If the `blueRed` assertions fail, adjust that ramp's arms darker and re-run;
 the numbers in the test are the contract, not the hexes.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/core/color
@@ -438,7 +438,7 @@ git commit -m "feat(color): re-derive the map ramps for a light canvas"
 - Produces: `CATEGORY_PALETTE` with light-surface values. `categoryColor(index)`
   is unchanged.
 
-- [ ] **Step 1: Extend the palette test**
+- [x] **Step 1: Extend the palette test**
 
 Add to `src/core/chart/palette.test.ts`:
 
@@ -470,7 +470,7 @@ describe('CATEGORY_PALETTE on a light panel', () => {
 });
 ```
 
-- [ ] **Step 2: Replace the palette**
+- [x] **Step 2: Replace the palette**
 
 In `src/core/chart/palette.ts`, swap the values and rewrite the doc comment to
 record the new validation. The order is unchanged — it is the safety mechanism:
@@ -509,7 +509,7 @@ export const CATEGORY_PALETTE = [
 ] as const satisfies readonly `#${string}`[];
 ```
 
-- [ ] **Step 3: Run and commit**
+- [x] **Step 3: Run and commit**
 
 ```bash
 npx vitest run src/core/chart src/components/CategoryPieChart
@@ -539,7 +539,7 @@ them below 640px. The owner wants the arrangement to stay put.
 **Interfaces:**
 - Produces: no `hm-hide-compact` class and no media queries in `base.css`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `src/components/CrimeHeatMap/CrimeHeatMap.test.tsx`:
 
@@ -564,7 +564,7 @@ describe('CrimeHeatMap — fixed layout', () => {
 });
 ```
 
-- [ ] **Step 2: Strip the breakpoints**
+- [x] **Step 2: Strip the breakpoints**
 
 Delete both media-query blocks from `src/styles/base.css` — the
 `@media (max-width: 1023px)` and `@media (max-width: 639px)` rules — and the
@@ -582,7 +582,7 @@ Delete both media-query blocks from `src/styles/base.css` — the
 The `prefers-reduced-motion` block in `tokens.css` is untouched — it is an
 accessibility preference, not a size breakpoint.
 
-- [ ] **Step 3: Drop the class from the markup**
+- [x] **Step 3: Drop the class from the markup**
 
 In `src/components/CrimeHeatMap/CrimeHeatMap.tsx`, remove ` hm-hide-compact`
 from all four `className` strings, leaving just the area class:
@@ -594,7 +594,7 @@ from all four `className` strings, leaving just the area class:
         <div className="hm-area-right">
 ```
 
-- [ ] **Step 4: Run and commit**
+- [x] **Step 4: Run and commit**
 
 ```bash
 npx vitest run src/components/CrimeHeatMap
@@ -622,7 +622,7 @@ git commit -m "feat(layout): fix panel positions at every window size"
 - Produces, added to `Strings.filters`: `open: string`, `close: string`.
 - `FilterBarProps` is unchanged — the open/closed state is the panel's own.
 
-- [ ] **Step 1: Add the strings**
+- [x] **Step 1: Add the strings**
 
 `src/i18n/types.ts`, inside `filters`:
 
@@ -639,7 +639,7 @@ git commit -m "feat(layout): fix panel positions at every window size"
     close: 'Filtreleri kapat',
 ```
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 Add to `src/components/FilterBar/FilterBar.test.tsx`:
 
@@ -718,7 +718,7 @@ function renderBar(state: HeatMapState = base, props: Partial<FilterBarProps> = 
 Every existing test keeps calling `renderBar` and needs no change. The new
 "collapsed by default" block calls `renderBarClosed`.
 
-- [ ] **Step 3: Implement the collapse**
+- [x] **Step 3: Implement the collapse**
 
 In `src/components/FilterBar/FilterBar.tsx`, wrap the body:
 
@@ -801,7 +801,7 @@ Add to `src/components/FilterBar/FilterBar.module.css`:
 }
 ```
 
-- [ ] **Step 4: Run and commit**
+- [x] **Step 4: Run and commit**
 
 ```bash
 npx vitest run src/components/FilterBar src/i18n

@@ -35,7 +35,7 @@ So the detail target is its own slice, carrying **its own level**, and
   - `{ type: 'openDetail'; code: string; level: GeoLevel }`
   - `{ type: 'closeDetail' }`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add to `src/context/HeatMapStore.test.ts`:
 
@@ -89,12 +89,12 @@ describe('region detail', () => {
 
 Add `detail: null` to the shared `base` fixture.
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `npx vitest run src/context/HeatMapStore.test.ts`
 Expected: FAIL — `detail` is not on `HeatMapState`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `src/context/HeatMapStore.ts`, add the type above `HeatMapState`:
 
@@ -158,12 +158,12 @@ Extend `resetView` to close the panel — it is part of the view:
 
 Leave `setLevel` alone. It must **not** touch `detail`.
 
-- [ ] **Step 4: Seed it in the root**
+- [x] **Step 4: Seed it in the root**
 
 In `src/components/CrimeHeatMap/CrimeHeatMap.tsx`, add `detail: null,` to the
 `createHeatMapStore` call.
 
-- [ ] **Step 5: Run, fix fixtures, commit**
+- [x] **Step 5: Run, fix fixtures, commit**
 
 ```bash
 npx vitest run src/context
@@ -198,7 +198,7 @@ districts, so the detail gets its own.
   - `RegionDetailData` — `{ code: string; level: GeoLevel; name: string; total: number; categories: readonly DetailCategory[]; byYear: ReadonlyMap<number, number> }`
   - `useRegionDetail(index, categories, filters, detail): RegionDetailData | null`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/hooks/useRegionDetail.test.tsx`:
 
@@ -319,7 +319,7 @@ describe('useRegionDetail', () => {
 });
 ```
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `npx vitest run src/hooks/useRegionDetail.test.tsx`
 Expected: FAIL — module not found.
@@ -328,7 +328,7 @@ Note the stability test will need the target object to be referentially stable;
 the hook memoizes on `detail?.code` and `detail?.level` rather than on the
 object, so an inline literal is fine.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 ```ts
 import { useMemo } from 'react';
@@ -408,7 +408,7 @@ export function useRegionDetail(
 }
 ```
 
-- [ ] **Step 4: Run and commit**
+- [x] **Step 4: Run and commit**
 
 ```bash
 npx vitest run src/hooks/useRegionDetail.test.tsx
@@ -452,7 +452,7 @@ here would mean two chart implementations drifting apart.
   };
   ```
 
-- [ ] **Step 1: Add the strings**
+- [x] **Step 1: Add the strings**
 
 `src/i18n/types.ts`:
 
@@ -483,7 +483,7 @@ here would mean two chart implementations drifting apart.
 
 Add `detail: mergeGroup('detail', overrides),` to `src/i18n/index.ts`.
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 Create `src/components/RegionDetail/RegionDetail.test.tsx`:
 
@@ -613,7 +613,7 @@ describe('RegionDetail', () => {
 });
 ```
 
-- [ ] **Step 3: Implement the category list**
+- [x] **Step 3: Implement the category list**
 
 `src/components/RegionDetail/RegionCategoryList.tsx`:
 
@@ -671,7 +671,7 @@ export function RegionCategoryList({ categories, order }: RegionCategoryListProp
 }
 ```
 
-- [ ] **Step 4: Implement the panel**
+- [x] **Step 4: Implement the panel**
 
 `src/components/RegionDetail/RegionDetail.tsx`:
 
@@ -766,7 +766,7 @@ export function RegionDetail({ detail, categories, onClose }: RegionDetailProps)
 }
 ```
 
-- [ ] **Step 5: Style it**
+- [x] **Step 5: Style it**
 
 `src/components/RegionDetail/RegionDetail.module.css`:
 
@@ -870,7 +870,7 @@ export function RegionDetail({ detail, categories, onClose }: RegionDetailProps)
 .empty { margin: 0; padding: 12px 0; font-size: 12px; color: var(--hm-fg-muted); }
 ```
 
-- [ ] **Step 6: Write the barrel, run and commit**
+- [x] **Step 6: Write the barrel, run and commit**
 
 `src/components/RegionDetail/index.ts`:
 
@@ -906,7 +906,7 @@ transform for even the largest province lands well above the 2.65 switch point.
 - Modify: `src/components/CrimeHeatMap/CrimeHeatMap.test.tsx`
 - Modify: `README.md`
 
-- [ ] **Step 1: Write the failing map test**
+- [x] **Step 1: Write the failing map test**
 
 Add to `src/components/MapCanvas/MapCanvas.test.tsx`:
 
@@ -956,7 +956,7 @@ describe('MapCanvas — opening a region detail', () => {
 });
 ```
 
-- [ ] **Step 2: Implement the click behaviour**
+- [x] **Step 2: Implement the click behaviour**
 
 In `src/components/MapCanvas/MapCanvas.tsx`, replace the body of `onSelect`:
 
@@ -985,7 +985,7 @@ In `src/components/MapCanvas/MapCanvas.tsx`, replace the body of `onSelect`:
   }, [dispatch, level, onRegionClick, names, values]);
 ```
 
-- [ ] **Step 3: Mount the panel**
+- [x] **Step 3: Mount the panel**
 
 In `src/components/CrimeHeatMap/CrimeHeatMap.tsx`, inside `Content`:
 
@@ -1024,7 +1024,7 @@ import { useRegionDetail } from '@/hooks/useRegionDetail.js';
 import { useHeatMapDispatch, useHeatMapState } from '@/hooks/useHeatMapState.js';
 ```
 
-- [ ] **Step 4: Cover it at the root**
+- [x] **Step 4: Cover it at the root**
 
 Add to `src/components/CrimeHeatMap/CrimeHeatMap.test.tsx`:
 
@@ -1064,7 +1064,7 @@ describe('CrimeHeatMap — region detail', () => {
 
 Import `fireEvent` in that file if it is not already imported.
 
-- [ ] **Step 5: Run the full verification**
+- [x] **Step 5: Run the full verification**
 
 ```bash
 npm run verify
@@ -1082,7 +1082,7 @@ npm run build
 node -e "const{gzipSync}=require('node:zlib'),fs=require('fs');const b=fs.readFileSync('dist/index.mjs');const g=['il','ilce'].reduce((n,l)=>n+gzipSync(fs.readFileSync('src/data/geo/turkiye-'+l+'.topo.json'),{level:9}).byteLength,0);const t=gzipSync(b,{level:9}).byteLength;const c=gzipSync(fs.readFileSync('dist/style.css'),{level:9}).byteLength;const k=x=>Math.round(x/1024)+'KB';console.log('total',k(t),'| geo',k(g),'(120KB)','| code+css',k(t-g+c),'(60KB)');"
 ```
 
-- [ ] **Step 6: Verify in a browser**
+- [x] **Step 6: Verify in a browser**
 
 Run `npm run playground` and confirm by eye:
 
@@ -1100,7 +1100,7 @@ Run `npm run playground` and confirm by eye:
 - Escape and the × both close it
 - resizing the window never moves a panel to a different corner
 
-- [ ] **Step 7: Update the README and commit**
+- [x] **Step 7: Update the README and commit**
 
 Change the status line:
 
@@ -1136,19 +1136,19 @@ git tag phase-4-complete
 
 Each verified by running it:
 
-- [ ] `npm run verify` passes end to end
-- [ ] `src/core` at 100% branch coverage
-- [ ] `npx eslint src/core` clean
-- [ ] The spectral ramp darkens monotonically and its lowest step recedes
-- [ ] The chart palette is the light-surface column, with the pie's labels intact
-- [ ] No `prefers-color-scheme` anywhere — light is the only theme
-- [ ] No media-query breakpoints; every panel keeps its corner at any width
-- [ ] The filter bar is collapsed by default and badges its active-filter count
-- [ ] A province click opens its panel **and** zooms past the district threshold
-- [ ] The province panel survives the level change that zoom causes
-- [ ] A district click opens its panel without moving the map
-- [ ] The map stays mounted and the region stays outlined behind the panel
-- [ ] Escape closes the panel
+- [x] `npm run verify` passes end to end
+- [x] `src/core` at 100% branch coverage
+- [x] `npx eslint src/core` clean
+- [x] The spectral ramp darkens monotonically and its lowest step recedes
+- [x] The chart palette is the light-surface column, with the pie's labels intact
+- [x] No `prefers-color-scheme` anywhere — light is the only theme
+- [x] No media-query breakpoints; every panel keeps its corner at any width
+- [x] The filter bar is collapsed by default and badges its active-filter count
+- [x] A province click opens its panel **and** zooms past the district threshold
+- [x] The province panel survives the level change that zoom causes
+- [x] A district click opens its panel without moving the map
+- [x] The map stays mounted and the region stays outlined behind the panel
+- [x] Escape closes the panel
 
 ## What Phase 5 needs from Phase 4
 

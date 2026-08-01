@@ -8,6 +8,7 @@ import { Legend } from '@/components/Legend/index.js';
 import {
   MapCanvas, type HeatStyle, type RegionClickPayload,
 } from '@/components/MapCanvas/index.js';
+import { RegionDetail } from '@/components/RegionDetail/index.js';
 import { SearchBar } from '@/components/SearchBar/index.js';
 import { Sidebar } from '@/components/Sidebar/index.js';
 import { TrendChart } from '@/components/TrendChart/index.js';
@@ -22,7 +23,8 @@ import type {
 } from '@/core/types/index.js';
 import { getLevelRegionMeta } from '@/data/geo/index.js';
 import { useAggregates } from '@/hooks/useAggregates.js';
-import { useHeatMapState } from '@/hooks/useHeatMapState.js';
+import { useHeatMapDispatch, useHeatMapState } from '@/hooks/useHeatMapState.js';
+import { useRegionDetail } from '@/hooks/useRegionDetail.js';
 import { mergeStrings, type PartialStrings } from '@/i18n/index.js';
 import { ErrorBoundary } from './ErrorBoundary.js';
 import { reconcileProps } from './reconcile.js';
@@ -84,10 +86,14 @@ function Content({ props, panels }: ContentProps) {
   const {
     data, categories, population, colorScale = 'spectral', heatStyle = 'glow',
   } = props;
-  const { rollup, scale, names } = useAggregates({
+  const { index, rollup, scale, names } = useAggregates({
     data, categories, colorScale, population,
   });
+  const dispatch = useHeatMapDispatch();
   const selectedCode = useHeatMapState((state) => state.selectedCode);
+  const detailTarget = useHeatMapState((state) => state.detail);
+  const filters = useHeatMapState((state) => state.filters);
+  const detail = useRegionDetail(index, categories, filters, detailTarget);
 
   // Lifted here only because two panels need it — the pie reports the hovered
   // category and the filter bar highlights the matching chip. Neither imports
@@ -163,6 +169,14 @@ function Content({ props, panels }: ContentProps) {
         </div>
       </div>
 
+      {detail === null ? null : (
+        <RegionDetail
+          detail={detail}
+          categories={categories}
+          onClose={() => { dispatch({ type: 'closeDetail' }); }}
+        />
+      )}
+
       {panels.tooltip ? (
         <HoverTooltip rollup={rollup} names={names} categories={categories} />
       ) : null}
@@ -219,6 +233,7 @@ export function CrimeHeatMap(props: CrimeHeatMapProps) {
     defaultFilters: reconciled.filters,
     yearBounds: reconciled.yearBounds,
     flyToRequest: null,
+    detail: null,
     metric: reconciled.metric,
     scaleMode,
   }));

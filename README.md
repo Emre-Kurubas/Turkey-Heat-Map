@@ -2,8 +2,8 @@
 
 Türkiye suç istatistikleri için etkileşimli ısı haritası React bileşeni.
 
-> **Durum:** Geliştirme aşamasında (Aşama 3/5 tamamlandı). Harita, paneller ve
-> grafikler çalışıyor. Karşılaştırma modu Aşama 4'te gelir.
+> **Durum:** Geliştirme aşamasında (Aşama 4/5 tamamlandı). Açık tema, bölge
+> detay paneli ve katlanabilir filtreler eklendi.
 
 ## Kurulum
 
@@ -39,6 +39,7 @@ render'da yeniden kurulur.
 | `CategoryPieChart`, `TrendChart` | Kategori dağılımı ve yıllara göre eğilim |
 | `CATEGORY_PALETTE`, `arcPath`, `linePath` | Doğrulanmış kategorik palet ve grafik geometrisi |
 | `buildPopulationIndex`, `toPerCapita` | 100.000 kişi başına suç oranı |
+| `RegionDetail` | Bölgeye tıklayınca açılan detay paneli: kategori tablosu, halka grafik ve yıllık eğilim |
 | `buildIndex`, `rollup`, `rankRegions`, `diffRollups` | Suç kayıtlarını doğrular, filtreler ve bölge bazında toplar |
 | `createColorScale`, `computeLegendBreaks` | Algısal olarak eşit aralıklı OKLab renk skalaları |
 | `foldTurkish`, `compareTurkish`, `searchEntities` | Türkçe'ye duyarlı arama ve sıralama |
@@ -108,6 +109,13 @@ Tek bir bozuk satır yüzünden sayfayı çökerten bir kütüphane kabul edilem
   yalnızca veri, filtre veya düzey değiştiğinde yeniden çalışır — imleç
   hareketinde asla. Haritanın anlık hissetmesiyle ağır hissetmesi arasındaki fark
   budur.
+- **Açık tema, tek tema.** Harita rampası açık zemin için yeniden türetildi:
+  her durak bir hedef parlaklığa çözüldü, böylece büyüklük yalnızca renk
+  tonuyla değil açıklıkla da okunuyor. Önceki rampa ortada açık renkliydi ve
+  açık zeminde orta değerler 1,36 kontrastla kayboluyordu.
+- **İle tıklandığında hem yakınlaşır hem detay açılır.** Detay hedefi kendi
+  düzeyini taşır; aksi hâlde yakınlaşmanın tetiklediği düzey değişimi, aynı
+  tıklamanın az önce açtığı paneli kapatırdı.
 - **Grafik renkleri seçilmedi, doğrulandı.** Sekiz renkli kategorik palet,
   panellerin gerçekte üzerine bindiği yüzeye (`#11172b`) karşı test edildi:
   açıklık bandı, kroma tabanı, komşu çiftlerde renk körlüğü ayrımı (en kötü

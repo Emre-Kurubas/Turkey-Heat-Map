@@ -30,6 +30,15 @@ export interface Strings {
     open: string;
     close: string;
   };
+  detail: {
+    close: string;
+    total: string;
+    categories: string;
+    empty: string;
+    /** Shown beside the region name so the unit is never ambiguous. */
+    levelIl: string;
+    levelIlce: string;
+  };
   pie: {
     title: string;
     /** Shown when no region is selected. */

@@ -1,0 +1,97 @@
+/*
+ * Anchored to the bottom rather than filling the frame: the map has to stay
+ * visible with the opened region still highlighted on it, which is the whole
+ * reason this is a panel and not a page.
+ */
+.panel {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 30;
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--hm-radius);
+  background: var(--hm-glass-bg-solid);
+  border: 1px solid var(--hm-glass-border);
+  box-shadow: var(--hm-glass-shadow);
+  pointer-events: auto;
+  animation: slideIn var(--hm-motion-panel) var(--hm-ease-panel);
+}
+
+@keyframes slideIn {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.panel:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.identity { display: flex; align-items: baseline; gap: 8px; }
+.name { margin: 0; font-size: 15px; font-weight: 600; color: var(--hm-fg); }
+
+.level {
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--hm-glass-border);
+  font-size: 10px;
+  color: var(--hm-fg-muted);
+}
+
+.total { display: flex; align-items: baseline; gap: 6px; margin: 0; }
+.totalLabel { font-size: 11px; color: var(--hm-fg-muted); }
+.totalValue { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.close {
+  margin-left: auto;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--hm-fg-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close:hover { background: rgba(15, 23, 42, 0.06); color: var(--hm-fg); }
+.close:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) auto auto;
+  gap: 14px;
+  align-items: start;
+}
+
+.listColumn { min-width: 0; max-height: 220px; overflow-y: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 12px; }
+
+.tableCaption {
+  text-align: left;
+  padding-bottom: 4px;
+  font-size: 11px;
+  color: var(--hm-fg-muted);
+}
+
+.row { border-bottom: 1px solid var(--hm-glass-border); }
+.swatchCell { width: 14px; padding: 3px 0; }
+.swatch { display: block; width: 8px; height: 8px; border-radius: 2px; }
+.rowLabel { padding: 3px 6px; text-align: left; font-weight: 400; color: var(--hm-fg); }
+.rowValue { padding: 3px 6px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.rowShare {
+  padding: 3px 0 3px 6px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--hm-fg-muted);
+}
+
+.empty { margin: 0; padding: 12px 0; font-size: 12px; color: var(--hm-fg-muted); }

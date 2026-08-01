@@ -27,6 +27,14 @@ export const trStrings: Strings = {
     open: 'Filtreleri aç',
     close: 'Filtreleri kapat',
   },
+  detail: {
+    close: 'Detayı kapat',
+    total: 'Toplam',
+    categories: 'Suç türleri',
+    empty: 'Bu bölge için kayıt yok',
+    levelIl: 'İl',
+    levelIlce: 'İlçe',
+  },
   pie: {
     title: 'Suç türü dağılımı',
     national: 'Türkiye geneli',

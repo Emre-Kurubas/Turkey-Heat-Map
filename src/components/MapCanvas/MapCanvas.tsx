@@ -77,14 +77,27 @@ export function MapCanvas({
   );
 
   const onSelect = useCallback((code: string | null) => {
-    dispatch({ type: 'select', code });
-    if (code === null || onRegionClick === undefined) return;
+    if (code === null) {
+      dispatch({ type: 'select', code: null });
+      dispatch({ type: 'closeDetail' });
+      return;
+    }
+
+    dispatch({ type: 'openDetail', code, level });
+
+    // A province click also zooms in. Fitting even the largest province to the
+    // viewport lands well past the 2.65 district threshold, so the level
+    // switches on its own — the detail target carries its own level precisely
+    // so that switch does not close the panel this click just opened.
+    if (level === 'il') dispatch({ type: 'requestFlyTo', code });
+
+    if (onRegionClick === undefined) return;
     onRegionClick({
       code,
       name: names.get(code) ?? code,
       value: values.get(code) ?? null,
     });
-  }, [dispatch, onRegionClick, names, values]);
+  }, [dispatch, level, onRegionClick, names, values]);
 
   const onFocusRegion = useCallback((code: string) => {
     dispatch({ type: 'focus', code });

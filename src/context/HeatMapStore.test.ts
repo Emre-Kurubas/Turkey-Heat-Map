@@ -12,6 +12,7 @@ const base: HeatMapState = {
   defaultFilters: DEFAULT_FILTERS,
   yearBounds: [2015, 2024],
   flyToRequest: null,
+  detail: null,
   metric: 'total',
   scaleMode: 'quantile',
 };
@@ -194,5 +195,51 @@ describe('fly-to requests', () => {
   it('drops a pending request when the level changes, since codes are level-specific', () => {
     const asked = heatMapReducer(base, { type: 'requestFlyTo', code: '34' });
     expect(heatMapReducer(asked, { type: 'setLevel', level: 'ilce' }).flyToRequest).toBeNull();
+  });
+});
+
+describe('region detail', () => {
+  it('opens a detail target at a given level', () => {
+    const next = heatMapReducer(base, { type: 'openDetail', code: '34', level: 'il' });
+    expect(next.detail).toEqual({ code: '34', level: 'il' });
+  });
+
+  it('selects the region it opened, so the map highlights it', () => {
+    const next = heatMapReducer(base, { type: 'openDetail', code: '34', level: 'il' });
+    expect(next.selectedCode).toBe('34');
+  });
+
+  it('closes', () => {
+    const open = heatMapReducer(base, { type: 'openDetail', code: '34', level: 'il' });
+    expect(heatMapReducer(open, { type: 'closeDetail' }).detail).toBeNull();
+  });
+
+  it('no-ops when closing an already-closed panel', () => {
+    expect(heatMapReducer(base, { type: 'closeDetail' })).toBe(base);
+  });
+
+  /**
+   * The whole reason the target carries its own level. Clicking a province
+   * zooms to district level; if that zoom cleared the target, the click would
+   * close the panel it just opened.
+   */
+  it('survives the level change that a province click triggers', () => {
+    const open = heatMapReducer(base, { type: 'openDetail', code: '34', level: 'il' });
+    const zoomed = heatMapReducer(open, { type: 'setLevel', level: 'ilce' });
+
+    expect(zoomed.detail).toEqual({ code: '34', level: 'il' });
+    // The selection does not survive — "34" means nothing at district level.
+    expect(zoomed.selectedCode).toBeNull();
+  });
+
+  it('replaces the target when another region is opened', () => {
+    let state = heatMapReducer(base, { type: 'openDetail', code: '34', level: 'il' });
+    state = heatMapReducer(state, { type: 'openDetail', code: '3401', level: 'ilce' });
+    expect(state.detail).toEqual({ code: '3401', level: 'ilce' });
+  });
+
+  it('closes when the view is reset', () => {
+    const open = heatMapReducer(base, { type: 'openDetail', code: '34', level: 'il' });
+    expect(heatMapReducer(open, { type: 'resetView' }).detail).toBeNull();
   });
 });

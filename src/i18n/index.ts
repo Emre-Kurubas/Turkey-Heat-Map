@@ -42,6 +42,7 @@ export function mergeStrings(overrides?: PartialStrings): Strings {
     level: mergeGroup('level', overrides),
     legend: mergeGroup('legend', overrides),
     filters: mergeGroup('filters', overrides),
+    detail: mergeGroup('detail', overrides),
     pie: mergeGroup('pie', overrides),
     trend: mergeGroup('trend', overrides),
     sidebar: mergeGroup('sidebar', overrides),
