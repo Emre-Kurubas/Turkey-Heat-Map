@@ -10,7 +10,7 @@ import { useVirtualList } from '@/hooks/useVirtualList.js';
 import { SidebarRow } from './SidebarRow.js';
 import styles from './Sidebar.module.css';
 
-const ROW_HEIGHT = 26;
+const ROW_HEIGHT = 28;
 
 export interface SidebarProps {
   rows: readonly RankedRegion[];
@@ -49,8 +49,17 @@ export function Sidebar({ rows, scale }: SidebarProps) {
 
   const slice = sorted.slice(list.window.startIndex, list.window.endIndex);
 
+  /*
+   * The collapsed width rides on a class, not a data attribute. GlassPanel
+   * forwards `className` and nothing else, so the old `.sidebar[data-collapsed]`
+   * rule never matched: the panel stayed 240px wide with its contents hidden,
+   * and the button looked like it did nothing.
+   */
   return (
-    <GlassPanel label={strings.sidebar.title} className={styles.sidebar}>
+    <GlassPanel
+      label={strings.sidebar.title}
+      className={collapsed ? `${styles.sidebar} ${styles.isCollapsed}` : styles.sidebar}
+    >
       <div className={styles.header}>
         {collapsed ? null : <h2 className={styles.title}>{strings.sidebar.title}</h2>}
         <div className={styles.actions}>

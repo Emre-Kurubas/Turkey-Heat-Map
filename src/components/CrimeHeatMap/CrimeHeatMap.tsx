@@ -124,6 +124,17 @@ function Content({ props, panels }: ContentProps) {
     return new Map(source);
   }, [rollup, selectedCode]);
 
+  /*
+   * The detail panel takes the whole left edge and the map keeps the rest, so
+   * every other panel stands down while it is open. Leaving them mounted put
+   * the region's own donut beside a national one and stacked two search-shaped
+   * boxes over a map the reader had already drilled into.
+   *
+   * The map itself stays — the panel answers "what is in this region", and the
+   * answer is worth little without the region still visible beside it.
+   */
+  const detailOpen = detail !== null;
+
   return (
     <>
       <MapCanvas
@@ -136,7 +147,9 @@ function Content({ props, panels }: ContentProps) {
         {...(props.testViewport === undefined ? {} : { testViewport: props.testViewport })}
       />
 
-      <div className="hm-overlay">
+      <div className="hm-overlay" data-detail-open={detailOpen ? 'true' : 'false'}>
+        {detailOpen ? null : (
+          <>
         {/* Search and filters share one row: both change what the map shows.
             The wrapper mounts whenever either does, and the flex row collapses
             to whichever survives. */}
@@ -177,8 +190,16 @@ function Content({ props, panels }: ContentProps) {
           </div>
         ) : null}
 
-        <div className="hm-area-bottomLeft">
-          {panels.legend ? <Legend scale={scale} /> : null}
+        {panels.legend ? (
+          <div className="hm-area-bottomRight"><Legend scale={scale} /></div>
+        ) : null}
+
+          </>
+        )}
+
+        {/* Outside the block above: the licence requires attribution whatever
+            else is on screen. */}
+        <div className="hm-area-bottomCentre">
           <Attribution />
         </div>
       </div>

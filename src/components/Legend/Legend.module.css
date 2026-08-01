@@ -1,62 +1,57 @@
-/*
- * No panel behind it. A colour key is a caption for the map, not a control,
- * and boxing it gave a legend the same visual weight as the filters and the
- * region list. It re-enables pointer events for itself because the overlay
- * above it disables them for the whole layer.
- *
- * Losing the panel means losing the panel's contrast guarantee, so every text
- * layer here carries a white halo: the legend sits over the map, and at high
- * zoom a dark ramp step can end up directly behind it.
- */
 .legend {
-  padding: 2px 4px;
-  min-width: 0;
-  pointer-events: auto;
-  text-shadow:
-    0 1px 2px var(--hm-map-bg),
-    0 0 4px var(--hm-map-bg),
-    0 0 8px var(--hm-map-bg);
+  padding: 12px 14px 10px;
+  width: 260px;
 }
 
 .title {
-  margin: 0 0 4px;
-  font-size: 11px;
+  margin: 0 0 8px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--hm-fg);
 }
 
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.ramp {
   display: grid;
-  gap: 1px;
+  gap: 4px;
 }
 
-.item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--hm-fg);
+/*
+ * The key itself. A continuous bar rather than a row of chips, because the
+ * ramp it describes is continuous — a fixed number of swatches told the reader
+ * the map had that many colours.
+ *
+ * The inset hairline keeps the pale low end from bleeding into the panel it
+ * sits on; without it the bar looks like it starts a third of the way along.
+ */
+.bar {
+  height: 12px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.18);
 }
 
-.chip {
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
-  flex: none;
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.25);
+/*
+ * Positioned, not spaced. Each tick sits at its value's own position on the
+ * scale, which under a quantile domain is nowhere near evenly spaced — the top
+ * bucket can span most of the value range while occupying a seventh of the bar.
+ */
+.ticks {
+  position: relative;
+  height: 14px;
+  font-size: 10px;
+  color: var(--hm-fg-muted);
 }
 
-.label {
+.tick {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
 .empty,
 .note {
-  margin: 4px 0 0;
-  font-size: 10px;
+  margin: 8px 0 0;
+  font-size: 11px;
   color: var(--hm-fg-muted);
 }

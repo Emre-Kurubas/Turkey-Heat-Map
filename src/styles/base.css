@@ -32,10 +32,15 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-rows: auto 1fr auto;
+  /*
+   * The sidebar column spans all three rows, so the region list runs the full
+   * height of the component rather than stopping between the top and bottom
+   * bands.
+   */
   grid-template-areas:
-    "topLeft    topCentre  topRight"
-    "left       centre     right"
-    "bottomLeft bottomCtr  bottomRight";
+    "left topCentre topRight"
+    "left centre    right"
+    "left bottomCtr bottomRight";
   gap: 12px;
   padding: 12px;
 }
@@ -60,20 +65,22 @@
 }
 .hm-area-topRight { grid-area: topRight; align-self: start; justify-self: end; }
 /*
- * Stretches. The sidebar is a ranked list of 81 provinces and the only panel
- * whose usefulness scales with its height, so it takes the whole middle row;
- * `min-height: 0` is what lets its inner scroller shrink instead of pushing
- * the grid taller than the viewport.
+ * Full height, top to bottom. The sidebar is a ranked list of every province
+ * and the one panel whose usefulness scales with its height; `min-height: 0`
+ * is what lets its inner scroller shrink instead of pushing the grid taller
+ * than the viewport.
  */
 .hm-area-left { grid-area: left; align-self: stretch; min-height: 0; }
 .hm-area-right { grid-area: right; align-self: end; justify-self: end; }
-.hm-area-bottomLeft {
-  grid-area: bottomLeft;
+.hm-area-bottomRight {
+  grid-area: bottomRight;
   align-self: end;
+  justify-self: end;
   display: grid;
   gap: 6px;
-  justify-items: start;
+  justify-items: end;
 }
+.hm-area-bottomCentre { grid-area: bottomCtr; align-self: end; justify-self: start; }
 
 /*
  * No breakpoints. Panel positions are fixed at every window size by choice:

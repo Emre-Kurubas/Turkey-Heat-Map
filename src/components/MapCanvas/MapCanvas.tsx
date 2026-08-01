@@ -19,7 +19,16 @@ import { SelectionLayer } from './SelectionLayer.js';
 import styles from './MapCanvas.module.css';
 
 /** Blur radius at k=1, in projected pixels. */
-const BASE_BLUR = 12;
+/*
+ * Gaussian std-dev for the heat glow, in projected pixels, divided by the zoom
+ * so the softness stays constant on screen.
+ *
+ * Was 12, which at province scale averaged across whole districts: neighbouring
+ * blues and reds blended into a flat lavender, so both the ramp's colour and
+ * the district-level detail underneath it were lost. Five keeps the soft
+ * heat-map read without dissolving the thing being measured.
+ */
+const BASE_BLUR = 5;
 
 /** Region code → total, the shape both the fills and the labels read. */
 function totalsOf(result: RollupResult): Map<string, number> {

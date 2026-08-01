@@ -8,6 +8,18 @@ const css = readFileSync(
   'utf8',
 );
 
+/*
+ * Component stylesheets whose *layout* is a stated requirement rather than a
+ * detail. They are asserted here, in the node project, because jsdom does not
+ * lay out: a rendered node reports no geometry, so every position looks
+ * identical to it and a DOM test cannot tell a left-anchored panel from a
+ * bottom-anchored one.
+ */
+const detailCss = readFileSync(
+  fileURLToPath(new URL('../components/RegionDetail/RegionDetail.module.css', import.meta.url)),
+  'utf8',
+);
+
 describe('design tokens', () => {
   it('declares every token the theme prop advertises', () => {
     for (const name of THEME_TOKEN_NAMES) {
@@ -80,20 +92,56 @@ describe('base stylesheet', () => {
 
   it('declares every grid area the layout positions panels into', () => {
     for (const area of [
-      'hm-area-topCentre', 'hm-area-topRight',
-      'hm-area-left', 'hm-area-right', 'hm-area-bottomLeft',
+      'hm-area-topCentre', 'hm-area-topRight', 'hm-area-left',
+      'hm-area-right', 'hm-area-bottomRight', 'hm-area-bottomCentre',
     ]) {
       expect(base, area).toContain(`.${area}`);
     }
   });
 
-  it('lets the sidebar take the full height of its row', () => {
-    // The list is the one panel whose usefulness scales with its height, and
-    // a stale 38vh cap once cut it off mid-alphabet with empty space below.
+  it('lets the sidebar take the full height of the component', () => {
+    // The list is the one panel whose usefulness scales with its height, and a
+    // stale 38vh cap once cut it off mid-alphabet with empty space below.
     expect(base).toMatch(/\.hm-area-left\s*\{[^}]*align-self:\s*stretch/u);
+  });
+
+  it('gives the sidebar column all three rows, top to bottom', () => {
+    // Named in every row of the template, which is what makes the grid span it.
+    const areas = base.slice(base.indexOf('grid-template-areas'));
+    const rows = areas.slice(0, areas.indexOf(';')).match(/"[^"]*"/gu) ?? [];
+    expect(rows).toHaveLength(3);
+    for (const row of rows) expect(row).toContain('left');
   });
 
   it('declares no size breakpoints, since panel positions are fixed', () => {
     expect(base).not.toContain('@media');
+  });
+});
+
+describe('region detail stylesheet', () => {
+  const panelRule = detailCss.slice(
+    detailCss.indexOf('.panel {'),
+    detailCss.indexOf('}', detailCss.indexOf('.panel {')),
+  );
+
+  it('anchors the panel to the left edge, not across the bottom', () => {
+    expect(panelRule).toMatch(/left:\s*12px/u);
+    expect(panelRule).toMatch(/top:\s*12px/u);
+    expect(panelRule).toMatch(/bottom:\s*12px/u);
+    // `right` would stretch it back across the full width.
+    expect(panelRule).not.toMatch(/right:/u);
+  });
+
+  it('gives it a fixed width, so the map keeps the rest of the frame', () => {
+    expect(panelRule).toMatch(/width:\s*380px/u);
+  });
+
+  it('never lets it outgrow a narrow container', () => {
+    expect(panelRule).toMatch(/max-width:\s*calc\(100% - 24px\)/u);
+  });
+
+  it('slides it in from the edge it is anchored to', () => {
+    const keyframes = detailCss.slice(detailCss.indexOf('@keyframes slideIn'));
+    expect(keyframes).toContain('translateX');
   });
 });

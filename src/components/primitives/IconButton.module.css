@@ -1,8 +1,8 @@
 .button {
   display: inline-grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   border-radius: 8px;
   border: 1px solid transparent;
@@ -11,9 +11,15 @@
   font: inherit;
   line-height: 1;
   cursor: pointer;
-  transition: background var(--hm-motion-hover) var(--hm-ease-hover),
-              color var(--hm-motion-hover) var(--hm-ease-hover);
+  transition:
+    background var(--hm-motion-hover) var(--hm-ease-hover),
+    color var(--hm-motion-hover) var(--hm-ease-hover),
+    transform var(--hm-motion-hover) var(--hm-ease-hover);
 }
+
+/* A press that moves is a press the reader believes registered. Scale rather
+   than a colour step, so it still reads under forced-colours. */
+.button:active { transform: scale(0.92); }
 
 .button:hover {
   background: rgba(15, 23, 42, 0.06);

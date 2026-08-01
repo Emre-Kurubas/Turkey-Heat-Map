@@ -41,6 +41,18 @@ const IL_WEIGHTS: Readonly<Record<string, number>> = {
 const DEFAULT_WEIGHT = 4;
 
 /**
+ * Relative weight per category, drawn once and reused for every province.
+ *
+ * Without this every category came out at 12.1–12.9% of the national total,
+ * because independent draws over 81 provinces × 10 years average to the mean.
+ * Real offence mixes are nothing like flat.
+ */
+const CATEGORY_WEIGHTS: Readonly<Record<string, number>> = {
+  hirsizlik: 1.9, yaralama: 1.5, trafik: 1.35, uyusturucu: 0.85,
+  dolandiricilik: 0.8, siber: 0.55, gasp: 0.4, kacakcilik: 0.3,
+};
+
+/**
  * Districts come from the shipped geography rather than a synthetic count.
  *
  * An invented count only overlapped the real `{plaka}{sıra}` codes by accident:
@@ -85,11 +97,35 @@ export function generateMockData(options: MockDataOptions = {}): MockDataset {
     // A per-province multiplier so provinces of similar size still differ.
     const ilFactor = 0.7 + random() * 0.6;
 
+    /*
+     * Each district gets ONE persistent weight, drawn here rather than per
+     * record.
+     *
+     * The previous generator drew a fresh 0.4–1.6 share for every district on
+     * every category in every year. Over 8 categories × 10 years those draws
+     * average to 1.0, so every district in a province converged to the same
+     * total and the map painted each province a single flat colour — the
+     * district view showed nothing the province view didn't.
+     *
+     * The weights are heavily skewed and sorted descending because that is the
+     * real shape: a province's central district usually carries several times
+     * the load of its smallest, and the geography lists districts in Turkish
+     * alphabetical order, not by size, so the skew has to be assigned here.
+     */
+    const districts = districtsOf(il.code);
     const codes: string[] = [];
-    for (const district of districtsOf(il.code)) {
+    const districtWeights = new Map<string, number>();
+    const drawn = districts.map(() => 0.25 + random() ** 2.2 * 3.4);
+    drawn.sort((a, b) => b - a);
+    // Rotate the peak off index 0 so the busiest district is not always the
+    // alphabetically first one across all 81 provinces.
+    const offset = Math.floor(random() * districts.length);
+    for (const [index, district] of districts.entries()) {
       codes.push(district.code);
       ilceNames.set(district.code, district.name);
+      districtWeights.set(district.code, drawn[(index + offset) % drawn.length]!);
     }
+    const weightSum = [...districtWeights.values()].reduce((a, b) => a + b, 0);
 
     for (const [yearIndex, year] of years.entries()) {
       // A gentle national trend plus per-province noise, so the trend chart has
@@ -105,13 +141,19 @@ export function generateMockData(options: MockDataOptions = {}): MockDataset {
       }
 
       for (const category of MOCK_CATEGORIES) {
-        const categoryFactor = 0.4 + random() * 1.2;
+        // Province-level noise around the category's fixed national weight, so
+        // the mix varies by province without losing its national shape.
+        const categoryFactor = (CATEGORY_WEIGHTS[category.id] ?? 1)
+          * (0.75 + random() * 0.5);
         const base = weight * ilFactor * trend * categoryFactor * 6;
 
         if (includeIlce) {
           for (const ilceCode of codes) {
-            const share = 0.4 + random() * 1.2;
-            const count = Math.max(0, Math.round((base / codes.length) * share));
+            // The persistent weight sets the district's size; the small jitter
+            // keeps successive years from being identical.
+            const share = (districtWeights.get(ilceCode)! / weightSum)
+              * (0.88 + random() * 0.24);
+            const count = Math.max(0, Math.round(base * share));
             records.push({ year, ilCode: il.code, ilceCode, category: category.id, count });
           }
         } else {

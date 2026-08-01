@@ -1,15 +1,20 @@
-.wrapper { position: relative; min-width: 260px; }
+.wrapper { position: relative; min-width: 300px; }
 
 .input {
   width: 100%;
-  padding: 7px 10px;
+  padding: 9px 12px;
   border-radius: 10px;
   border: 1px solid var(--hm-glass-border);
   background: #ffffff;
   color: var(--hm-fg);
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
+  transition:
+    border-color var(--hm-motion-hover) var(--hm-ease-hover),
+    box-shadow var(--hm-motion-hover) var(--hm-ease-hover);
 }
+
+.input:hover { border-color: rgba(15, 23, 42, 0.28); }
 
 .input::placeholder { color: var(--hm-fg-muted); }
 .input:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 1px; }

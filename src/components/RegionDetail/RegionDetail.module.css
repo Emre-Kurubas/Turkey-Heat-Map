@@ -1,17 +1,23 @@
 /*
- * Anchored to the bottom rather than filling the frame: the map has to stay
- * visible with the opened region still highlighted on it, which is the whole
- * reason this is a panel and not a page.
+ * The left edge, full height. It takes the column the sidebar occupies and
+ * every other panel stands down while it is open, so nothing competes with it.
+ *
+ * The map keeps the rest of the frame and is not covered: this panel answers
+ * "what is in this region", and that answer is worth little without the region
+ * still visible — and still highlighted — beside it.
  */
 .panel {
   position: absolute;
   left: 12px;
-  right: 12px;
+  top: 12px;
   bottom: 12px;
+  width: 380px;
+  max-width: calc(100% - 24px);
   z-index: 30;
   display: grid;
-  gap: 10px;
-  padding: 12px 14px;
+  grid-template-rows: auto 1fr;
+  gap: 12px;
+  padding: 14px 16px;
   border-radius: var(--hm-radius);
   background: var(--hm-glass-bg-solid);
   border: 1px solid var(--hm-glass-border);
@@ -20,78 +26,119 @@
   animation: slideIn var(--hm-motion-panel) var(--hm-ease-panel);
 }
 
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .panel {
+    background: var(--hm-glass-bg);
+    -webkit-backdrop-filter: blur(var(--hm-glass-blur)) saturate(var(--hm-glass-saturate));
+    backdrop-filter: blur(var(--hm-glass-blur)) saturate(var(--hm-glass-saturate));
+    box-shadow:
+      inset 0 1px 0 var(--hm-glass-highlight),
+      var(--hm-glass-shadow);
+  }
+}
+
+/* Slides in from the edge it is anchored to. */
 @keyframes slideIn {
-  from { transform: translateY(12px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translateX(-16px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 .panel:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
 
 .header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: baseline;
-  gap: 16px;
+  gap: 6px 12px;
 }
 
-.identity { display: flex; align-items: baseline; gap: 8px; }
-.name { margin: 0; font-size: 15px; font-weight: 600; color: var(--hm-fg); }
+.identity { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--hm-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .level {
-  padding: 1px 6px;
+  padding: 1px 7px;
   border-radius: 999px;
   border: 1px solid var(--hm-glass-border);
-  font-size: 10px;
+  font-size: 11px;
+  flex: none;
   color: var(--hm-fg-muted);
 }
 
-.total { display: flex; align-items: baseline; gap: 6px; margin: 0; }
-.totalLabel { font-size: 11px; color: var(--hm-fg-muted); }
-.totalValue { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Second row of the header grid, under the name — the panel is too narrow to
+   sit the total beside it without the name truncating on most regions. */
+.total {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+}
+.totalLabel { font-size: 12px; color: var(--hm-fg-muted); }
+.totalValue { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .close {
-  margin-left: auto;
-  width: 26px;
-  height: 26px;
+  grid-row: 1;
+  grid-column: 2;
+  width: 30px;
+  height: 30px;
   border: 0;
   border-radius: 8px;
   background: transparent;
   color: var(--hm-fg-muted);
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
   cursor: pointer;
+  transition:
+    background var(--hm-motion-hover) var(--hm-ease-hover),
+    color var(--hm-motion-hover) var(--hm-ease-hover);
 }
 
-.close:hover { background: rgba(15, 23, 42, 0.06); color: var(--hm-fg); }
+.close:hover { background: rgba(15, 23, 42, 0.08); color: var(--hm-fg); }
 .close:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
 
+/*
+ * One column now, stacked and scrollable. The three-across layout was built
+ * for a panel that spanned the full width; at 380px the donut and the trend
+ * chart have to sit under the table rather than beside it.
+ */
 .body {
   display: grid;
-  grid-template-columns: minmax(200px, 1fr) auto auto;
+  grid-template-rows: auto auto auto;
   gap: 14px;
-  align-items: start;
+  align-content: start;
+  min-height: 0;
+  overflow-y: auto;
 }
 
-.listColumn { min-width: 0; max-height: 220px; overflow-y: auto; }
-.table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.listColumn { min-width: 0; }
+.table { width: 100%; border-collapse: collapse; font-size: 13px; }
 
 .tableCaption {
   text-align: left;
-  padding-bottom: 4px;
-  font-size: 11px;
+  padding-bottom: 5px;
+  font-size: 12px;
   color: var(--hm-fg-muted);
 }
 
 .row { border-bottom: 1px solid var(--hm-glass-border); }
-.swatchCell { width: 14px; padding: 3px 0; }
-.swatch { display: block; width: 8px; height: 8px; border-radius: 2px; }
-.rowLabel { padding: 3px 6px; text-align: left; font-weight: 400; color: var(--hm-fg); }
-.rowValue { padding: 3px 6px; text-align: right; font-variant-numeric: tabular-nums; }
+.swatchCell { width: 16px; padding: 5px 0; }
+.swatch { display: block; width: 9px; height: 9px; border-radius: 2px; }
+.rowLabel { padding: 5px 6px; text-align: left; font-weight: 400; color: var(--hm-fg); }
+.rowValue { padding: 5px 6px; text-align: right; font-variant-numeric: tabular-nums; }
 
 .rowShare {
-  padding: 3px 0 3px 6px;
+  padding: 5px 0 5px 6px;
   text-align: right;
   font-variant-numeric: tabular-nums;
   color: var(--hm-fg-muted);
 }
 
-.empty { margin: 0; padding: 12px 0; font-size: 12px; color: var(--hm-fg-muted); }
+.empty { margin: 0; padding: 12px 0; font-size: 13px; color: var(--hm-fg-muted); }

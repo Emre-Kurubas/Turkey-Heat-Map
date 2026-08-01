@@ -126,3 +126,4 @@ describe('RegionDetail', () => {
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'false');
   });
 });
+

@@ -1,9 +1,24 @@
 import { useMemo } from 'react';
+import { GlassPanel } from '@/components/primitives/GlassPanel.js';
 import { computeLegendBreaks, type ColorScale } from '@/core/color/index.js';
+import { formatTrNumber } from '@/core/format/index.js';
 import { useHeatMapState, useStrings } from '@/hooks/useHeatMapState.js';
 import styles from './Legend.module.css';
 
 const DEFAULT_BREAKS = 6;
+
+/**
+ * Samples used to build the gradient bar.
+ *
+ * The ramp is continuous, so the key has to be too. Six discrete swatches
+ * implied the map only had six colours, which is the opposite of what it does.
+ *
+ * Every sample is the ramp's own output at that position rather than something
+ * the browser interpolated: CSS gradients blend in sRGB, and this ramp is built
+ * in OKLab. Sampling it densely enough is what keeps the bar showing the same
+ * colours the map is actually painted with.
+ */
+const GRADIENT_SAMPLES = 64;
 
 export interface LegendProps {
   scale: ColorScale;
@@ -15,9 +30,8 @@ export interface LegendProps {
  *
  * Always states the active scale mode, because a quantile map answers "how does
  * this rank" while a linear map answers "how many", and reading one as the
- * other is a real analytical error (§6.5). Numbers sit beside every swatch for
- * the same reason: no rainbow ramp is fully colourblind-safe, so colour is the
- * summary and the number is the source of truth.
+ * other is a real analytical error (§6.5). Numbers sit along the bar for the
+ * same reason: colour is the summary, the number is the source of truth.
  */
 export function Legend({ scale, breakCount = DEFAULT_BREAKS }: LegendProps) {
   const strings = useStrings();
@@ -28,28 +42,63 @@ export function Legend({ scale, breakCount = DEFAULT_BREAKS }: LegendProps) {
     [scale, breakCount],
   );
 
+  const gradient = useMemo(() => {
+    const stops: string[] = [];
+    for (let i = 0; i < GRADIENT_SAMPLES; i += 1) {
+      const t = i / (GRADIENT_SAMPLES - 1);
+      stops.push(`${scale.ramp(t)} ${(t * 100).toFixed(2)}%`);
+    }
+    return `linear-gradient(to right, ${stops.join(', ')})`;
+  }, [scale]);
+
   // An empty dataset collapses the domain to [0, 0]. That is "nothing to show",
   // not a one-bucket scale, and saying so beats rendering a lone zero swatch.
   const hasData = scale.domain.min !== scale.domain.max || scale.domain.max !== 0;
 
+  /*
+   * Ticks reuse the break boundaries rather than dividing the bar evenly, so a
+   * number sits above the colour it actually names. Under a quantile domain
+   * those are very different positions: the top bucket can cover most of the
+   * value range while occupying a seventh of the bar.
+   */
+  const ticks = useMemo(() => {
+    if (breaks.length === 0) return [];
+    const values = [breaks[0]!.from, ...breaks.map((entry) => entry.to)];
+    return values.map((value, index) => ({
+      value,
+      percent: scale.domain.toT(value) * 100,
+      key: `${index}-${value}`,
+    }));
+  }, [breaks, scale]);
+
+  const lastTick = ticks.length - 1;
+
   return (
-    <div role="group" aria-label={strings.legend.title} className={styles.legend}>
+    <GlassPanel label={strings.legend.title} className={styles.legend}>
       <h2 className={styles.title}>{strings.legend.title}</h2>
 
       {hasData ? (
-        <ul className={styles.list}>
-          {breaks.map((entry) => (
-            <li key={`${entry.from}-${entry.to}`} className={styles.item} data-role="swatch">
+        <div className={styles.ramp}>
+          <div className={styles.bar} data-role="ramp" style={{ background: gradient }} />
+          <div className={styles.ticks}>
+            {ticks.map((tick, index) => (
               <span
-                className={styles.chip}
-                data-role="chip"
-                style={{ background: entry.color }}
-                aria-hidden="true"
-              />
-              <span className={styles.label}>{entry.label}</span>
-            </li>
-          ))}
-        </ul>
+                key={tick.key}
+                className={styles.tick}
+                data-role="tick"
+                style={{
+                  left: `${tick.percent}%`,
+                  // The end labels would otherwise hang off the bar.
+                  transform: index === 0
+                    ? 'none'
+                    : index === lastTick ? 'translateX(-100%)' : 'translateX(-50%)',
+                }}
+              >
+                {formatTrNumber(tick.value)}
+              </span>
+            ))}
+          </div>
+        </div>
       ) : (
         <p className={styles.empty}>{strings.legend.noData}</p>
       )}
@@ -57,6 +106,6 @@ export function Legend({ scale, breakCount = DEFAULT_BREAKS }: LegendProps) {
       <p className={styles.note}>
         {strings.scaleMode[scaleMode]} · {strings.legend.scaleNote}
       </p>
-    </div>
+    </GlassPanel>
   );
 }

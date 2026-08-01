@@ -6,34 +6,39 @@ export type RampFn = (t: number) => string;
 export type ColorScaleName = 'ember' | 'deepBlue';
 
 /**
- * The default map ramp: one hue, light to dark.
+ * The default map ramp: blue for low, red for high, continuous in between.
  *
- * This replaced a spectral rainbow — blue, cyan, green, olive, orange, red —
- * and the reason is worth keeping. A rainbow has no intrinsic order: nothing
- * about green says it is more than cyan, so the reader has to consult the
- * legend for every single region. Worse on a pale canvas, the hues that fall
- * between the ends land on olive and teal, and the map reads as mud rather
- * than as a gradient. A single hue darkening toward the top has the order
- * built into it and needs the legend only for the numbers.
+ * The stops are control points, not the palette. `createRamp` interpolates
+ * between them in OKLab, so the map paints every tone along the path — the
+ * nine values below are just where the curve is pinned.
  *
- * Each stop is solved rather than picked: even steps of OKLab lightness from
- * 0.90 down to 0.40, each at the largest chroma still in gamut at that
- * lightness, scaled by a curve that keeps the pale end from going chalky.
- * The result darkens monotonically (relative luminance 0.726 → 0.059, a 12.3×
- * span) with every adjacent pair separated by at least 1.33 contrast.
+ * Three things make a blue→red ramp work rather than turn to mud. The hue path
+ * runs 264° → 392° through violet and magenta, never through grey or olive,
+ * which is where two-hue ramps usually die. Lightness falls the whole way,
+ * 0.682 → 0.057, so magnitude still reads if hue does not: the ramp survives
+ * greyscale printing and red-green colour blindness even though it is built
+ * from exactly the two hues that confusion affects.
  *
- * The lowest stop is a warm tint rather than the surface itself: it clears
- * `--hm-map-bg` by 1.20 and the no-data fill by 1.09, so "few records" still
- * reads as a measured value and not as a hole in the map.
+ * And chroma dips through the middle rather than peaking there. Following the
+ * gamut ceiling put a neon violet across the mid-range that shouted louder
+ * than the dark red at the top, which inverts what the map is trying to say.
+ * The first attempt overcorrected the other way: holding chroma low at the
+ * pale end made the bottom half a wash of grey-lavender with no blue visible
+ * anywhere, so the ramp read as one colour rather than two.
+ *
+ * Every adjacent pair clears 1.22 contrast and the lowest stop clears the map
+ * surface by 1.27, so "few records" reads as a value rather than as a hole.
  */
 export const EMBER_STOPS: readonly string[] = [
-  '#e8dbd5', // soluk kum   — en düşük
-  '#e3b8a5',
-  '#e88f64',
-  '#d96b30',
-  '#bc5311',
-  '#9a3f00',
-  '#762f00', // koyu kor    — en yüksek
+  '#cbd8f1', // mavi        — en düşük
+  '#b7c3e8',
+  '#aaacdd',
+  '#a492d3',
+  '#ab6ecc',
+  '#ab53a4',
+  '#a14075',
+  '#942e46',
+  '#7e2314', // koyu kırmızı — en yüksek
 ];
 
 /**

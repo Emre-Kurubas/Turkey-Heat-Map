@@ -9,6 +9,14 @@ import { useHeatMapDispatch, useHeatMapState } from './useHeatMapState.js';
 const WHEEL_STEP = 1.2;
 const BUTTON_STEP = 1.5;
 
+/**
+ * How far the pointer must travel before a press counts as a pan, in CSS pixels.
+ *
+ * Small enough that a deliberate drag feels immediate, large enough to absorb
+ * the two or three pixels a hand moves during an ordinary click.
+ */
+const DRAG_THRESHOLD = 4;
+
 export interface MapZoomHandlers {
   onPointerDown: (event: ReactPointerEvent<SVGSVGElement>) => void;
   onPointerMove: (event: ReactPointerEvent<SVGSVGElement>) => void;
@@ -40,7 +48,28 @@ export function useMapZoom(viewport: Viewport): MapZoom {
   const level = useHeatMapState((state) => state.level);
   const dispatch = useHeatMapDispatch();
 
-  const drag = useRef<{ pointerId: number; x: number; y: number } | null>(null);
+  /**
+   * `panning` is what makes region clicks work.
+   *
+   * Capturing the pointer on pointerdown broke them: while a pointer is
+   * captured, the browser dispatches the following `click` to the *capture
+   * target* — the `<svg>` — rather than to the element under the cursor, so the
+   * region path's own handler never ran and nothing on the map was clickable.
+   *
+   * Capture is only needed once a drag is actually under way, so it is deferred
+   * until the pointer passes DRAG_THRESHOLD. A press that never moves never
+   * captures, and its click reaches the region. The same flag doubles as the
+   * guard against a pan ending in an accidental selection: a real drag *does*
+   * capture, which routes that click to the svg and away from the region.
+   */
+  const drag = useRef<{
+    pointerId: number;
+    x: number;
+    y: number;
+    originX: number;
+    originY: number;
+    panning: boolean;
+  } | null>(null);
   const transformRef = useRef(transform);
   transformRef.current = transform;
 
@@ -84,17 +113,34 @@ export function useMapZoom(viewport: Viewport): MapZoom {
 
   const onPointerDown = useCallback((event: ReactPointerEvent<SVGSVGElement>) => {
     if (event.button !== 0) return;
-    drag.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // Deliberately no setPointerCapture here — see the ref's comment.
+    drag.current = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      originX: event.clientX,
+      originY: event.clientY,
+      panning: false,
+    };
   }, []);
 
   const onPointerMove = useCallback((event: ReactPointerEvent<SVGSVGElement>) => {
     const active = drag.current;
     if (active === null || active.pointerId !== event.pointerId) return;
 
+    if (!active.panning) {
+      const far = Math.abs(event.clientX - active.originX) > DRAG_THRESHOLD
+        || Math.abs(event.clientY - active.originY) > DRAG_THRESHOLD;
+      // Still within the slop of a click. Do not pan, and do not capture.
+      if (!far) return;
+      active.panning = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
     const dx = event.clientX - active.x;
     const dy = event.clientY - active.y;
-    drag.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+    active.x = event.clientX;
+    active.y = event.clientY;
     dispatch({
       type: 'setTransform',
       transform: panBy(transformRef.current, dx, dy, viewport),
@@ -102,9 +148,13 @@ export function useMapZoom(viewport: Viewport): MapZoom {
   }, [dispatch, viewport]);
 
   const onPointerUp = useCallback((event: ReactPointerEvent<SVGSVGElement>) => {
-    if (drag.current === null) return;
+    const active = drag.current;
+    if (active === null) return;
     drag.current = null;
-    event.currentTarget.releasePointerCapture(event.pointerId);
+    // Only a drag ever took capture, so only a drag releases it.
+    if (active.panning && event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
   }, []);
 
   const zoomIn = useCallback(() => {

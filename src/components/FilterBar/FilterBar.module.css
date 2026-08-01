@@ -15,10 +15,22 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
-  padding: 10px 12px;
+  padding: 12px 14px;
   display: grid;
-  gap: 10px;
-  width: 300px;
+  gap: 12px;
+  width: 336px;
+  transform-origin: top center;
+  animation: expand var(--hm-motion-panel) var(--hm-ease-panel);
+}
+
+/*
+ * Drops out of the toggle rather than appearing. The slight scale is what makes
+ * it read as the button opening instead of a second panel arriving from
+ * somewhere else.
+ */
+@keyframes expand {
+  from { opacity: 0; transform: translate(-50%, -6px) scale(0.97); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 
 .header {
@@ -28,25 +40,28 @@
   gap: 12px;
 }
 
-.title { margin: 0; font-size: 12px; font-weight: 600; color: var(--hm-fg); }
+.title { margin: 0; font-size: 13px; font-weight: 600; color: var(--hm-fg); }
 
 .reset {
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 6px;
   border: 1px solid var(--hm-glass-border);
   background: transparent;
   color: var(--hm-fg-muted);
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
+  transition:
+    background var(--hm-motion-hover) var(--hm-ease-hover),
+    color var(--hm-motion-hover) var(--hm-ease-hover);
 }
 
-.reset:hover { color: var(--hm-fg); }
+.reset:hover { color: var(--hm-fg); background: rgba(15, 23, 42, 0.05); }
 .reset:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
 
 .section { display: grid; gap: 5px; }
-.sectionLabel { font-size: 11px; color: var(--hm-fg-muted); }
-.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.sectionLabel { font-size: 12px; color: var(--hm-fg-muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .perCapita { justify-self: start; }
 
 .collapsed { padding: 0; width: auto; }
@@ -55,16 +70,22 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 12px;
+  padding: 9px 14px;
   border: 0;
   border-radius: var(--hm-radius);
   background: transparent;
   color: var(--hm-fg);
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    background var(--hm-motion-hover) var(--hm-ease-hover),
+    transform var(--hm-motion-hover) var(--hm-ease-hover);
 }
+
+.toggle:hover { background: rgba(15, 23, 42, 0.05); }
+.toggle:active { transform: scale(0.97); }
 
 .toggle:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
 

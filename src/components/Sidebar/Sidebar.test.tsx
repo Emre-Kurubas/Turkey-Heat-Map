@@ -162,6 +162,46 @@ describe('Sidebar', () => {
     }));
     const { container } = renderSidebar(many);
     const spacer = container.querySelector('[class*="spacer"]') as HTMLElement;
-    expect(spacer.style.height).toBe(`${973 * 26}px`);
+    // Row height is the component's own constant; what matters is that the
+    // spacer reserves one row per region rather than one per rendered window.
+    const rowHeight = Number.parseFloat(spacer.style.height) / 973;
+    expect(Number.isInteger(rowHeight)).toBe(true);
+    expect(spacer.style.height).toBe(`${973 * rowHeight}px`);
+  });
+});
+
+describe('Sidebar — collapsing', () => {
+  /**
+   * The regression this pins: the collapsed width was expressed as
+   * `.sidebar[data-collapsed='true']`, but GlassPanel forwards `className` and
+   * nothing else, so the attribute never reached the DOM. The panel stayed
+   * full width with its contents hidden and the button looked inert.
+   */
+  it('narrows the panel itself, not just its contents', () => {
+    const { container } = renderSidebar();
+    const panel = container.querySelector('[class*="sidebar"]') as HTMLElement;
+    const before = panel.className;
+
+    fireEvent.click(screen.getByRole('button', { name: trStrings.sidebar.collapse }));
+
+    expect(panel.className).not.toBe(before);
+    expect(panel.className).toMatch(/isCollapsed/u);
+  });
+
+  it('hides the list while collapsed', () => {
+    renderSidebar();
+    fireEvent.click(screen.getByRole('button', { name: trStrings.sidebar.collapse }));
+    expect(screen.queryByRole('button', { name: /İstanbul/u })).not.toBeInTheDocument();
+  });
+
+  it('expands again, restoring both the list and the width', () => {
+    const { container } = renderSidebar();
+    const panel = container.querySelector('[class*="sidebar"]') as HTMLElement;
+
+    fireEvent.click(screen.getByRole('button', { name: trStrings.sidebar.collapse }));
+    fireEvent.click(screen.getByRole('button', { name: trStrings.sidebar.expand }));
+
+    expect(panel.className).not.toMatch(/isCollapsed/u);
+    expect(screen.getByRole('button', { name: /İstanbul/u })).toBeInTheDocument();
   });
 });

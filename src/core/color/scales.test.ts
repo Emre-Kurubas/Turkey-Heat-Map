@@ -154,18 +154,37 @@ describe('EMBER_STOPS on a light canvas', () => {
   });
 
   it('separates every adjacent step by lightness alone', () => {
+    // Deliberately looser than a coarse ramp would need: nine stops make each
+    // step smaller, which is what makes the interpolation read as seamless.
     for (let i = 1; i < EMBER_STOPS.length; i += 1) {
       expect(contrast(EMBER_STOPS[i - 1]!, EMBER_STOPS[i]!), `pair ${i}`)
-        .toBeGreaterThan(1.25);
+        .toBeGreaterThan(1.2);
     }
   });
 
-  it('holds one hue from end to end', () => {
-    // A sequential ramp encodes magnitude by lightness; a hue that drifts adds
-    // a second, meaningless signal. Tolerance is generous because maximum
-    // in-gamut chroma pulls the hue slightly at the extremes.
-    const hues = EMBER_STOPS.map(hue);
-    for (const h of hues) expect(Math.abs(h - hues[0]!)).toBeLessThan(0.35);
+  it('never passes through grey, which is where two-hue ramps turn to mud', () => {
+    // The ramp runs blue to red, and the honest short path between them goes
+    // through violet. Routing it through the neutral axis instead would put a
+    // dead grey band across the middle of the country.
+    for (const stop of EMBER_STOPS.slice(1)) {
+      expect(chroma(stop), stop).toBeGreaterThan(0.02);
+    }
+  });
+
+  it('never turns green or olive on the way', () => {
+    // The other route from blue to red passes through green. On a light canvas
+    // that lands on olive, which is exactly the mud this ramp replaced.
+    for (const stop of EMBER_STOPS) {
+      const { r, g, b } = parseHex(stop)!;
+      expect(g, stop).toBeLessThanOrEqual(Math.max(r, b));
+    }
+  });
+
+  it('travels from blue to red, ends included', () => {
+    const first = parseHex(EMBER_STOPS[0]!)!;
+    const last = parseHex(EMBER_STOPS[EMBER_STOPS.length - 1]!)!;
+    expect(first.b).toBeGreaterThan(first.r);
+    expect(last.r).toBeGreaterThan(last.b);
   });
 
   it('makes the high end unmistakable against the surface', () => {

@@ -44,16 +44,54 @@ describe('Legend', () => {
     expect(screen.getByRole('group', { name: trStrings.legend.title })).toBeInTheDocument();
   });
 
-  it('renders one swatch per break', () => {
+  it('renders the ramp as one continuous bar, not a row of buckets', () => {
+    // Six discrete swatches told the reader the map had six colours. It has as
+    // many as the ramp can produce, and the key has to say so.
     const { container } = renderLegend();
-    expect(container.querySelectorAll('[data-role="swatch"]').length).toBeGreaterThan(1);
+    const bar = container.querySelector<HTMLElement>('[data-role="ramp"]');
+    expect(bar).not.toBeNull();
+    expect(bar!.style.background).toContain('linear-gradient');
   });
 
-  it('shows a number beside every colour, because colour alone is not accessible', () => {
+  it('samples the gradient densely enough that no step is visible', () => {
     const { container } = renderLegend();
-    for (const swatch of container.querySelectorAll('[data-role="swatch"]')) {
-      expect(swatch.textContent?.trim()).not.toBe('');
-    }
+    const bar = container.querySelector('[data-role="ramp"]') as HTMLElement;
+    const stops = bar.style.background.match(/#[\da-f]{6}/gu) ?? [];
+    expect(stops.length).toBeGreaterThan(32);
+  });
+
+  it('samples the ramp itself rather than letting CSS interpolate', () => {
+    // CSS gradients blend in sRGB; this ramp is built in OKLab. Two stops and a
+    // browser blend would not be the colours the map is painted with.
+    const scale = createColorScale({ values: [0, 50, 100], mode: 'linear', ramp: 'ember' });
+    const { container } = renderLegend(scale);
+    const bar = container.querySelector('[data-role="ramp"]') as HTMLElement;
+    const stops = bar.style.background.match(/#[\da-f]{6}/gu) ?? [];
+    expect(stops[0]).toBe(scale.ramp(0));
+    expect(stops.at(-1)).toBe(scale.ramp(1));
+  });
+
+  it('shows numbers along the bar, because colour alone is not accessible', () => {
+    const { container } = renderLegend();
+    const ticks = container.querySelectorAll('[data-role="tick"]');
+    expect(ticks.length).toBeGreaterThan(1);
+    for (const tick of ticks) expect(tick.textContent?.trim()).not.toBe('');
+  });
+
+  it('places each tick at its own position on the scale, not at even intervals', () => {
+    // Under a quantile domain the top bucket can span most of the value range
+    // while occupying a seventh of the bar. Evenly spaced labels would sit
+    // above colours they do not name.
+    const skewed = createColorScale({
+      values: [1, 2, 3, 4, 5, 900], mode: 'quantile', ramp: 'ember',
+    });
+    const { container } = renderLegend(skewed);
+    const lefts = [...container.querySelectorAll('[data-role="tick"]')]
+      .map((tick) => Number.parseFloat((tick as HTMLElement).style.left));
+
+    expect(lefts).toEqual([...lefts].sort((a, b) => a - b));
+    const gaps = lefts.slice(1).map((left, i) => left - lefts[i]!);
+    expect(Math.max(...gaps)).toBeGreaterThan(Math.min(...gaps) * 1.5);
   });
 
   it('names the active scale mode, so rank is never read as magnitude', () => {
@@ -73,15 +111,17 @@ describe('Legend', () => {
     expect(screen.getByText(trStrings.legend.noData)).toBeInTheDocument();
   });
 
-  it('collapses to a single swatch when every value is identical', () => {
+  it('still names the single value when every region is identical', () => {
     const flat = createColorScale({ values: [5, 5, 5], mode: 'quantile', ramp: 'ember' });
     const { container } = renderLegend(flat);
-    expect(container.querySelectorAll('[data-role="swatch"]')).toHaveLength(1);
+    const ticks = [...container.querySelectorAll('[data-role="tick"]')];
+    expect(ticks.length).toBeGreaterThan(0);
+    for (const tick of ticks) expect(tick.textContent).toContain('5');
   });
 
-  it('paints each swatch with its break colour', () => {
-    const { container } = renderLegend();
-    const chip = container.querySelector('[data-role="swatch"] [data-role="chip"]');
-    expect((chip as HTMLElement).style.background).not.toBe('');
+  it('sits on a panel, so its text never lands on the map it describes', () => {
+    renderLegend();
+    const group = screen.getByRole('group', { name: trStrings.legend.title });
+    expect(group.className).toMatch(/panel/u);
   });
 });

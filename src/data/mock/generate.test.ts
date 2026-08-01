@@ -136,3 +136,57 @@ describe('generateMockData — agreement with the shipped geography', () => {
       .toEqual(generateMockData({ seed: 99 }).records);
   });
 });
+
+describe('district-level variation', () => {
+  /**
+   * The bug this guards: shares were redrawn per category per year, so over
+   * 8 categories × 10 years they averaged to the mean and every district in a
+   * province ended up with the same total. The map then painted each province
+   * one flat colour and the district view showed nothing new.
+   */
+  it('spreads districts within a province across a wide range', () => {
+    const { records } = generateMockData();
+    const totals = new Map<string, number>();
+    for (const rec of records) {
+      if (rec.ilceCode === undefined) continue;
+      totals.set(rec.ilceCode, (totals.get(rec.ilceCode) ?? 0) + rec.count);
+    }
+
+    // İstanbul: 39 districts, the largest division in the country.
+    const istanbul = [...totals.entries()]
+      .filter(([code]) => code.startsWith('34'))
+      .map(([, total]) => total)
+      .sort((a, b) => b - a);
+
+    expect(istanbul.length).toBeGreaterThan(30);
+    expect(istanbul[0]!).toBeGreaterThan(istanbul.at(-1)! * 3);
+  });
+
+  it('varies districts in every province, not just the big ones', () => {
+    const { records } = generateMockData();
+    const totals = new Map<string, Map<string, number>>();
+    for (const rec of records) {
+      if (rec.ilceCode === undefined) continue;
+      const perIl = totals.get(rec.ilCode) ?? new Map<string, number>();
+      perIl.set(rec.ilceCode, (perIl.get(rec.ilceCode) ?? 0) + rec.count);
+      totals.set(rec.ilCode, perIl);
+    }
+
+    for (const [ilCode, perIl] of totals) {
+      // A province with a single district has nothing to vary.
+      if (perIl.size < 4) continue;
+      const values = [...perIl.values()].sort((a, b) => b - a);
+      expect(values[0]!, `il ${ilCode}`).toBeGreaterThan(values.at(-1)! * 1.5);
+    }
+  });
+
+  it('gives categories distinct national shares rather than a flat eighth', () => {
+    const { records } = generateMockData();
+    const byCategory = new Map<string, number>();
+    for (const rec of records) {
+      byCategory.set(rec.category, (byCategory.get(rec.category) ?? 0) + rec.count);
+    }
+    const shares = [...byCategory.values()].sort((a, b) => b - a);
+    expect(shares[0]!).toBeGreaterThan(shares.at(-1)! * 3);
+  });
+});

@@ -184,8 +184,8 @@ describe('CrimeHeatMap — fixed layout', () => {
   it('places every panel in its own grid area', () => {
     const { container } = renderMap();
     for (const area of [
-      'hm-area-topCentre', 'hm-area-topRight',
-      'hm-area-left', 'hm-area-right', 'hm-area-bottomLeft',
+      'hm-area-topCentre', 'hm-area-topRight', 'hm-area-left',
+      'hm-area-right', 'hm-area-bottomRight', 'hm-area-bottomCentre',
     ]) {
       expect(container.querySelector(`.${area}`), area).not.toBeNull();
     }
@@ -218,5 +218,46 @@ describe('CrimeHeatMap — region detail', () => {
     fireEvent.click(container.querySelector('path[data-code="34"][role="img"]')!);
 
     expect(screen.getByRole('application', { name: trStrings.map.label })).toBeInTheDocument();
+  });
+});
+
+describe('CrimeHeatMap — the detail panel owns the frame', () => {
+  function openDetail() {
+    const view = renderMap();
+    fireEvent.click(view.container.querySelector('path[data-code="34"][role="img"]')!);
+    return view;
+  }
+
+  it('stands the other panels down while it is open', () => {
+    // Leaving them mounted put the region's own donut beside a national one
+    // and stacked two search-shaped boxes over a map already drilled into.
+    openDetail();
+    expect(screen.queryByRole('combobox', { name: trStrings.search.label }))
+      .not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: trStrings.filters.open }))
+      .not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: trStrings.sidebar.title }))
+      .not.toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: trStrings.legend.title }))
+      .not.toBeInTheDocument();
+  });
+
+  it('keeps the map, since the panel describes a region on it', () => {
+    openDetail();
+    expect(screen.getByRole('application', { name: trStrings.map.label })).toBeInTheDocument();
+  });
+
+  it('keeps the attribution, which the licence requires regardless', () => {
+    openDetail();
+    expect(screen.getByText(/OpenStreetMap/u)).toBeInTheDocument();
+  });
+
+  it('brings every panel back when it closes', () => {
+    openDetail();
+    fireEvent.click(screen.getByRole('button', { name: trStrings.detail.close }));
+
+    expect(screen.getByRole('combobox', { name: trStrings.search.label })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: trStrings.sidebar.title })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: trStrings.legend.title })).toBeInTheDocument();
   });
 });
