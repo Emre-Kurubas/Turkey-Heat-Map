@@ -18,6 +18,15 @@ export interface Strings {
     /** Shown beneath the ramp so a quantile map is never read as absolute. */
     scaleNote: string;
   };
+  filters: {
+    title: string;
+    yearRange: string;
+    categories: string;
+    reset: string;
+    perCapita: string;
+    /** Shown when no category chip is selected — empty means every category. */
+    allCategories: string;
+  };
   scaleMode: {
     linear: string;
     log: string;

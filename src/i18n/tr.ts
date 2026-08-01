@@ -17,6 +17,14 @@ export const trStrings: Strings = {
     noData: 'Veri yok',
     scaleNote: 'Renk sıralamayı, sayı büyüklüğü gösterir.',
   },
+  filters: {
+    title: 'Filtreler',
+    yearRange: 'Yıl aralığı',
+    categories: 'Suç türü',
+    reset: 'Sıfırla',
+    perCapita: 'Nüfusa göre',
+    allCategories: 'Tümü',
+  },
   scaleMode: {
     linear: 'Doğrusal',
     log: 'Logaritmik',

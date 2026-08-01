@@ -41,6 +41,7 @@ export function mergeStrings(overrides?: PartialStrings): Strings {
     map: mergeGroup('map', overrides),
     level: mergeGroup('level', overrides),
     legend: mergeGroup('legend', overrides),
+    filters: mergeGroup('filters', overrides),
     scaleMode: mergeGroup('scaleMode', overrides),
     tooltip: mergeGroup('tooltip', overrides),
     attribution: mergeGroup('attribution', overrides),

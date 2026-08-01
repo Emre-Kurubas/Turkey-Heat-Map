@@ -1,0 +1,29 @@
+.bar { padding: 10px 12px; display: grid; gap: 10px; min-width: 260px; }
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title { margin: 0; font-size: 12px; font-weight: 600; color: var(--hm-fg); }
+
+.reset {
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--hm-glass-border);
+  background: transparent;
+  color: var(--hm-fg-muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.reset:hover { color: var(--hm-fg); }
+.reset:focus-visible { outline: 2px solid var(--hm-focus-ring); outline-offset: 2px; }
+
+.section { display: grid; gap: 5px; }
+.sectionLabel { font-size: 11px; color: var(--hm-fg-muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.perCapita { justify-self: start; }
